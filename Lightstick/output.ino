@@ -132,7 +132,7 @@ void output_start_pattern(int pattern_selected) {
          break;
     case 5:
          g_color_palette[0].h=HUE_YELLOW;g_color_palette[0].s=1.0;
-         g_color_palette[1].h=HUE_BLUE;g_color_palette[1].s=1.0;
+         g_color_palette[1].h=HUE_PURPLE;g_color_palette[1].s=1.0;
          g_color_palette[2].h=HUE_RED;g_color_palette[2].s=1.0; 
          g_color_palette[3].h=HUE_GREEN;g_color_palette[3].s=1.0; 
          g_color_palette_lenght=4;

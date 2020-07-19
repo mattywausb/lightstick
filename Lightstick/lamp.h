@@ -10,9 +10,9 @@
 #define HUE_BLUE 240.0
 #define HUE_PINK 300.0
 
-#define HUE_PURPLE 260.0
-#define HUE_ORANGE 30.0
-#define HUE_LEMON 90.0
+#define HUE_PURPLE 250.0
+#define HUE_ORANGE 25.0
+#define HUE_LEMON 95.0
 
 typedef struct {
     int r;       // 0-255
