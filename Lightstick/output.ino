@@ -53,6 +53,7 @@ long g_pattern_previous_step_time = 0L;
 int g_pattern_step_index = 0;
 uint8_t g_steps_per_color=0;
 uint8_t g_step_in_color_index=0;
+int g_max_step_count=1000;
 int g_pattern_step_wait_interval=1000;
 float g_pattern_value = 0.5;
 float g_master_light_value = 0.5;
@@ -98,14 +99,14 @@ void output_start_pattern(int pattern_selected) {
     case 0:
          g_color_palette[0].h=HUE_YELLOW;g_color_palette[0].s=1.0;
          g_color_palette_lenght=1;
-         start_colorWipe(0.05,g_output_waittime[WAIT_2BEATS]);
+         start_colorWipe(0.05,g_output_waittime[WAIT_2BEATS],true);
          break;
     case 1:
          g_color_palette[0].h=HUE_RED;g_color_palette[0].s=1.0;
          g_color_palette[1].h=HUE_ORANGE;g_color_palette[1].s=1.0;
          g_color_palette[2].h=HUE_RED;g_color_palette[2].s=0.8;
          g_color_palette_lenght=3;
-         start_colorWipe(0.5,g_output_waittime[WAIT_8TH]);
+         start_colorWipe(0.5,g_output_waittime[WAIT_8TH],true);
          break;
     case 2:
          g_color_palette[0].h=HUE_GREEN;g_color_palette[0].s=1.0;
@@ -113,13 +114,13 @@ void output_start_pattern(int pattern_selected) {
          g_color_palette[2].h=HUE_GREEN;g_color_palette[2].s=1.0;
          g_color_palette[3].h=HUE_LEMON;g_color_palette[3].s=1.0;
          g_color_palette_lenght=4;
-         start_colorWipe(0.5,g_output_waittime[WAIT_16TH]);
+         start_colorWipe(0.5,g_output_waittime[WAIT_8TH],false);
          break;
     case 3:
          g_color_palette[0].h=HUE_BLUE;g_color_palette[0].s=1.0;
          g_color_palette[1].h=HUE_CYAN;g_color_palette[1].s=0.1; // WHITE
          g_color_palette_lenght=2;
-         start_colorWipe(0.5,g_output_waittime[WAIT_BEAT]);
+         start_colorWipe(0.5,g_output_waittime[WAIT_16TH],false);
          break;
     case 4:
          g_color_palette[0].h=HUE_BLUE;g_color_palette[0].s=1.0;
@@ -160,13 +161,14 @@ void output_process_pattern() {
  *   Light up one dot in the ring every step. Then sets them off step by step.
  */
 // 
-void start_colorWipe(float lamp_value, int wait){
+void start_colorWipe(float lamp_value, int wait, boolean over_black){
   // init all globales for the pattern
   g_pattern_start_time = millis();
   g_current_stepper_type=ST_COLOR_WIPE;
   g_pattern_step_wait_interval=wait/6;
   g_pattern_previous_step_time = 0L;
   g_pattern_step_index = 0;
+  g_max_step_count=over_black ?  (LAMP_COUNT - 1) * 2 : (LAMP_COUNT - 1) ; 
 
   g_pattern_value = lamp_value;
   g_color_palette_index=0;
@@ -195,7 +197,7 @@ void process_colorWipe() {
   output_push_lamps_to_pixels();
   
   // Step foreward
-  if (++g_pattern_step_index >= (LAMP_COUNT - 1) * 2) {
+  if (++g_pattern_step_index >= g_max_step_count) {
     g_pattern_step_index = 0;
     // Change color after complete cycle
     if (++g_color_palette_index>=g_color_palette_lenght) g_color_palette_index=0;
