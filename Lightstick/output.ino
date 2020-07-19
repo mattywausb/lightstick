@@ -99,14 +99,14 @@ void output_start_pattern(int pattern_selected) {
     case 0:
          g_color_palette[0].h=HUE_YELLOW;g_color_palette[0].s=1.0;
          g_color_palette_lenght=1;
-         start_colorWipe(0.05,g_output_waittime[WAIT_2BEATS],true);
+         start_colorWipe(0.05,WAIT_BEAT,true);
          break;
     case 1:
          g_color_palette[0].h=HUE_RED;g_color_palette[0].s=1.0;
          g_color_palette[1].h=HUE_ORANGE;g_color_palette[1].s=1.0;
          g_color_palette[2].h=HUE_RED;g_color_palette[2].s=0.8;
          g_color_palette_lenght=3;
-         start_colorWipe(0.5,g_output_waittime[WAIT_8TH],true);
+         start_colorWipe(0.5,WAIT_8TH,true);
          break;
     case 2:
          g_color_palette[0].h=HUE_GREEN;g_color_palette[0].s=1.0;
@@ -114,13 +114,13 @@ void output_start_pattern(int pattern_selected) {
          g_color_palette[2].h=HUE_GREEN;g_color_palette[2].s=1.0;
          g_color_palette[3].h=HUE_LEMON;g_color_palette[3].s=1.0;
          g_color_palette_lenght=4;
-         start_colorWipe(0.5,g_output_waittime[WAIT_8TH],false);
+         start_colorWipe(0.5,WAIT_2BEATS,false);
          break;
     case 3:
          g_color_palette[0].h=HUE_BLUE;g_color_palette[0].s=1.0;
          g_color_palette[1].h=HUE_CYAN;g_color_palette[1].s=0.1; // WHITE
          g_color_palette_lenght=2;
-         start_colorWipe(0.5,g_output_waittime[WAIT_16TH],false);
+         start_colorWipe(0.5,WAIT_16TH,false);
          break;
     case 4:
          g_color_palette[0].h=HUE_BLUE;g_color_palette[0].s=1.0;
@@ -161,11 +161,12 @@ void output_process_pattern() {
  *   Light up one dot in the ring every step. Then sets them off step by step.
  */
 // 
-void start_colorWipe(float lamp_value, int wait, boolean over_black){
+void start_colorWipe(float lamp_value, int wait_index, boolean over_black){
   // init all globales for the pattern
   g_pattern_start_time = millis();
   g_current_stepper_type=ST_COLOR_WIPE;
-  g_pattern_step_wait_interval=wait/6;
+  if(wait_index==WAIT_2BEATS) g_pattern_step_wait_interval=g_output_waittime[WAIT_BEAT];
+  else  g_pattern_step_wait_interval=g_output_waittime[wait_index]/3;
   g_pattern_previous_step_time = 0L;
   g_pattern_step_index = 0;
   g_max_step_count=over_black ?  (LAMP_COUNT - 1) * 2 : (LAMP_COUNT - 1) ; 
