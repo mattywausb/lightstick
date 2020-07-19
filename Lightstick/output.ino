@@ -38,7 +38,8 @@ uint8_t g_color_palette_index=0;
 
 enum STEPPER_TYPE {
   ST_COLOR_WIPE,
-  ST_DOUBLE_ORBIT
+  ST_DOUBLE_ORBIT,
+  ST_RAINBOW
 };
 
 STEPPER_TYPE g_current_stepper_type=ST_COLOR_WIPE;
@@ -57,6 +58,7 @@ int g_max_step_count=1000;
 int g_pattern_step_wait_interval=1000;
 float g_pattern_value = 0.5;
 float g_master_light_value = 0.5;
+float g_rainbow_step_angle_increment=1.0;
 
 #define WAIT_2BEATS 0
 #define WAIT_BEAT   1
@@ -144,6 +146,21 @@ void output_start_pattern(int pattern_selected) {
          g_color_palette_lenght=4;
          start_doubleOrbit(0.5,g_output_waittime[WAIT_32TH],32);
          break;
+    case 7:
+         start_rainbow(0.5,g_output_waittime[WAIT_BEAT],60.0,60.0); // Full span, hart stepping
+         break;
+    case 8:
+         start_rainbow(0.5,g_output_waittime[WAIT_32TH],-60.0,1.0); // Full span, soft stepping
+         break;
+    case 9:
+         start_rainbow(0.5,g_output_waittime[WAIT_32TH],10.0,1.0); // 1/6  span, soft stepping
+         break;
+    case 10:
+         start_rainbow(0.5,g_output_waittime[WAIT_8TH],20.0,-15.0); // 1/3  cycle, medium reverse stepping
+         break;
+    case 11:
+         start_rainbow(0.5,g_output_waittime[WAIT_2BEATS],0.0,100.0); // 1/3  cycle, medium reverse stepping
+         break;
   }
   output_process_pattern();
 }
@@ -153,6 +170,7 @@ void output_process_pattern() {
   switch (g_current_stepper_type) {
     case ST_COLOR_WIPE: process_colorWipe();      break;
     case ST_DOUBLE_ORBIT: process_doubleOrbit(); break;
+    case ST_RAINBOW: process_rainbow();break;
   }
 }
 
@@ -256,68 +274,43 @@ void process_doubleOrbit() {
 }
 
 /*
- *  Theatre-style crawling lights with rainbow effect
+ *  rainbow
  */
 
-void theaterChaseRainbow(uint8_t wait) {
-  for (int j = 0; j < 256; j++) {   // cycle all 256 colors in the wheel
-    for (int q = 0; q < 3; q++) {
-      for (int i = 0; i < strip.numPixels(); i = i + 3) {
-        strip.setPixelColor(i + q, Wheel( (i + j) % 255)); //turn every third pixel on
-      }
-      strip.show();
-
-      delay(wait);
-
-      for (int i = 0; i < strip.numPixels(); i = i + 3) {
-        strip.setPixelColor(i + q, 0);      //turn every third pixel off
-      }
-    }
+ void start_rainbow(float lamp_value, int wait, float angle_difference, float angle_step){
+  // init all globales for the pattern
+  g_pattern_start_time = millis();
+  g_current_stepper_type=ST_RAINBOW;
+  g_pattern_step_wait_interval=wait;
+  g_pattern_previous_step_time = 0L;
+ 
+  g_rainbow_step_angle_increment=angle_step;
+   
+  g_pattern_value = lamp_value;
+  
+  // init all lamps
+  lamp[0].set_value(0.0); // Switch of center lamp
+  // Preset color, but set value to 0
+   float hue=0;
+  for (int i = 1; i < PIXEL_COUNT; i++) 
+  {
+    lamp[i].set_hsv(hue, 1.0, 1.0);
+     hue+=angle_difference;
   }
 }
 
+void process_rainbow() {
 
-/*
- *   Rainbow stepper
- */
-void rainbow(uint8_t wait) {
-  uint16_t i, j;
+  long current_step_time = millis();
+  if (current_step_time - g_pattern_previous_step_time < g_pattern_step_wait_interval) return;
+  g_pattern_previous_step_time = current_step_time;
 
-  for (j = 0; j < 256; j++) {
-    for (i = 0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel((i + j) & 255));
-    }
-    strip.show();
-    delay(wait);
+  for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index) {
+    lamp[lamp_index].add_hue_angle(g_rainbow_step_angle_increment);
   }
-}
 
-// Slightly different, this makes the rainbow equally distributed throughout
-void rainbowCycle(uint8_t wait) {
-  uint16_t i, j;
+  output_push_lamps_to_pixels();
 
-  for (j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
-    for (i = 0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
-    }
-    strip.show();
-    delay(wait);
-  }
-}
-
-// Input a value 0 to 255 to get a color value.
-// The colours are a transition r - g - b - back to r.
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if (WheelPos < 85) {
-    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if (WheelPos < 170) {
-    WheelPos -= 85;
-    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 
 /*
