@@ -38,7 +38,7 @@ uint8_t g_color_palette_index=0;
 
 enum STEPPER_TYPE {
   ST_COLOR_WIPE,
-  ST_THEATER_CHASE
+  ST_DOUBLE_ORBIT
 };
 
 STEPPER_TYPE g_current_stepper_type=ST_COLOR_WIPE;
@@ -51,6 +51,8 @@ boolean g_pattern_needs_init = false;
 long g_pattern_start_time = 0L;
 long g_pattern_previous_step_time = 0L;
 int g_pattern_step_index = 0;
+uint8_t g_steps_per_color=0;
+uint8_t g_step_in_color_index=0;
 int g_pattern_step_wait_interval=1000;
 float g_pattern_value = 0.5;
 float g_master_light_value = 0.5;
@@ -75,7 +77,7 @@ void output_setup() {
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
   digitalWrite(LED_BUILTIN, HIGH);
-  output_set_bpm(60);
+  output_set_bpm(120);
 }
 
 // Change bpm
@@ -119,6 +121,28 @@ void output_start_pattern(int pattern_selected) {
          g_color_palette_lenght=2;
          start_colorWipe(0.5,g_output_waittime[WAIT_BEAT]);
          break;
+    case 4:
+         g_color_palette[0].h=HUE_BLUE;g_color_palette[0].s=1.0;
+         g_color_palette[1].h=HUE_CYAN;g_color_palette[1].s=1.0; // WHITE
+         g_color_palette_lenght=2;
+         start_doubleOrbit(0.5,g_output_waittime[WAIT_BEAT],8);
+         break;
+    case 5:
+         g_color_palette[0].h=HUE_YELLOW;g_color_palette[0].s=1.0;
+         g_color_palette[1].h=HUE_BLUE;g_color_palette[1].s=1.0;
+         g_color_palette[2].h=HUE_RED;g_color_palette[2].s=1.0; 
+         g_color_palette[3].h=HUE_GREEN;g_color_palette[3].s=1.0; 
+         g_color_palette_lenght=4;
+         start_doubleOrbit(0.5,g_output_waittime[WAIT_16TH],32);
+         break;
+    case 6:
+         g_color_palette[0].h=HUE_LEMON;g_color_palette[0].s=1.0;
+         g_color_palette[1].h=HUE_CYAN;g_color_palette[1].s=1.0;
+         g_color_palette[2].h=HUE_PINK;g_color_palette[2].s=0.7;  // PINK
+         g_color_palette[3].h=HUE_ORANGE;g_color_palette[3].s=1.0; 
+         g_color_palette_lenght=4;
+         start_doubleOrbit(0.5,g_output_waittime[WAIT_32TH],32);
+         break;
   }
   output_process_pattern();
 }
@@ -127,7 +151,7 @@ void output_start_pattern(int pattern_selected) {
 void output_process_pattern() {
   switch (g_current_stepper_type) {
     case ST_COLOR_WIPE: process_colorWipe();      break;
-    //case ST_THEATER_CHASE: process_theaterChase(); break;
+    case ST_DOUBLE_ORBIT: process_doubleOrbit(); break;
   }
 }
 
@@ -178,6 +202,77 @@ void process_colorWipe() {
   }
 }
 
+/*
+ *   Double Orbit
+ */
+void start_doubleOrbit(float lamp_value, int wait, int steps_per_color){
+  // init all globales for the pattern
+  g_pattern_start_time = millis();
+  g_current_stepper_type=ST_DOUBLE_ORBIT;
+  g_pattern_step_wait_interval=wait;
+  g_pattern_previous_step_time = 0L;
+  g_pattern_step_index = 0;
+  g_steps_per_color=steps_per_color;
+  g_step_in_color_index=0;
+
+  g_pattern_value = lamp_value;
+  g_color_palette_index=0;
+
+  // init all lamps
+  lamp[0].set_value(0.0); // Switch of center lamp
+  // Preset color, but set value to 0
+  for (int i = 1; i < PIXEL_COUNT; i++) lamp[i].set_hsv(g_color_palette[g_color_palette_index].h, g_color_palette[g_color_palette_index].s, 0.0);
+}
+
+void process_doubleOrbit() {
+
+  long current_step_time = millis();
+  if (current_step_time - g_pattern_previous_step_time < g_pattern_step_wait_interval) return;
+  g_pattern_previous_step_time = current_step_time;
+
+  int angle = g_pattern_step_index % 3; // angle, where the pixel is on
+
+  for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index) {
+    if (lamp_index % 3 == angle) lamp[lamp_index].set_hsv(g_color_palette[g_color_palette_index].h, g_color_palette[g_color_palette_index].s, g_pattern_value);
+    else  lamp[lamp_index].set_value(0.0);
+  }
+
+  // center pixel lightens every 4th step for 2 ticks
+  if (g_pattern_step_index % 8 == 0 || g_pattern_step_index % 8 == 1) lamp[0].set_hsv(g_color_palette[g_color_palette_index].h, g_color_palette[g_color_palette_index].s, g_pattern_value);
+  else  lamp[0].set_value(0.0);
+
+  output_push_lamps_to_pixels();
+
+  // step foreward;
+  
+  if (++g_pattern_step_index >= 24) g_pattern_step_index = 0; // Whole sequence has 24 step because of the blinking
+  if (++g_step_in_color_index>=g_steps_per_color) {
+        g_step_in_color_index=0;
+        if (++g_color_palette_index>=g_color_palette_lenght) g_color_palette_index=0;
+  }
+}
+
+/*
+ *  Theatre-style crawling lights with rainbow effect
+ */
+
+void theaterChaseRainbow(uint8_t wait) {
+  for (int j = 0; j < 256; j++) {   // cycle all 256 colors in the wheel
+    for (int q = 0; q < 3; q++) {
+      for (int i = 0; i < strip.numPixels(); i = i + 3) {
+        strip.setPixelColor(i + q, Wheel( (i + j) % 255)); //turn every third pixel on
+      }
+      strip.show();
+
+      delay(wait);
+
+      for (int i = 0; i < strip.numPixels(); i = i + 3) {
+        strip.setPixelColor(i + q, 0);      //turn every third pixel off
+      }
+    }
+  }
+}
+
 
 /*
  *   Rainbow stepper
@@ -204,54 +299,6 @@ void rainbowCycle(uint8_t wait) {
     }
     strip.show();
     delay(wait);
-  }
-}
-
-//Theatre-style crawling lights.
-void process_theaterChase(uint32_t c, long wait) {
-  if (g_pattern_needs_init) { // Init pattern when switchting
-    g_pattern_needs_init = false;
-    g_pattern_type_running = g_pattern_type_selected;
-    g_pattern_start_time = millis();
-    g_pattern_previous_step_time = 0L;
-    g_pattern_step_index = 0;
-  }
-  long current_step_time = millis();
-  if (current_step_time - g_pattern_previous_step_time < wait) return;
-  g_pattern_previous_step_time = current_step_time;
-
-  int angle = g_pattern_step_index % 3; // angle, where the pixel is on
-
-  for (int pixel_index = 1; pixel_index < PIXEL_COUNT; ++pixel_index) {
-    if (pixel_index % 3 == angle) strip.setPixelColor(pixel_index, c);
-    else  strip.setPixelColor(pixel_index, g_color_black);
-  }
-
-  // center pixel lightens every 4th step
-  if (g_pattern_step_index % 8 == 0 || g_pattern_step_index % 8 == 1) strip.setPixelColor(0, c);
-  else  strip.setPixelColor(0, g_color_black);
-
-
-  // pattern and step foreward
-  strip.show();
-  if (++g_pattern_step_index >= 24) g_pattern_step_index = 0; // Whole sequence has 24 step
-}
-
-//Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(uint8_t wait) {
-  for (int j = 0; j < 256; j++) {   // cycle all 256 colors in the wheel
-    for (int q = 0; q < 3; q++) {
-      for (int i = 0; i < strip.numPixels(); i = i + 3) {
-        strip.setPixelColor(i + q, Wheel( (i + j) % 255)); //turn every third pixel on
-      }
-      strip.show();
-
-      delay(wait);
-
-      for (int i = 0; i < strip.numPixels(); i = i + 3) {
-        strip.setPixelColor(i + q, 0);      //turn every third pixel off
-      }
-    }
   }
 }
 

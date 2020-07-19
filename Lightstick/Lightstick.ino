@@ -42,7 +42,7 @@ void loop() {
   // Get current button state.
   input_switches_scan_tick();
   if (input_stepGotPressed()) {
-      if (++g_pattern_type_selected > 3) g_pattern_type_selected=0;
+      if (++g_pattern_type_selected > 6) g_pattern_type_selected=0;
       output_start_pattern(g_pattern_type_selected);
       #ifdef TRACE_ON 
        Serial.print("#startpattern ");Serial.println(g_pattern_type_selected);
