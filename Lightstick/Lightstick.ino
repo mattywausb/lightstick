@@ -1,7 +1,5 @@
-// This is a demonstration on how to use an input device to trigger changes on your neo pixels.
-// You should wire a momentary push button to connect from ground to a digital IO pin.  When you
-// press the button it will change to a new pixel animation.  Note that you need to press the
-// button once to start the first animation!
+// This is code creates small light show, using neo pixel
+
 
 #include <Adafruit_NeoPixel.h>
 #include "lamp.h"
@@ -44,7 +42,7 @@ void loop() {
   // Get current button state.
   input_switches_scan_tick();
   if (input_stepGotPressed()) {
-      if (++g_pattern_type_selected > 6) g_pattern_type_selected=0;
+      if (++g_pattern_type_selected > 3) g_pattern_type_selected=0;
       output_start_pattern(g_pattern_type_selected);
       #ifdef TRACE_ON 
        Serial.print("#startpattern ");Serial.println(g_pattern_type_selected);

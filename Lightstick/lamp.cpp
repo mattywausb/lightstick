@@ -1,6 +1,10 @@
 #include "lamp.h"
 #include "Arduino.h"
 
+#ifdef TRACE_ON
+#define TRACE_LAMP_CONVERSION
+#endif
+
 Lamp::Lamp()
 {
   m_color_hsv.h=0.0;
@@ -29,6 +33,27 @@ void Lamp::add_value(float value)
   if(m_color_hsv.v<0.0) m_color_hsv.v=0.0;
 }
 
+void Lamp::set_hue_angle(float angle) 
+{
+  m_color_hsv.h=angle; 
+  while(m_color_hsv.h>=360.) {m_color_hsv.h-=360.0;}; 
+  while(m_color_hsv.h<0.0) {m_color_hsv.h+=360.0;};
+ }
+
+void Lamp::set_saturation(float saturation) 
+{
+  m_color_hsv.s=saturation; 
+  if(m_color_hsv.s>=1.0) m_color_hsv.s=1.0; 
+  if(m_color_hsv.s<0.0) m_color_hsv.s=0.0;
+}
+
+void Lamp::set_value(float value) 
+{
+  m_color_hsv.v=value; 
+  if(m_color_hsv.v>=1.0) m_color_hsv.v=1.0; 
+  if(m_color_hsv.v<0.0) m_color_hsv.v=0.0;
+}
+
 void Lamp::set_hsv(float h,float s,float v)
 {
   m_color_hsv.h=h; 
@@ -44,17 +69,40 @@ void Lamp::set_hsv(float h,float s,float v)
   if(m_color_hsv.v<0.0) m_color_hsv.v=0.0;
 }
 
+void Lamp::trace_hsv()
+{
+  Serial.print(m_color_hsv.h);Serial.print(F(","));
+  Serial.print(m_color_hsv.s);Serial.print(F(","));
+  Serial.print(m_color_hsv.v);
+}
 
-t_color_rgb Lamp::get_color_rgb(float maximum_value)
+void Lamp::trace_rgb(t_color_rgb_int color_rgb )
+{
+  Serial.print(color_rgb.r);Serial.print(F(","));
+  Serial.print(color_rgb.g);Serial.print(F(","));
+  Serial.println(color_rgb.b);
+}
+
+
+
+t_color_rgb_int Lamp::get_color_rgb(float maximum_value)
 {
     float      hue_segment, p, q, t, hue_segment_remainder;
     long        hue_segment_int;
-    t_color_rgb         out;
+    t_color_rgb_int         out;
+
+    #ifdef TRACE_LAMP_CONVERSION
+      Serial.print(F(">TRACE_LAMP_CONVERSION hsv "));
+      lamp[p].trace_hsv();
+    #endif
 
     if(m_color_hsv.s <= 0.0) {       // zero or negative saturation will result in white
-        out.r = m_color_hsv.v;
-        out.g = m_color_hsv.v;
-        out.b = m_color_hsv.v;
+        out.r = m_color_hsv.v*255.0;
+        out.g = m_color_hsv.v*255.0;
+        out.b = m_color_hsv.v*255.0;
+        #ifdef TRACE_LAMP_CONVERSION
+          trace_rgb(out );
+        #endif
         return out;
     }
 
@@ -72,38 +120,39 @@ t_color_rgb Lamp::get_color_rgb(float maximum_value)
     // Calculate rgb  participation depending on hure segment
     switch(hue_segment_int) {
     case 0:   // pure red to pure yellow 0-60
-        out.r = m_color_hsv.v;
-        out.g = hsv_get_t;
-        out.b = p;
+        out.r = m_color_hsv.v*255.0;
+        out.g = hsv_get_t*255.0;
+        out.b = p*255.0;;
         break;
     case 1:   // yellow to pure green   60-120
-        out.r = hsv_get_q;
-        out.g = m_color_hsv.v;
-        out.b = p;
+        out.r = hsv_get_q*255.0;
+        out.g = m_color_hsv.v*255.0;
+        out.b = p*255.0;
         break;
     case 2:   // green to cyan   120-180
-        out.r = p;
-        out.g = m_color_hsv.v;
-        out.b = hsv_get_t;
+        out.r = p*255.0;
+        out.g = m_color_hsv.v*255.0;
+        out.b = hsv_get_t*255.0;
         break;
 
     case 3:  // cyan to blue  180-240
-        out.r = p;
-        out.g = hsv_get_q;
-        out.b = m_color_hsv.v;
+        out.r = p*255.0;
+        out.g = hsv_get_q*255.0;
+        out.b = m_color_hsv.v*255.0;
         break;
     case 4: // blue to magenta  240-300
-        out.r = hsv_get_t;
-        out.g = p;
-        out.b = m_color_hsv.v;
+        out.r = hsv_get_t*255.0;
+        out.g = p*255.0;
+        out.b = m_color_hsv.v*255.0;
         break;
     case 5: // magenta to red  300-360
     default:
-        out.r = m_color_hsv.v;
-        out.g = p;
-        out.b = hsv_get_q;
+        out.r = m_color_hsv.v*255.0;
+        out.g = p*255.0;
+        out.b = hsv_get_q*255.0;
         break;
     }
+
     return out;     
 }
 
