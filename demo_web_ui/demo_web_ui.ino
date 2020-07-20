@@ -28,19 +28,23 @@ const char* password = STAPSK;
 MDNSResponder mdns;
 
 ESP8266WebServer server(80);
-const char DEFAULT_CSS[] =
-"body {   font-family: \"Open Sans\", \"Arial\", \"mono\";  color:#ffe036;  background-color: #18006a;  font-size: 14px;  text-align: left; }"
-"h1 {   text-align: center; }"
-"label {  float: left;     margin: 2px 2px;     padding: 10px 10px; }"
-"input[type=\"submit\"] {   background-color: #4CAF50;   border-radius: 4px;   border: none;   color:white;   margin: 2px 2px;   padding: 16px 16px;   width:100% }"
-"input[type=\"number\"], select{   background-color: #432e8b;   border-radius: 4px;   border: none;   color:#ffe036;   box-sizing: border-box;   margin: 2px 2px;   padding: 10px 10px; }  "
-".col-c {    width: 50%;   float:center; }"
-".col-1 {    width: 50%; }"
-".col-2, .col-3 {    width: 20%; }"
-".row:after {   content: \"\";   display: table;   clear: both; }";
 
-const char INDEX_HTML[] =
-"<!DOCTYPE html>"
+// GPIO#0 is for Adafruit ESP8266 HUZZAH board. Your board LED might be on 13.
+const int LEDPIN = LED_BUILTIN ;
+
+void handleRoot()
+{
+  if (server.hasArg("BPM")) {
+    handleSubmit();
+  }
+  else {
+     sendMainPage() ;
+  }
+}
+
+void sendMainPage() {
+  server.send(200, "text/html", F(
+    "<!DOCTYPE html>"
 "<html><head>"
 "<meta http-equiv=\"content-type\" content=\"text/html; charset=windows-1252\">"
 "<meta name=\"viewport\" content=\"width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0\">"
@@ -83,23 +87,20 @@ const char INDEX_HTML[] =
 "</div>"
 "<input type=\"submit\" value=\"Start\"> </form>"
 "</div>"
-"</body></html>";
-
-// GPIO#0 is for Adafruit ESP8266 HUZZAH board. Your board LED might be on 13.
-const int LEDPIN = LED_BUILTIN ;
-
-void handleRoot()
-{
-  if (server.hasArg("BPM")) {
-    handleSubmit();
-  }
-  else {
-    server.send(200, "text/html", INDEX_HTML);
-  }
+"</body></html>"));
 }
 
 void sendStylesheet() {
-   server.send(200, "text/css", DEFAULT_CSS);
+   server.send(200, "text/css", F(
+    "body {   font-family: \"Open Sans\", \"Arial\", \"mono\";  color:#ffe036;  background-color: #18006a;  font-size: 14px;  text-align: left; }"
+"h1 {   text-align: center; }"
+"label {  float: left;     margin: 2px 2px;     padding: 10px 10px; }"
+"input[type=\"submit\"] {   background-color: #4CAF50;   border-radius: 4px;   border: none;   color:white;   margin: 2px 2px;   padding: 16px 16px;   width:100% }"
+"input[type=\"number\"], select{   background-color: #432e8b;   border-radius: 4px;   border: none;   color:#ffe036;   box-sizing: border-box;   margin: 2px 2px;   padding: 10px 10px; }  "
+".col-c {    width: 50%;   float:center; }"
+".col-1 {    width: 50%; }"
+".col-2, .col-3 {    width: 20%; }"
+".row:after {   content: \"\";   display: table;   clear: both; }"));
 }
 
 void returnFail(String msg)
@@ -119,11 +120,11 @@ void handleSubmit()
   BPM=BPMArgument.toInt();
   if (BPM%2==1) {
     writeLED(true);
-    server.send(200, "text/html", INDEX_HTML);
+   sendMainPage();
   }
   else  {
     writeLED(false);
-    server.send(200, "text/html", INDEX_HTML);
+    sendMainPage();
   }
 
 }
