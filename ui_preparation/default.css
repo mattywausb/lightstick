@@ -1,0 +1,54 @@
+body {
+	font-family: "Open Sans", "Arial", "mono";
+	color:#ffe036;
+	background-color: #18006a;
+	font-size: 14px;
+	text-align: left;
+}
+
+h1 {
+	text-align: center;
+}
+
+/* Form Styles */
+
+label {
+	float: left;
+    margin: 2px 2px;
+    padding: 10px 10px;
+}
+
+/* normal button */
+input[type="submit"] {
+  background-color: #4CAF50;
+  border-radius: 4px;
+  border: none;
+  color:white;
+  margin: 2px 2px;
+  padding: 16px 16px;
+  width:100%
+}
+
+/* Number input, Select box */
+input[type="number"], select{
+  background-color: #432e8b;
+  border-radius: 4px;
+  border: none;
+  color:#ffe036;
+  box-sizing: border-box;
+  margin: 2px 2px;
+  padding: 10px 10px;
+}  
+
+.col-1 {
+	 width: 50%;
+}
+.col-2, .col-3 {
+	 width: 20%;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
