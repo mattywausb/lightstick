@@ -32,6 +32,8 @@ ESP8266WebServer server(80);
 // GPIO#0 is for Adafruit ESP8266 HUZZAH board. Your board LED might be on 13.
 const int LEDPIN = LED_BUILTIN ;
 
+int g_BPM=0;
+
 void handleRoot()
 {
   if (server.hasArg("BPM")) {
@@ -43,10 +45,10 @@ void handleRoot()
 }
 
 void sendMainPage() {
-  server.send(200, "text/html", F(
-    "<!DOCTYPE html>"
+  String BPM_as_string= String(g_BPM);
+  String send_part1= "<!DOCTYPE html>"
 "<html><head>"
-"<meta http-equiv=\"content-type\" content=\"text/html; charset=windows-1252\">"
+"<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">"
 "<meta name=\"viewport\" content=\"width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0\">"
 "<title>Lightstick</title>"
 "<link href=\"default.css\" rel=\"stylesheet\" type=\"text/css\">"
@@ -57,7 +59,9 @@ void sendMainPage() {
 "<form action=\"/\" method=\"post\">"
 "<div class=\"row\">"
 "<label for=\"BPM\" class=\"col-1\"> Beats per minute</label>"
-"<input type=\"number\" id=\"BPM\" name=\"BPM\" value=\"120\" class=\"col-2\">"
+"<input type=\"number\" id=\"BPM\" name=\"BPM\" value=\"";
+
+String send_part2="\" class=\"col-2\">"
 "</div>"
 "<div class=\"row\">"
 " <select id=\"Preset1\" name=\"Preset1\" class=\"col-1\" >"
@@ -87,7 +91,8 @@ void sendMainPage() {
 "</div>"
 "<input type=\"submit\" value=\"Start\"> </form>"
 "</div>"
-"</body></html>"));
+"</body></html>";
+    server.send(200, "text/html", send_part1 + BPM_as_string + send_part2);
 }
 
 void sendStylesheet() {
@@ -113,12 +118,12 @@ void returnFail(String msg)
 void handleSubmit()
 {
   String BPMArgument;
-  int BPM;
+
 
   if (!server.hasArg("BPM")) return returnFail("BAD ARGS");
   BPMArgument = server.arg("BPM");
-  BPM=BPMArgument.toInt();
-  if (BPM%2==1) {
+  g_BPM=BPMArgument.toInt();
+  if (g_BPM%2==1) {
     writeLED(true);
    sendMainPage();
   }
@@ -190,7 +195,8 @@ void setup(void)
 
   Serial.begin(115200);
   WiFi.begin(ssid, password);
-  Serial.println("");
+     char compile_signature[] = "\n\n\n--- START (Build: " __DATE__ " " __TIME__ ") ---";   
+  Serial.println(compile_signature);
 
   // Wait for connection
   while (WiFi.status() != WL_CONNECTED) {
