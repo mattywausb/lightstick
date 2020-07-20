@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252">
+<meta name="viewport" content="width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0">
+
+<title>Lightstick</title>
+<link href="default.css" rel="stylesheet" type="text/css">
+</head>
+
+<BODY class="body">
+<body><h1>Show Control</h1>
+<div>
+<form action="/index1.html" method="post">
+<div class="row">
+<label for="BPM" class="col-1"> Beats per minute</label>
+<input type="number" id="BPM" name="BPM" value="120" class="col-2">
+</div>
+<div class="row">
+ <select id="Preset1" name="Preset1" class="col-1" >
+  <option value="-1">- off -</option>
+  <option value="0">Alarm Gelb</option>
+  <option value="1">Alarm Rot/Orange/Rosa</option>
+  <option value="2">Fade Grün/Cyan/Lemon</option>
+  <option value="3">Fade Blau/Weiß</option>
+  <option value="4">Orbit Blau/Cyan</option>
+  <option value="5">Orbit Gelb/Lila/Rot/Grün</option>
+  <option value="6">Orbit Lemon/Cyan/Pink/Orange</option>
+  <option value="7" selected>Rainbow 60° Step</option>
+  <option value="8">Rainbow 1° Step</option>
+  <option value="9">1/4 Rainbow 1° Step</option>
+  <option value="10">1/4 Rainbow 10° Step</option>
+  <option value="11">Einfarbig 100° Farbstep</option>
+</select> 
+ <select id="Speed1" name="Speed1" class="col-2">
+  <option value="0">2 Beats (Half Note)</option>
+  <option value="1" selected>1 Beat (Quater Note)</option>
+  <option value="2">8th Note</option>
+  <option value="3">16th Note</option>
+  <option value="4">32th Note</option>
+  <option value="5">64th Note</option>
+</select>
+<input type="number" name="duration1" value="4" class="col-3">
+</div>
+
+<input type="submit" value="Start"> </form>
+</div>
+</body></html>

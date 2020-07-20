@@ -28,41 +28,78 @@ const char* password = STAPSK;
 MDNSResponder mdns;
 
 ESP8266WebServer server(80);
+const char DEFAULT_CSS[] =
+"body {   font-family: \"Open Sans\", \"Arial\", \"mono\";  color:#ffe036;  background-color: #18006a;  font-size: 14px;  text-align: left; }"
+"h1 {   text-align: center; }"
+"label {  float: left;     margin: 2px 2px;     padding: 10px 10px; }"
+"input[type=\"submit\"] {   background-color: #4CAF50;   border-radius: 4px;   border: none;   color:white;   margin: 2px 2px;   padding: 16px 16px;   width:100% }"
+"input[type=\"number\"], select{   background-color: #432e8b;   border-radius: 4px;   border: none;   color:#ffe036;   box-sizing: border-box;   margin: 2px 2px;   padding: 10px 10px; }  "
+".col-c {    width: 50%;   float:center; }"
+".col-1 {    width: 50%; }"
+".col-2, .col-3 {    width: 20%; }"
+".row:after {   content: \"\";   display: table;   clear: both; }";
 
 const char INDEX_HTML[] =
-"<!DOCTYPE HTML>"
-"<html>"
-"<head>"
-"<meta name = \"viewport\" content = \"width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0\">"
-"<title>ESP8266 Web Form Demo</title>"
-"<style>"
-"\"body { background-color: #808080; font-family: Arial, Helvetica, Sans-Serif; Color: #000000; }\""
-"</style>"
+"<!DOCTYPE html>"
+"<html><head>"
+"<meta http-equiv=\"content-type\" content=\"text/html; charset=windows-1252\">"
+"<meta name=\"viewport\" content=\"width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0\">"
+"<title>Lightstick</title>"
+"<link href=\"default.css\" rel=\"stylesheet\" type=\"text/css\">"
 "</head>"
-"<body>"
-"<h1>ESP8266 Web Form Demo</h1>"
-"<FORM action=\"/\" method=\"post\">"
-"<P>"
-"LED<br>"
-"<INPUT type=\"radio\" name=\"LED\" value=\"1\">On<BR>"
-"<INPUT type=\"radio\" name=\"LED\" value=\"0\">Off<BR>"
-"<INPUT type=\"submit\" value=\"Send\"> <INPUT type=\"reset\">"
-"</P>"
-"</FORM>"
-"</body>"
-"</html>";
+"<BODY class=\"body\">"
+"<body><h1>Show Control</h1>"
+"<div>"
+"<form action=\"/\" method=\"post\">"
+"<div class=\"row\">"
+"<label for=\"BPM\" class=\"col-1\"> Beats per minute</label>"
+"<input type=\"number\" id=\"BPM\" name=\"BPM\" value=\"120\" class=\"col-2\">"
+"</div>"
+"<div class=\"row\">"
+" <select id=\"Preset1\" name=\"Preset1\" class=\"col-1\" >"
+  "<option value=\"-1\">- off -</option>"
+  "<option value=\"0\">Alarm Gelb</option>"
+  "<option value=\"1\">Alarm Rot/Orange/Rosa</option>"
+  "<option value=\"2\">Fade Grün/Cyan/Lemon</option>"
+  "<option value=\"3\">Fade Blau/Weiß</option>"
+  "<option value=\"4\">Orbit Blau/Cyan</option>"
+  "<option value=\"5\">Orbit Gelb/Lila/Rot/Grün</option>"
+  "<option value=\"6\">Orbit Lemon/Cyan/Pink/Orange</option>"
+  "<option value=\"7\" selected>Rainbow 60° Step</option>"
+  "<option value=\"8\">Rainbow 1° Step</option>"
+  "<option value=\"9\">1/4 Rainbow 1° Step</option>"
+  "<option value=\"10\">1/4 Rainbow 10° Step</option>"
+  "<option value=\"11\">Einfarbig 100° Farbstep</option>"
+"</select>" 
+" <select id=\"Speed1\" name=\"Speed1\" class=\"col-2\">"
+  "<option value=\"0\">2 Beats (Half Note)</option>"
+  "<option value=\"1\" selected>1 Beat (Quater Note)</option>"
+  "<option value=\"2\">8th Note</option>"
+  "<option value=\"3\">16th Note</option>"
+  "<option value=\"4\">32th Note</option>"
+  "<option value=\"5\">64th Note</option>"
+"</select>"
+"<input type=\"number\" name=\"duration1\" value=\"4\" class=\"col-3\">"
+"</div>"
+"<input type=\"submit\" value=\"Start\"> </form>"
+"</div>"
+"</body></html>";
 
 // GPIO#0 is for Adafruit ESP8266 HUZZAH board. Your board LED might be on 13.
 const int LEDPIN = LED_BUILTIN ;
 
 void handleRoot()
 {
-  if (server.hasArg("LED")) {
+  if (server.hasArg("BPM")) {
     handleSubmit();
   }
   else {
     server.send(200, "text/html", INDEX_HTML);
   }
+}
+
+void sendStylesheet() {
+   server.send(200, "text/css", DEFAULT_CSS);
 }
 
 void returnFail(String msg)
@@ -74,21 +111,21 @@ void returnFail(String msg)
 
 void handleSubmit()
 {
-  String LEDvalue;
+  String BPMArgument;
+  int BPM;
 
-  if (!server.hasArg("LED")) return returnFail("BAD ARGS");
-  LEDvalue = server.arg("LED");
-  if (LEDvalue == "1") {
+  if (!server.hasArg("BPM")) return returnFail("BAD ARGS");
+  BPMArgument = server.arg("BPM");
+  BPM=BPMArgument.toInt();
+  if (BPM%2==1) {
     writeLED(true);
     server.send(200, "text/html", INDEX_HTML);
   }
-  else if (LEDvalue == "0") {
+  else  {
     writeLED(false);
     server.send(200, "text/html", INDEX_HTML);
   }
-  else {
-    returnFail("Bad LED value");
-  }
+
 }
 
 void returnOK()
@@ -170,6 +207,7 @@ void setup(void)
   }
 
   server.on("/", handleRoot);
+  server.on("/default.css", sendStylesheet);
   server.on("/ledon", handleLEDon);
   server.on("/ledoff", handleLEDoff);
   server.onNotFound(handleNotFound);

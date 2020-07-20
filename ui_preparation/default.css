@@ -40,6 +40,10 @@ input[type="number"], select{
   padding: 10px 10px;
 }  
 
+.col-c {
+	 width: 50%;
+	 float:center;
+}
 .col-1 {
 	 width: 50%;
 }
