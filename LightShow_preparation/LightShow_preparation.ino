@@ -38,6 +38,18 @@ void setup() {
   output_start_preset(g_preset_selected);
 }
 
+
+void change_waittime_for_input(int value) {
+        switch(value) {
+        case 2: output_set_pattern_speed(STEP_ON_2BEATS); break;
+        case 4: output_set_pattern_speed(STEP_ON_BEAT); break;
+        case 8: output_set_pattern_speed(STEP_ON_8TH); break;
+        case 16:  output_set_pattern_speed(STEP_ON_16TH); break;
+        case 32:  output_set_pattern_speed(STEP_ON_32TH); break;
+        case 64:  output_set_pattern_speed(STEP_ON_64TH); break;
+      }
+}
+
 void loop() {
   // Manage Button Press
   input_switches_scan_tick();
@@ -52,23 +64,28 @@ void loop() {
   // Manage Serial input
   if(input_newSerialCommandAvailable()) {
     String command=input_getSerialCommand();
-    if(command.startsWith("b")) {
-      int bpm=command.substring(2).toInt();
+    if(command.startsWith("b")) {  // b123 <- Change bpm: 
+      int bpm=command.substring(1).toInt();
       if(bpm>0) output_set_bpm(bpm);
     }
-    if(command.startsWith("w")) {
-      int value=command.substring(1).toInt();
-      switch(value) {
-        case 2: output_set_pattern_speed(STEP_ON_2BEATS); break;
-        case 4: output_set_pattern_speed(STEP_ON_BEAT); break;
-        case 8: output_set_pattern_speed(STEP_ON_8TH); break;
-        case 16:  output_set_pattern_speed(STEP_ON_16TH); break;
-        case 32:  output_set_pattern_speed(STEP_ON_32TH); break;
-        case 64:  output_set_pattern_speed(STEP_ON_64TH); break;
-      }
+    if(command.startsWith("w")) {  // w16 <- Change waittime
+      int wait_value=command.substring(1).toInt();
+      change_waittime_for_input(wait_value);
     }
-
+    if(command.startsWith("p")) { //Change preset
+      int value=command.substring(1).toInt();
+      output_start_preset(value);
+    }
+    int position_of_dash=command.indexOf('-');  
+    if(position_of_dash>0) { //Change preset and waittime
+      int preset_id=command.toInt();
+      int wait_value=command.substring(position_of_dash+1).toInt();
+       change_waittime_for_input(wait_value); 
+       output_start_preset(preset_id);
+    }
   }
   output_process_pattern();
 }
+
+
 

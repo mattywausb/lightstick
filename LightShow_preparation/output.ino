@@ -158,7 +158,7 @@ void output_start_preset(int preset_id) {
          start_doubleOrbit(0.5,32);
          break;
     case 7:
-         start_rainbow(0.5,60.0,30.0); // Full span, hart stepping
+         start_rainbow(0.5,60.0,60.0); // Full span, hart stepping
          break;
     case 8:
          start_rainbow(0.5,-60.0,5.0); // Full span reverse order, soft stepping
