@@ -51,10 +51,11 @@ STEPPER_TYPE g_current_stepper_type=ST_COLOR_WIPE;
 int g_output_waittime[6];
 int g_beats_per_minute = 120;
 int g_pattern_step_wait_index=STEP_ON_BEAT;
+long output_beat_sync_time=0L;
 
 
 boolean g_pattern_needs_init = false;
-long g_pattern_start_time = 0L;
+
 long g_pattern_previous_step_time = 0L;
 int g_pattern_step_index = 0;
 uint8_t g_steps_per_color=0;
@@ -90,12 +91,27 @@ void output_set_bpm(int beats_per_minute) {
   g_output_waittime[STEP_ON_16TH] = g_output_waittime[STEP_ON_8TH] /2;
   g_output_waittime[STEP_ON_32TH] = g_output_waittime[STEP_ON_16TH] /2;
   g_output_waittime[STEP_ON_64TH] = g_output_waittime[STEP_ON_32TH] /2;
+  output_sync_beat();
   #ifdef TRACE_OUTPUT_TIMING
     Serial.print(F(">TRACE_OUTPUT_TIMING g_beats_per_minute ")); Serial.println(g_beats_per_minute);
     Serial.print(F(">TRACE_OUTPUT_TIMING STEP_ON_BEAT ")); Serial.println(g_output_waittime[STEP_ON_BEAT]);
     Serial.print(F(">TRACE_OUTPUT_TIMING STEP_ON_32TH ")); Serial.println(g_output_waittime[STEP_ON_32TH]);
     Serial.print(F(">TRACE_OUTPUT_TIMING STEP_ON_64TH ")); Serial.println(g_output_waittime[STEP_ON_64TH]);
   #endif
+}
+
+int output_get_current_beat_number() {
+  long runtime_since_sync=millis()-output_beat_sync_time;
+  return runtime_since_sync/g_output_waittime[STEP_ON_BEAT];
+}
+
+long output_get_current_beat_start_time()  {
+   return output_get_current_beat_number()*g_output_waittime[STEP_ON_BEAT]; 
+}
+
+void output_sync_beat() {
+  output_beat_sync_time=millis();
+  g_pattern_previous_step_time=output_get_current_beat_start_time();
 }
 
 // Change Pattern speed (relative to bpm)
@@ -192,10 +208,10 @@ void output_process_pattern() {
 // 
 void start_colorWipe(float lamp_value, boolean over_black){
   // init all globales for the pattern
-  g_pattern_start_time = millis();
+
   g_current_stepper_type=ST_COLOR_WIPE;
 
-  g_pattern_previous_step_time = 0L;
+  g_pattern_previous_step_time = output_get_current_beat_start_time() ;
   g_pattern_step_index = 0;
   g_max_step_count=over_black ?  (LAMP_COUNT - 1) * 2 : (LAMP_COUNT - 1) ; 
 
@@ -240,9 +256,8 @@ void process_colorWipe() {
  */
 void start_doubleOrbit(float lamp_value,  int steps_per_color){
   // init all globales for the pattern
-  g_pattern_start_time = millis();
   g_current_stepper_type=ST_DOUBLE_ORBIT;
-  g_pattern_previous_step_time = 0L;
+  g_pattern_previous_step_time = output_get_current_beat_start_time();
   g_pattern_step_index = 0;
   g_steps_per_color=steps_per_color;
   g_step_in_color_index=0;
@@ -290,9 +305,9 @@ void process_doubleOrbit() {
 
  void start_rainbow(float lamp_value,  float angle_difference, float angle_step){
   // init all globales for the pattern
-  g_pattern_start_time = millis();
+
   g_current_stepper_type=ST_RAINBOW;
-   g_pattern_previous_step_time = 0L;
+     g_pattern_previous_step_time = output_get_current_beat_start_time();
  
   g_rainbow_step_angle_increment=angle_step;
    

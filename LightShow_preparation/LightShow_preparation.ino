@@ -54,11 +54,7 @@ void loop() {
   // Manage Button Press
   input_switches_scan_tick();
   if (input_stepGotPressed()) {
-      if (++g_preset_selected > 11) g_preset_selected=0;
-      output_start_preset(g_preset_selected);
-      #ifdef TRACE_ON 
-       Serial.print("#startpattern ");Serial.println(g_preset_selected);
-      #endif
+      output_sync_beat() ;
   }
 
   // Manage Serial input
