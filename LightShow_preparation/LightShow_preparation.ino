@@ -3,7 +3,7 @@
 
 #include <Adafruit_NeoPixel.h>
 #include "lamp.h"
-
+#include "output.h"
 
 
 #define PIXEL_PIN    6    // Digital IO pin connected to the NeoPixels.
@@ -23,7 +23,7 @@
 
 
 long g_music_start_time=0;
-int g_pattern_type_selected = 7;
+int g_preset_selected = 7;
 
 
 
@@ -35,18 +35,39 @@ void setup() {
   #endif
   input_setup();
   output_setup();
-  output_start_pattern(g_pattern_type_selected);
+  output_start_preset(g_preset_selected);
 }
 
 void loop() {
-  // Get current button state.
+  // Manage Button Press
   input_switches_scan_tick();
   if (input_stepGotPressed()) {
-      if (++g_pattern_type_selected > 11) g_pattern_type_selected=0;
-      output_start_pattern(g_pattern_type_selected);
+      if (++g_preset_selected > 11) g_preset_selected=0;
+      output_start_preset(g_preset_selected);
       #ifdef TRACE_ON 
-       Serial.print("#startpattern ");Serial.println(g_pattern_type_selected);
+       Serial.print("#startpattern ");Serial.println(g_preset_selected);
       #endif
+  }
+
+  // Manage Serial input
+  if(input_newSerialCommandAvailable()) {
+    String command=input_getSerialCommand();
+    if(command.startsWith("b")) {
+      int bpm=command.substring(2).toInt();
+      if(bpm>0) output_set_bpm(bpm);
+    }
+    if(command.startsWith("w")) {
+      int value=command.substring(1).toInt();
+      switch(value) {
+        case 2: output_set_pattern_speed(STEP_ON_2BEATS); break;
+        case 4: output_set_pattern_speed(STEP_ON_BEAT); break;
+        case 8: output_set_pattern_speed(STEP_ON_8TH); break;
+        case 16:  output_set_pattern_speed(STEP_ON_16TH); break;
+        case 32:  output_set_pattern_speed(STEP_ON_32TH); break;
+        case 64:  output_set_pattern_speed(STEP_ON_64TH); break;
+      }
+    }
+
   }
   output_process_pattern();
 }
