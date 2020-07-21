@@ -54,6 +54,7 @@ int g_pattern_step_wait_index=STEP_ON_BEAT;
 long output_beat_sync_time=0L;
 
 
+
 boolean g_pattern_needs_init = false;
 
 long g_pattern_previous_step_time = 0L;
@@ -85,15 +86,19 @@ void output_setup() {
 // Change bpm
 void output_set_bpm(int beats_per_minute) {
   g_beats_per_minute = beats_per_minute;
-  g_output_waittime[STEP_ON_2BEATS] = 120000 / g_beats_per_minute;
-  g_output_waittime[STEP_ON_BEAT] = g_output_waittime[STEP_ON_2BEATS] /2;
+  output_set_waittimes(60000/g_beats_per_minute);
+  output_sync_beat();
+};
+
+void output_set_waittimes(int time_for_beat) {
+  g_output_waittime[STEP_ON_2BEATS] =time_for_beat*2;
+  g_output_waittime[STEP_ON_BEAT] = time_for_beat;
   g_output_waittime[STEP_ON_8TH] = g_output_waittime[STEP_ON_BEAT] /2;
   g_output_waittime[STEP_ON_16TH] = g_output_waittime[STEP_ON_8TH] /2;
   g_output_waittime[STEP_ON_32TH] = g_output_waittime[STEP_ON_16TH] /2;
   g_output_waittime[STEP_ON_64TH] = g_output_waittime[STEP_ON_32TH] /2;
-  output_sync_beat();
   #ifdef TRACE_OUTPUT_TIMING
-    Serial.print(F(">TRACE_OUTPUT_TIMING g_beats_per_minute ")); Serial.println(g_beats_per_minute);
+    Serial.print(F(">TRACE_OUTPUT_TIMING calculated BPM ")); Serial.println(60000/time_for_beat);
     Serial.print(F(">TRACE_OUTPUT_TIMING STEP_ON_BEAT ")); Serial.println(g_output_waittime[STEP_ON_BEAT]);
     Serial.print(F(">TRACE_OUTPUT_TIMING STEP_ON_32TH ")); Serial.println(g_output_waittime[STEP_ON_32TH]);
     Serial.print(F(">TRACE_OUTPUT_TIMING STEP_ON_64TH ")); Serial.println(g_output_waittime[STEP_ON_64TH]);

@@ -25,6 +25,12 @@
 long g_music_start_time=0;
 int g_preset_selected = 7;
 
+int g_tap_track_interval[3];
+int g_tap_track_count=0;
+int g_tap_track_index=0;
+int g_tap_track_sum=0;
+long g_tap_track_prev_time=0L;
+
 
 
 void setup() {
@@ -50,11 +56,52 @@ void change_waittime_for_input(int value) {
       }
 }
 
+void manage_tap_input() {
+  int prev_tap_track_interval=g_tap_track_interval[g_tap_track_index];
+  long current_millis=millis();
+
+  if(++g_tap_track_index>=3) g_tap_track_index=0;  // Foreward track array index
+
+  // Determine tap interval
+  g_tap_track_interval[g_tap_track_index]=current_millis-g_tap_track_prev_time;
+  g_tap_track_prev_time=current_millis;
+  g_tap_track_sum+=g_tap_track_interval[g_tap_track_index];
+  
+  if(abs(g_tap_track_interval[g_tap_track_index]-prev_tap_track_interval)>300) {  // no valid lenght compared to previous
+    g_tap_track_count=1; // Reset Counter and sum to latest measure
+    g_tap_track_sum=g_tap_track_interval[g_tap_track_index];
+    #ifdef TRACE_ON
+            Serial.print(F(">TRACE_ON Tap prev check failed by ")); Serial.println(abs(g_tap_track_interval[g_tap_track_index]-prev_tap_track_interval));
+    #endif
+  } else g_tap_track_count++;
+  
+ 
+  if(g_tap_track_count>=3) { // We have collected 3 valid lenght
+    g_tap_track_count=3;
+    int average_tap_lenght=g_tap_track_sum/g_tap_track_count;
+     for (int i=0; i<3;i++) {
+        if(abs(average_tap_lenght-g_tap_track_interval[i])>300) { // Reset on deviation more then 150 ms to average
+                 g_tap_track_count=1;
+                 g_tap_track_sum=g_tap_track_interval[g_tap_track_index];
+                   #ifdef TRACE_ON
+                      Serial.print(F(">TRACE_ON Tap avg check failed by ")); Serial.println(abs(average_tap_lenght-g_tap_track_interval[i]));
+                   #endif
+                 return; // Get  out in case of fail
+        }
+     }
+     output_set_waittimes(average_tap_lenght);
+     g_tap_track_count=1; // Reset Counter and sum to latest measure
+     g_tap_track_sum=g_tap_track_interval[g_tap_track_index];
+  }
+     
+}
+
 void loop() {
   // Manage Button Press
   input_switches_scan_tick();
   if (input_stepGotPressed()) {
       output_sync_beat() ;
+      manage_tap_input();
   }
 
   // Manage Serial input
