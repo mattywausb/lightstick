@@ -30,11 +30,17 @@ typedef struct {
     byte beats_to_run;       // 0-255
 } t_sequence_entry;
 
-t_sequence_entry preset_sequence[6]={{2,8,16},
-                              {5,16,8},
-                              {3,16,8}};
-
-int g_sequence_entry_count=3;
+t_sequence_entry preset_sequence[8]={
+                               {1, 4,16}
+                              ,{1, 8,16}
+                              ,{7, 4, 8}
+                              ,{3,16, 8}
+                              ,{6,16,32}
+                              ,{7, 4, 8}
+                              ,{3,16, 4}
+                              ,{8,32, 4}
+                              };
+int g_sequence_entry_count=8;
 int g_sequence_index=0;
 
 long g_music_start_time=0;

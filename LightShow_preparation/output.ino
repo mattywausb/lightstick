@@ -5,7 +5,7 @@
 #ifdef TRACE_ON
 // #define TRACE_OUPUT_PIXEL_RESULT
 #define TRACE_OUTPUT_TIMING
-#define TRACE_OUTPUT_PATTERN_BEAT
+//#define TRACE_OUTPUT_PATTERN_BEAT
 #endif
 
 #define BUTTON_PIN   12    // Digital IO pin connected to the button.  This will be
