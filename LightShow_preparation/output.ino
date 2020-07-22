@@ -5,6 +5,7 @@
 #ifdef TRACE_ON
 // #define TRACE_OUPUT_PIXEL_RESULT
 #define TRACE_OUTPUT_TIMING
+#define TRACE_OUTPUT_PATTERN_BEAT
 #endif
 
 #define BUTTON_PIN   12    // Digital IO pin connected to the button.  This will be
@@ -52,7 +53,8 @@ int g_output_waittime[6];
 int g_beats_per_minute = 120;
 int g_pattern_step_wait_index=STEP_ON_BEAT;
 long output_beat_sync_time=0L;
-
+int output_preset_beat_start_beat=0;
+int output_preset_beat_count=0;
 
 
 boolean g_pattern_needs_init = false;
@@ -78,7 +80,7 @@ void output_setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
-  digitalWrite(LED_BUILTIN, HIGH);
+  digitalWrite(LED_BUILTIN, LOW);
   output_set_bpm(120);
   output_set_pattern_speed(STEP_ON_BEAT);
 }
@@ -105,13 +107,17 @@ void output_set_waittimes(int time_for_beat) {
   #endif
 }
 
-int output_get_current_beat_number() {
+int output_get_beat_number_since_sync() {
   long runtime_since_sync=millis()-output_beat_sync_time;
   return runtime_since_sync/g_output_waittime[STEP_ON_BEAT];
 }
 
 long output_get_current_beat_start_time()  {
-   return output_get_current_beat_number()*g_output_waittime[STEP_ON_BEAT]; 
+   return output_get_beat_number_since_sync()*g_output_waittime[STEP_ON_BEAT]; 
+}
+
+int output_get_preset_beat_count() {
+  return output_preset_beat_count;
 }
 
 void output_sync_beat() {
@@ -127,6 +133,8 @@ void output_set_pattern_speed(int wait_index)
 
 // Select and start a pattern
 void output_start_preset(int preset_id) {
+  output_preset_beat_start_beat=output_get_beat_number_since_sync();
+  output_preset_beat_count=0;
   switch (preset_id) {
     case 0:
          g_color_palette[0].h=HUE_YELLOW;g_color_palette[0].s=1.0;
@@ -204,6 +212,14 @@ void output_process_pattern() {
     case ST_DOUBLE_ORBIT: process_doubleOrbit(); break;
     case ST_RAINBOW: process_rainbow();break;
   }
+  
+  if(output_preset_beat_start_beat==output_get_beat_number_since_sync())  return;
+  #ifdef TRACE_OUTPUT_PATTERN_BEAT
+    Serial.print(F(">TRACE_OUTPUT_PATTERN_BEAT Beat = ")); Serial.println(output_preset_beat_count);
+  #endif 
+  output_preset_beat_start_beat=output_get_beat_number_since_sync();
+  digitalWrite(LED_BUILTIN, output_preset_beat_count%2);
+  output_preset_beat_count++;
 }
 
 /*

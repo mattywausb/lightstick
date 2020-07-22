@@ -12,6 +12,10 @@
 
 #define TRACE_ON
 
+#ifdef TRACE_ON
+#define TRACE_SEQUENCE_PROGRESS
+#endif
+
 // Parameter 1 = number of pixels in strip,  neopixel stick has 8
 // Parameter 2 = pin number (most are valid)
 // Parameter 3 = pixel type flags, add together as needed:
@@ -20,7 +24,18 @@
 //   NEO_KHZ400  400 KHz bitstream (e.g. FLORA pixels)
 //   NEO_KHZ800  800 KHz bitstream (e.g. High Density LED strip), correct for neopixel stick
 
+typedef struct {
+    byte preset_id;       // 0-255
+    byte preset_wait_time;       // 0-255
+    byte beats_to_run;       // 0-255
+} t_sequence_entry;
 
+t_sequence_entry preset_sequence[6]={{2,8,16},
+                              {5,16,8},
+                              {3,16,8}};
+
+int g_sequence_entry_count=3;
+int g_sequence_index=0;
 
 long g_music_start_time=0;
 int g_preset_selected = 7;
@@ -32,6 +47,12 @@ int g_tap_track_sum=0;
 long g_tap_track_prev_time=0L;
 
 
+enum MODE_OF_OPERATION {
+  MODE_SEQUENCE,
+  MODE_FIX_PRESET
+};
+
+MODE_OF_OPERATION mode_of_operation=MODE_SEQUENCE;
 
 void setup() {
   #ifdef TRACE_ON 
@@ -41,7 +62,7 @@ void setup() {
   #endif
   input_setup();
   output_setup();
-  output_start_preset(g_preset_selected);
+  sequence_start();
 }
 
 
@@ -89,12 +110,44 @@ void manage_tap_input() {
                  return; // Get  out in case of fail
         }
      }
-     output_set_waittimes(average_tap_lenght);
+     output_set_bpm(60000/average_tap_lenght);
      g_tap_track_count=1; // Reset Counter and sum to latest measure
      g_tap_track_sum=g_tap_track_interval[g_tap_track_index];
   }
      
 }
+
+#ifdef TRACE_SEQUENCE_PROGRESS
+void trace_sequence()
+{
+  Serial.print(F(">TRACE_SEQUENCE_PROGRESS index:")); Serial.print(g_sequence_index);
+  Serial.print(F(" preset_id: ")); Serial.print(preset_sequence[g_sequence_index].preset_id);
+  Serial.print(F(" preset_wait_time: ")); Serial.print(preset_sequence[g_sequence_index].preset_wait_time);
+  Serial.print(F(" beats_to_run: ")); Serial.println(preset_sequence[g_sequence_index].beats_to_run);
+}
+#endif
+
+void sequence_start()
+{
+  g_sequence_index=0;
+  change_waittime_for_input(preset_sequence[g_sequence_index].preset_wait_time);
+  output_start_preset(preset_sequence[g_sequence_index].preset_id);
+  #ifdef TRACE_SEQUENCE_PROGRESS
+    trace_sequence();
+  #endif
+}
+
+void sequence_next_pattern()
+{
+    if(++g_sequence_index>=g_sequence_entry_count)g_sequence_index=0;
+    change_waittime_for_input(preset_sequence[g_sequence_index].preset_wait_time);
+    output_start_preset(preset_sequence[g_sequence_index].preset_id);   
+    #ifdef TRACE_SEQUENCE_PROGRESS
+      trace_sequence();
+    #endif
+}
+
+
 
 void loop() {
   // Manage Button Press
@@ -111,13 +164,19 @@ void loop() {
       int bpm=command.substring(1).toInt();
       if(bpm>0) output_set_bpm(bpm);
     }
+    if(command.startsWith("s")) {  // trigger sequence mode
+      mode_of_operation=MODE_SEQUENCE;
+      sequence_start();
+    }
     if(command.startsWith("w")) {  // w16 <- Change waittime
       int wait_value=command.substring(1).toInt();
       change_waittime_for_input(wait_value);
+      mode_of_operation=MODE_FIX_PRESET;
     }
     if(command.startsWith("p")) { //Change preset
       int value=command.substring(1).toInt();
       output_start_preset(value);
+      mode_of_operation=MODE_FIX_PRESET;
     }
     int position_of_dash=command.indexOf('-');  
     if(position_of_dash>0) { //Change preset and waittime
@@ -125,8 +184,17 @@ void loop() {
       int wait_value=command.substring(position_of_dash+1).toInt();
        change_waittime_for_input(wait_value); 
        output_start_preset(preset_id);
+        mode_of_operation=MODE_FIX_PRESET;
     }
   }
+
+  // Manage current sequence 
+  if(mode_of_operation==MODE_SEQUENCE) {
+    if(output_get_preset_beat_count()>=preset_sequence[g_sequence_index].beats_to_run) {
+      sequence_next_pattern();
+    }
+  }
+  
   output_process_pattern();
 }
 
