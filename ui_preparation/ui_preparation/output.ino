@@ -9,6 +9,13 @@ long output_beat_sync_time=0L;
 int output_preset_beat_count=0;
 int output_preset_beat_start_beat=0;
 
+/*
+ * 
+ *      ATTENTION: Use pin D6 (GPIO12) for LED Data
+ * 
+ * 
+ */
+
 void output_setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);

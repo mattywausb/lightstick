@@ -13,8 +13,8 @@
 
 
 /* Button constants */ 
-const byte switch_pin_list[] = {5,    // Mode Select 
-                                4    // Step
+const byte switch_pin_list[] = {5,    // Mode Select  D1 on ESP8266 / Node MCU
+                                4    // Step          D2 on ESP8266 / Node MCU
                                };
                                 
 #define INPUT_PORT_COUNT sizeof(switch_pin_list)
