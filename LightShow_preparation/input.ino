@@ -13,8 +13,8 @@
 
 
 /* Button constants */ 
-const byte switch_pin_list[] = {11,    // Mode Select 
-                                12    // Step
+const byte switch_pin_list[] = {7,    // Mode Select 
+                                6    // Step
                                };
                                 
 #define INPUT_PORT_COUNT sizeof(switch_pin_list)
