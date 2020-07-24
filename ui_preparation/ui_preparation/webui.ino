@@ -21,6 +21,20 @@
 #include <ESP8266mDNS.h>
 #include "wifi_credentials.h"
 #include "webui.h"
+#include "mainSettings.h"
+
+#ifdef TRACE_ON
+#define TRACE_WEBUI
+#define TRACE_WEBUI_PAGE_GENERATION
+#endif
+
+/* Macro to declare Strings with reserved buffer */
+#define DECLARE_PREALLOCATED_STRING(varname, alloc_size) String varname((const char*)nullptr); varname.reserve(alloc_size)
+
+constexpr unsigned SMALL_STR = 64-1;
+constexpr unsigned MED_STR = 256-1;
+constexpr unsigned LARGE_STR = 512-1;
+constexpr unsigned XLARGE_STR = 1024-1;
 
 //  SSID and password are defined in header file that will not be in the git repo
 const char* ssid = STASSID;
@@ -29,9 +43,6 @@ const char* password = STAPSK;
 MDNSResponder mdns;
 
 ESP8266WebServer server(80);
-
-// GPIO#0 is for Adafruit ESP8266 HUZZAH board. Your board LED might be on 13.
-const int LEDPIN = LED_BUILTIN ;
 
 t_webui_command webui_command=NONE;
 int webui_data_bpm=0;
@@ -46,65 +57,194 @@ t_webui_command webui_read_command() {
 
 int webui_data_get_bpm() { return webui_data_bpm;}
 
+/* HTML Header */ 
+
+const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html>"
+"<head> <title>Lightstick</title> "
+"<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">"
+"<meta name=\"viewport\" content=\"width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0\">"
+"<link href=\"default.css\" rel=\"stylesheet\" type=\"text/css\">"
+"</head><body>";
+
+const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
+
+static void send_html_header() {
+ 
+  DECLARE_PREALLOCATED_STRING(s, LARGE_STR);
+  s = FPSTR(WEB_PAGE_HEADER);
+  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  server.send(200, FPSTR(TXT_CONTENT_TYPE_TEXT_HTML), s);
+}
+
+/* End of Webpage */
+const char WEB_PAGE_FOOTER[] PROGMEM = "</body></html>\r\n";
+
+
+static void send_html_body(String& body_content) {
+  if (body_content.length()) {
+    server.sendContent(body_content);
+  } else {
+    server.sendContent(F("<h1>Ooops. There was no/nada/nix content assembled for the html page body</h1>"));
+  }
+  server.sendContent_P(WEB_PAGE_FOOTER);
+  #ifdef TRACE_WEBUI
+    Serial.println(F(">TRACE_WEBUI- Page sent "));
+  #endif
+      
+}
+
+const char preset_name_off[] PROGMEM ="-off-";
+const char preset_name_0[] PROGMEM ="Alarm Gelb";
+const char preset_name_1[] PROGMEM ="Alarm Rot/Orange/Rosa";
+const char preset_name_2[] PROGMEM ="Fade Grün/Cyan/Lemon";
+const char preset_name_3[] PROGMEM ="Fade Blau/Weiß";
+const char preset_name_4[] PROGMEM ="Orbit Blau/Cyan";
+const char preset_name_5[] PROGMEM ="Orbit Gelb/Lila/Rot/Grün";
+const char preset_name_6[] PROGMEM ="Orbit Lemon/Cyan/Pink/Orange";
+const char preset_name_7[] PROGMEM ="Rainbow 60° Step";
+const char preset_name_8[] PROGMEM ="Rainbow 1° Step";
+const char preset_name_9[] PROGMEM ="1/4 Rainbow 1° Step";
+const char preset_name_10[] PROGMEM ="1/4 Rainbow 10° Step";
+const char preset_name_11[] PROGMEM ="Einfarbig 100° Farbstep";
+
+const char * const preset_name_table[] PROGMEM =  {preset_name_off
+                                                  ,preset_name_0
+                                                  ,preset_name_1
+                                                  ,preset_name_2
+                                                  ,preset_name_3
+                                                  ,preset_name_4
+                                                  ,preset_name_5
+                                                  ,preset_name_6
+                                                  ,preset_name_7
+                                                  ,preset_name_8
+                                                  ,preset_name_9
+                                                  ,preset_name_10
+                                                  ,preset_name_11};
+
+#define PRESET_NAME_COUNT 12
+
+const char speed_name_0[] PROGMEM ="2 Beats";
+const char speed_name_1[] PROGMEM ="1 Beat";
+const char speed_name_2[] PROGMEM ="8th Note";
+const char speed_name_3[] PROGMEM ="16th Note";
+const char speed_name_4[] PROGMEM ="32rd Note";
+const char speed_name_5[] PROGMEM ="64th Note";
+
+
+const char * const speed_name_table[] PROGMEM  = {speed_name_0
+                                                 ,speed_name_1
+                                                 ,speed_name_2
+                                                 ,speed_name_3
+                                                 ,speed_name_4
+                                                 ,speed_name_5};
+#define SPEED_NAME_COUNT 6
+                                                 
+
+void send_main_page() {
+  DECLARE_PREALLOCATED_STRING(body_content,XLARGE_STR);
+
+  String value_as_string;
+  
+  send_html_header() ;
+
+  // Heading of page 
+  body_content+=F("<h1>Show Control</h1> <div>");
+  body_content+=F("<form action=\"/\" method=\"post\">"); 
+  body_content+=F("<div class=\"row\">");
+
+  // BPM input
+  #ifdef TRACE_WEBUI_PAGE_GENERATION
+    Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- BPM Input"));
+  #endif
+  value_as_string= String(output_get_bpm());
+  body_content+=F("<input type=\"number\" id=\"BPM\" name=\"BPM\" value=\"");
+  body_content+=value_as_string;
+  body_content+=F("\" class=\"col-2\">");
+
+  
+  // Pattern Setup Table
+  char string_buffer[30];
+  for(int preset_step_index=0;preset_step_index<4;preset_step_index++) {
+        body_content+=F("</div><div class=\"row\">");
+        // Preset selection
+        #ifdef TRACE_WEBUI_PAGE_GENERATION
+          Serial.print(F(">TRACE_WEBUI_PAGE_GENERATION- preset selection #"));
+          Serial.println(preset_step_index);
+        #endif
+        value_as_string= "Preset"+String(preset_step_index+1);
+        body_content+=F("<select id=\"");
+        body_content+=value_as_string;
+        body_content+=F("\" name=\"");
+        body_content+=value_as_string;
+        body_content+=F("\" class=\"col-1\" >");
+        for(int select_index=0;select_index<PRESET_NAME_COUNT;select_index++) {
+           Serial.print(">");
+           strcpy_P(string_buffer, (char*)pgm_read_word(&(preset_name_table[select_index])));
+           Serial.println("<");
+           body_content+=F("<option value=\"");
+           body_content+=String(select_index-1);
+           // 2do add selected tag here for selected option
+           body_content+=F("\">");
+
+           body_content+=string_buffer;
+
+           body_content+=F("</option>");
+        }
+        body_content+=F("</select>");
+        /*
+        // Speed selection 
+        #ifdef TRACE_WEBUI_PAGE_GENERATION
+          Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- Speed selection"));
+        #endif
+        value_as_string= "Speed"+String(preset_step_index+1);
+        body_content+=F("<select id=\"");
+        body_content+=value_as_string;
+        body_content+=F("\" name=\"");
+        body_content+=value_as_string;
+        body_content+=F("\" class=\"col-2\" >");
+        for(int speed_index=0;speed_index<SPEED_NAME_COUNT;speed_index++) {
+          strcpy_P(string_buffer, (char*)pgm_read_word(&(speed_name_table[speed_index])));
+           body_content+=F("<option value=\"");
+           body_content+=String(speed_index-1);
+           body_content+=F("\">");
+           // 2do add selected tag here for selected option
+           body_content+=string_buffer;
+           body_content+=F("</option>");
+        }
+        body_content+=F("</select>");
+
+        // preset beat duration input 
+        value_as_string= "duration"+String(preset_step_index+1);
+        body_content+=F("<input type=\"number\" name=\"");
+        body_content+=value_as_string;;
+        body_content+=F("\" value=\"4\" class=\"col-3\">");
+        */
+        
+  }// end of loop over preset parameter rows 
+  
+  // Submit button 
+  body_content+=F("</div><div class=\"row\">");
+  body_content+=F("<input type=\"submit\" value=\"Start\">");
+
+  // End of Form
+  body_content+=F("</div></form>");
+
+  /*Now get it all out to the user */
+  send_html_body(body_content);
+}
+
 void handleRoot()
 {
+  #ifdef TRACE_WEBUI
+    Serial.println(F(">TRACE_WEBUI- handleRoot started"));
+  #endif
   if (server.hasArg("BPM")) {
     parseFormData();
     process_webui_command();
   }
-  sendMainPage() ;
+  send_main_page() ;
 }
 
-void sendMainPage() {
-  String BPM_as_string= String(output_get_bpm());
-  String send_part1= "<!DOCTYPE html>"
-"<html><head>"
-"<meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\">"
-"<meta name=\"viewport\" content=\"width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable=0\">"
-"<title>Lightstick</title>"
-"<link href=\"default.css\" rel=\"stylesheet\" type=\"text/css\">"
-"</head>"
-"<BODY class=\"body\">"
-"<body><h1>Show Control</h1>"
-"<div>"
-"<form action=\"/\" method=\"post\">"
-"<div class=\"row\">"
-"<label for=\"BPM\" class=\"col-1\"> Beats per minute</label>"
-"<input type=\"number\" id=\"BPM\" name=\"BPM\" value=\"";
-
-String send_part2="\" class=\"col-2\">"
-"</div>"
-"<div class=\"row\">"
-" <select id=\"Preset1\" name=\"Preset1\" class=\"col-1\" >"
-  "<option value=\"-1\">- off -</option>"
-  "<option value=\"0\">Alarm Gelb</option>"
-  "<option value=\"1\">Alarm Rot/Orange/Rosa</option>"
-  "<option value=\"2\">Fade Grün/Cyan/Lemon</option>"
-  "<option value=\"3\">Fade Blau/Weiß</option>"
-  "<option value=\"4\">Orbit Blau/Cyan</option>"
-  "<option value=\"5\">Orbit Gelb/Lila/Rot/Grün</option>"
-  "<option value=\"6\">Orbit Lemon/Cyan/Pink/Orange</option>"
-  "<option value=\"7\" selected>Rainbow 60° Step</option>"
-  "<option value=\"8\">Rainbow 1° Step</option>"
-  "<option value=\"9\">1/4 Rainbow 1° Step</option>"
-  "<option value=\"10\">1/4 Rainbow 10° Step</option>"
-  "<option value=\"11\">Einfarbig 100° Farbstep</option>"
-"</select>" 
-" <select id=\"Speed1\" name=\"Speed1\" class=\"col-2\">"
-  "<option value=\"0\">2 Beats (Half Note)</option>"
-  "<option value=\"1\" selected>1 Beat (Quater Note)</option>"
-  "<option value=\"2\">8th Note</option>"
-  "<option value=\"3\">16th Note</option>"
-  "<option value=\"4\">32th Note</option>"
-  "<option value=\"5\">64th Note</option>"
-"</select>"
-"<input type=\"number\" name=\"duration1\" value=\"4\" class=\"col-3\">"
-"</div>"
-"<input type=\"submit\" value=\"Start\"> </form>"
-"</div>"
-"</body></html>";
-    server.send(200, "text/html", send_part1 + BPM_as_string + send_part2);
-}
 
 void sendStylesheet() {
    server.send(200, "text/css", F(
