@@ -39,7 +39,6 @@ t_sequence_entry g_preset_sequence[MAX_NUMBER_OF_PRESETS_IN_SEQUENCE]={ /* IDOL 
                               ,{255,STEP_ON_8TH, 8}
                               };
 
-
 int g_sequence_entry_count=8;
 int g_sequence_index=0;
 
@@ -69,6 +68,7 @@ void setup() {
   webui_setup();
   input_setup();
   output_setup();
+  output_set_bpm(126);
   sequence_start();
   #ifdef TRACE_ON
     Serial.println(F(">TRACE_ON setup complete "));

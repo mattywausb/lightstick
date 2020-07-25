@@ -77,7 +77,7 @@ void output_setup() {
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
   digitalWrite(LED_BUILTIN, LOW);
-  output_set_bpm(120);
+  output_set_bpm(40);
   output_set_pattern_speed(STEP_ON_BEAT);
 }
 
