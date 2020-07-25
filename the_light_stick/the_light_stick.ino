@@ -1,10 +1,18 @@
-// This is code creates small light show, using neo pixel
+/* Compile against  NodeMCU 1.0 Profile */
 
+/* Main controller Module
+ *  
+ *  Orchestrates all Elements 
+ *  transforming input signals from Buttons, Web IU and Serial Input into Actions and Mode changes
+ *  manage output processing
+ *  
+ */
 
 #include <Adafruit_NeoPixel.h>
 #include "lamp.h"
 #include "output.h"
 #include "mainSettings.h"
+#include "webui.h"
 
 
 #ifdef TRACE_ON
@@ -51,12 +59,16 @@ MODE_OF_OPERATION mode_of_operation=MODE_SEQUENCE;
 void setup() {
   #ifdef TRACE_ON 
     char compile_signature[] = "--- START (Build: " __DATE__ " " __TIME__ ") ---";   
-    Serial.begin(9600);
+    Serial.begin(115200);
     Serial.println(compile_signature); 
   #endif
+  webui_setup();
   input_setup();
   output_setup();
   sequence_start();
+  #ifdef TRACE_ON
+    Serial.println(F(">TRACE_ON setup complete "));
+  #endif
 }
 
 /* Tranlates input over serial into step speed index */
@@ -133,7 +145,8 @@ void sequence_start()
 
 void sequence_next_pattern()
 {
-    if(++g_sequence_index>=g_sequence_entry_count)g_sequence_index=0;
+    if(++g_sequence_index>=MAX_NUMBER_OF_PRESETS_IN_SEQUENCE)g_sequence_index=0;
+    while(g_preset_sequence[g_sequence_index].preset_id==PRESET_ID_OFF) if(++g_sequence_index>=MAX_NUMBER_OF_PRESETS_IN_SEQUENCE){g_sequence_index=0;break;}
     output_set_pattern_speed(g_preset_sequence[g_sequence_index].preset_speed_id);
     output_start_preset(g_preset_sequence[g_sequence_index].preset_id);   
     #ifdef TRACE_SEQUENCE_PROGRESS
@@ -141,9 +154,23 @@ void sequence_next_pattern()
     #endif
 }
 
-
+void process_webui_command() {
+  switch (webui_read_command())
+    {
+      case SET_SEQUENCE:
+             
+      case SET_BPM: 
+              int new_bpm=webui_data_get_bpm();
+              output_set_bpm(new_bpm);
+              sequence_start();
+              break;
+    }
+}
 
 void loop() {
+  // Check for input from webui
+  webui_loop();
+  
   // Manage Button Press
   input_switches_scan_tick();
   if (input_stepGotPressed()) {
