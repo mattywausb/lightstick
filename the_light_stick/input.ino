@@ -227,7 +227,7 @@ void input_switches_scan_tick()
 
 /* ************** Manage Serial input ***************** */
 
-void serialEvent() {
+void input_pollSerial() {
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();

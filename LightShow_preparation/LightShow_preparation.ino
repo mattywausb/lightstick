@@ -133,7 +133,8 @@ void sequence_start()
 
 void sequence_next_pattern()
 {
-    if(++g_sequence_index>=g_sequence_entry_count)g_sequence_index=0;
+    if(++g_sequence_index>=MAX_NUMBER_OF_PRESETS_IN_SEQUENCE)g_sequence_index=0;
+    while(g_preset_sequence[g_sequence_index].preset_id==PRESET_ID_OFF) if(++g_sequence_index>=MAX_NUMBER_OF_PRESETS_IN_SEQUENCE){g_sequence_index=0;break;}
     output_set_pattern_speed(g_preset_sequence[g_sequence_index].preset_speed_id);
     output_start_preset(g_preset_sequence[g_sequence_index].preset_id);   
     #ifdef TRACE_SEQUENCE_PROGRESS
