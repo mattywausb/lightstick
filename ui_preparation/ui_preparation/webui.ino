@@ -93,33 +93,19 @@ static void send_html_body(String& body_content) {
       
 }
 
-const char preset_name_off[] PROGMEM ="-off-";
-const char preset_name_0[] PROGMEM ="Alarm Gelb";
-const char preset_name_1[] PROGMEM ="Alarm Rot/Orange/Rosa";
-const char preset_name_2[] PROGMEM ="Fade Grün/Cyan/Lemon";
-const char preset_name_3[] PROGMEM ="Fade Blau/Weiß";
-const char preset_name_4[] PROGMEM ="Orbit Blau/Cyan";
-const char preset_name_5[] PROGMEM ="Orbit Gelb/Lila/Rot/Grün";
-const char preset_name_6[] PROGMEM ="Orbit Lemon/Cyan/Pink/Orange";
-const char preset_name_7[] PROGMEM ="Rainbow 60° Step";
-const char preset_name_8[] PROGMEM ="Rainbow 1° Step";
-const char preset_name_9[] PROGMEM ="1/4 Rainbow 1° Step";
-const char preset_name_10[] PROGMEM ="1/4 Rainbow 10° Step";
-const char preset_name_11[] PROGMEM ="Einfarbig 100° Farbstep";
-
-const char * const preset_name_table[] PROGMEM =  {preset_name_off
-                                                  ,preset_name_0
-                                                  ,preset_name_1
-                                                  ,preset_name_2
-                                                  ,preset_name_3
-                                                  ,preset_name_4
-                                                  ,preset_name_5
-                                                  ,preset_name_6
-                                                  ,preset_name_7
-                                                  ,preset_name_8
-                                                  ,preset_name_9
-                                                  ,preset_name_10
-                                                  ,preset_name_11};
+const char PRESET_NAME_LIST_STR[] PROGMEM ="-off-|" 
+                                          "Alarm Gelb|"
+                                          "Alarm Rot/Orange/Rosa|"
+                                          "Fade Grün/Cyan/Lemon|"
+                                          "Fade Blau/Weiß|"
+                                          "Orbit Blau/Cyan|"
+                                          "Orbit Gelb/Lila/Rot/Grün|"
+                                          "Orbit Lemon/Cyan/Pink/Orange|"
+                                          "Rainbow 60° Step|"
+                                          "Rainbow 1° Step|"
+                                          "1/4 Rainbow 1° Step|"
+                                          "1/4 Rainbow 10° Step|"
+                                          "Einfarbig 100° Farbstep|";
 
 #define PRESET_NAME_COUNT 12
 
@@ -156,6 +142,7 @@ void send_main_page() {
   #ifdef TRACE_WEBUI_PAGE_GENERATION
     Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- BPM Input"));
   #endif
+  body_content+=F("<label for=\"BPM\" class=\"col-1\"> Beats per minute</label>");
   value_as_string= String(output_get_bpm());
   body_content+=F("<input type=\"number\" id=\"BPM\" name=\"BPM\" value=\"");
   body_content+=value_as_string;
@@ -163,7 +150,7 @@ void send_main_page() {
 
   
   // Pattern Setup Table
-  char string_buffer[30];
+
   for(int preset_step_index=0;preset_step_index<4;preset_step_index++) {
         body_content+=F("</div><div class=\"row\">");
         // Preset selection
@@ -176,25 +163,29 @@ void send_main_page() {
         body_content+=value_as_string;
         body_content+=F("\" name=\"");
         body_content+=value_as_string;
-        body_content+=F("\" class=\"col-1\" >");
+        body_content+=F("\" class=\"col-1\" >");  
+        String element_list=FPSTR(PRESET_NAME_LIST_STR);
+        int element_end_index=element_list.indexOf('|');
+        int element_start_index=0;
         for(int select_index=0;select_index<PRESET_NAME_COUNT;select_index++) {
-           Serial.print(">");
-           strcpy_P(string_buffer, (char*)pgm_read_word(&(preset_name_table[select_index])));
-           Serial.println("<");
            body_content+=F("<option value=\"");
            body_content+=String(select_index-1);
            // 2do add selected tag here for selected option
            body_content+=F("\">");
-
-           body_content+=string_buffer;
-
+           body_content+=element_list.substring(element_start_index,element_end_index);
            body_content+=F("</option>");
+
+           // Foreward to next list element
+           element_start_index=element_end_index+1;
+           if(element_start_index>=element_list.length()) break;
+           element_end_index=element_list.indexOf('|',element_start_index);
         }
         body_content+=F("</select>");
-        /*
+        
         // Speed selection 
+        char string_buffer[50];
         #ifdef TRACE_WEBUI_PAGE_GENERATION
-          Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- Speed selection"));
+          Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- preset speed selection"));
         #endif
         value_as_string= "Speed"+String(preset_step_index+1);
         body_content+=F("<select id=\"");
@@ -203,7 +194,7 @@ void send_main_page() {
         body_content+=value_as_string;
         body_content+=F("\" class=\"col-2\" >");
         for(int speed_index=0;speed_index<SPEED_NAME_COUNT;speed_index++) {
-          strcpy_P(string_buffer, (char*)pgm_read_word(&(speed_name_table[speed_index])));
+           strcpy_P(string_buffer, (char*)pgm_read_dword(&(speed_name_table[speed_index])));
            body_content+=F("<option value=\"");
            body_content+=String(speed_index-1);
            body_content+=F("\">");
@@ -214,11 +205,14 @@ void send_main_page() {
         body_content+=F("</select>");
 
         // preset beat duration input 
+        #ifdef TRACE_WEBUI_PAGE_GENERATION
+          Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- preset duration input"));
+        #endif
         value_as_string= "duration"+String(preset_step_index+1);
         body_content+=F("<input type=\"number\" name=\"");
         body_content+=value_as_string;;
         body_content+=F("\" value=\"4\" class=\"col-3\">");
-        */
+        
         
   }// end of loop over preset parameter rows 
   
