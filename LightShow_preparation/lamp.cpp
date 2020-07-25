@@ -2,7 +2,7 @@
 #include "Arduino.h"
 
 #ifdef TRACE_ON
-#define TRACE_LAMP_CONVERSION
+// #define TRACE_LAMP_CONVERSION
 #endif
 
 Lamp::Lamp()
@@ -93,7 +93,7 @@ t_color_rgb_int Lamp::get_color_rgb(float maximum_value)
 
     #ifdef TRACE_LAMP_CONVERSION
       Serial.print(F(">TRACE_LAMP_CONVERSION hsv "));
-      lamp[p].trace_hsv();
+      trace_hsv();
     #endif
 
     if(m_color_hsv.s <= 0.0) {       // zero or negative saturation will result in white

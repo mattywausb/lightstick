@@ -1,6 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 #include "lamp.h"
 #include "output.h"
+#include "mainSettings.h"
 
 #ifdef TRACE_ON
 // #define TRACE_OUPUT_PIXEL_RESULT
@@ -8,12 +9,7 @@
 //#define TRACE_OUTPUT_PATTERN_BEAT
 #endif
 
-#define BUTTON_PIN   12    // Digital IO pin connected to the button.  This will be
-// driven with a pull-up resistor so the switch should
-// pull the pin to ground momentarily.  On a high -> low
-// transition the button press logic will execute.
-
-#define PIXEL_PIN    3    // Digital IO pin connected to the NeoPixels.
+#define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
 
 #define PIXEL_COUNT 7
 

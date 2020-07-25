@@ -6,15 +6,15 @@
 
 #ifdef TRACE_ON
 #define TRACE_INPUT 
-//#define TRACE_INPUT_HIGH
+#define TRACE_INPUT_HIGH
 //#define TRACE_INPUT_TIMING 
 #endif
 
 
 
 /* Button constants */ 
-const byte switch_pin_list[] = {7,    // Mode Select 
-                                6    // Step
+const byte switch_pin_list[] = {4,    // Mode Select  D2 on ESP8266 / Node MCU
+                                5    // Step          D1 on ESP8266 / Node MCU
                                };
                                 
 #define INPUT_PORT_COUNT sizeof(switch_pin_list)

@@ -4,25 +4,13 @@
 #include <Adafruit_NeoPixel.h>
 #include "lamp.h"
 #include "output.h"
+#include "mainSettings.h"
 
-
-#define PIXEL_PIN    6    // Digital IO pin connected to the NeoPixels.
-
-#define PIXEL_COUNT 7
-
-#define TRACE_ON
 
 #ifdef TRACE_ON
 #define TRACE_SEQUENCE_PROGRESS
+#define TRACE_BUTTON_INPUT
 #endif
-
-// Parameter 1 = number of pixels in strip,  neopixel stick has 8
-// Parameter 2 = pin number (most are valid)
-// Parameter 3 = pixel type flags, add together as needed:
-//   NEO_RGB     Pixels are wired for RGB bitstream
-//   NEO_GRB     Pixels are wired for GRB bitstream, correct for neopixel stick
-//   NEO_KHZ400  400 KHz bitstream (e.g. FLORA pixels)
-//   NEO_KHZ800  800 KHz bitstream (e.g. High Density LED strip), correct for neopixel stick
 
 typedef struct {
     byte preset_id;       // 0-255
@@ -97,8 +85,8 @@ void manage_tap_input() {
   if(abs(g_tap_track_interval[g_tap_track_index]-prev_tap_track_interval)>300) {  // no valid lenght compared to previous
     g_tap_track_count=1; // Reset Counter and sum to latest measure
     g_tap_track_sum=g_tap_track_interval[g_tap_track_index];
-    #ifdef TRACE_ON
-            Serial.print(F(">TRACE_ON Tap prev check failed by ")); Serial.println(abs(g_tap_track_interval[g_tap_track_index]-prev_tap_track_interval));
+    #ifdef TRACE_BUTTON_INPUT
+            Serial.print(F(">TRACE_BUTTON_INPUT Tap prev check failed by ")); Serial.println(abs(g_tap_track_interval[g_tap_track_index]-prev_tap_track_interval));
     #endif
   } else g_tap_track_count++;
   
@@ -110,8 +98,8 @@ void manage_tap_input() {
         if(abs(average_tap_lenght-g_tap_track_interval[i])>300) { // Reset on deviation more then 150 ms to average
                  g_tap_track_count=1;
                  g_tap_track_sum=g_tap_track_interval[g_tap_track_index];
-                   #ifdef TRACE_ON
-                      Serial.print(F(">TRACE_ON Tap avg check failed by ")); Serial.println(abs(average_tap_lenght-g_tap_track_interval[i]));
+                   #ifdef TRACE_BUTTON_INPUT
+                      Serial.print(F(">TRACE_BUTTON_INPUT Tap avg check failed by ")); Serial.println(abs(average_tap_lenght-g_tap_track_interval[i]));
                    #endif
                  return; // Get  out in case of fail
         }
@@ -159,7 +147,10 @@ void loop() {
   // Manage Button Press
   input_switches_scan_tick();
   if (input_stepGotPressed()) {
-      output_sync_beat() ;
+      #ifdef TRACE_BUTTON_INPUT
+        Serial.println(F(">TRACE_BUTTON_INPUT step got pressed"));
+      #endif
+      output_sync_beat();
       manage_tap_input();
   }
 
