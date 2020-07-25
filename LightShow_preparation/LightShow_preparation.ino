@@ -26,19 +26,19 @@
 
 typedef struct {
     byte preset_id;       // 0-255
-    byte preset_wait_time;       // 0-255
+    byte preset_speed;       // 0-255
     byte beats_to_run;       // 0-255
 } t_sequence_entry;
 
-t_sequence_entry preset_sequence[8]={
-                               {1, 4,16}
-                              ,{1, 8,16}
-                              ,{7, 4, 8}
-                              ,{3,16, 8}
-                              ,{6,16,32}
-                              ,{7, 4, 8}
-                              ,{3,16, 4}
-                              ,{8,32, 4}
+t_sequence_entry g_preset_sequence[8]={
+                               {1,STEP_ON_BEAT,16}
+                              ,{1,STEP_ON_8TH,16}
+                              ,{7,STEP_ON_BEAT, 8}
+                              ,{3,STEP_ON_16TH, 8}
+                              ,{6,STEP_ON_16TH,32}
+                              ,{7,STEP_ON_BEAT, 8}
+                              ,{3,STEP_ON_16TH, 4}
+                              ,{8,STEP_ON_32RD, 4}
                               };
 int g_sequence_entry_count=8;
 int g_sequence_index=0;
@@ -71,14 +71,14 @@ void setup() {
   sequence_start();
 }
 
-
+/* Tranlates input over serial into step speed index */
 void change_waittime_for_input(int value) {
         switch(value) {
         case 2: output_set_pattern_speed(STEP_ON_2BEATS); break;
         case 4: output_set_pattern_speed(STEP_ON_BEAT); break;
         case 8: output_set_pattern_speed(STEP_ON_8TH); break;
         case 16:  output_set_pattern_speed(STEP_ON_16TH); break;
-        case 32:  output_set_pattern_speed(STEP_ON_32TH); break;
+        case 32:  output_set_pattern_speed(STEP_ON_32RD); break;
         case 64:  output_set_pattern_speed(STEP_ON_64TH); break;
       }
 }
@@ -127,17 +127,17 @@ void manage_tap_input() {
 void trace_sequence()
 {
   Serial.print(F(">TRACE_SEQUENCE_PROGRESS index:")); Serial.print(g_sequence_index);
-  Serial.print(F(" preset_id: ")); Serial.print(preset_sequence[g_sequence_index].preset_id);
-  Serial.print(F(" preset_wait_time: ")); Serial.print(preset_sequence[g_sequence_index].preset_wait_time);
-  Serial.print(F(" beats_to_run: ")); Serial.println(preset_sequence[g_sequence_index].beats_to_run);
+  Serial.print(F(" preset_id: ")); Serial.print(g_preset_sequence[g_sequence_index].preset_id);
+  Serial.print(F(" preset_speed: ")); Serial.print(g_preset_sequence[g_sequence_index].preset_speed);
+  Serial.print(F(" beats_to_run: ")); Serial.println(g_preset_sequence[g_sequence_index].beats_to_run);
 }
 #endif
 
 void sequence_start()
 {
   g_sequence_index=0;
-  change_waittime_for_input(preset_sequence[g_sequence_index].preset_wait_time);
-  output_start_preset(preset_sequence[g_sequence_index].preset_id);
+  output_set_pattern_speed(g_preset_sequence[g_sequence_index].preset_speed);
+  output_start_preset(g_preset_sequence[g_sequence_index].preset_id);
   #ifdef TRACE_SEQUENCE_PROGRESS
     trace_sequence();
   #endif
@@ -146,8 +146,8 @@ void sequence_start()
 void sequence_next_pattern()
 {
     if(++g_sequence_index>=g_sequence_entry_count)g_sequence_index=0;
-    change_waittime_for_input(preset_sequence[g_sequence_index].preset_wait_time);
-    output_start_preset(preset_sequence[g_sequence_index].preset_id);   
+    output_set_pattern_speed(g_preset_sequence[g_sequence_index].preset_speed);
+    output_start_preset(g_preset_sequence[g_sequence_index].preset_id);   
     #ifdef TRACE_SEQUENCE_PROGRESS
       trace_sequence();
     #endif
@@ -196,7 +196,7 @@ void loop() {
 
   // Manage current sequence 
   if(mode_of_operation==MODE_SEQUENCE) {
-    if(output_get_preset_beat_count()>=preset_sequence[g_sequence_index].beats_to_run) {
+    if(output_get_preset_beat_count()>=g_preset_sequence[g_sequence_index].beats_to_run) {
       sequence_next_pattern();
     }
   }

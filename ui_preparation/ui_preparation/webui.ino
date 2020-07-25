@@ -121,13 +121,13 @@ const char PRESET_NAME_LIST_STR[] PROGMEM ="-off-|"
                                           "1/4 Rainbow 10° Step|"
                                           "Einfarbig 100° Farbstep|";
 
-#define PRESET_NAME_COUNT 12
+#define PRESET_NAME_COUNT 13
 
 const char speed_name_0[] PROGMEM ="2 Beats";
 const char speed_name_1[] PROGMEM ="1 Beat";
 const char speed_name_2[] PROGMEM ="8th Note";
 const char speed_name_3[] PROGMEM ="16th Note";
-const char speed_name_4[] PROGMEM ="32rd Note";
+const char speed_name_4[] PROGMEM ="32nd Note";
 const char speed_name_5[] PROGMEM ="64th Note";
 
 
@@ -191,12 +191,13 @@ void send_main_page() {
 
            // Foreward to next list element
            element_start_index=element_end_index+1;
-           if(element_start_index>=element_list.length()) break;
+           if(element_start_index>=element_list.length()) element_start_index =0;
            element_end_index=element_list.indexOf('|',element_start_index);
         }
         body_content+=F("</select>");
         
-        // Speed selection 
+        // Preset Speed selection 
+        
         char string_buffer[50];
         #ifdef TRACE_WEBUI_PAGE_GENERATION
           Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- preset speed selection"));
@@ -213,14 +214,13 @@ void send_main_page() {
            body_content+=String(speed_index);
            if(speed_index==g_preset_sequence[sequence_step_index].preset_speed) body_content+=F("\" selected>");
            else body_content+=F("\">");
-           body_content+=F("\">");
-           // 2do add selected tag here for selected option
            body_content+=string_buffer;
            body_content+=F("</option>");
         }
         body_content+=F("</select>");
 
         // preset beat duration input 
+        
         #ifdef TRACE_WEBUI_PAGE_GENERATION
           Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- preset duration input"));
         #endif
