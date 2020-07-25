@@ -68,6 +68,20 @@ const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html>"
 
 const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
 
+void sendStylesheet() {
+   server.send(200, "text/css", F(
+    "body {   font-family: \"Open Sans\", \"Arial\", \"mono\";  color:#ffe036;  background-color: #18006a;  font-size: 14px;  text-align: left; }"
+"h1 {   text-align: center; }"
+"label {  float: left;     margin: 2px 2px;     padding: 10px 10px; }"
+"input[type=\"submit\"] {   background-color: #4CAF50;   border-radius: 4px;   border: none;   color:white;   margin: 2px 2px;   padding: 16px 16px;   width:100% }"
+"input[type=\"number\"], select{   background-color: #432e8b;   border-radius: 4px;   border: none;   color:#ffe036;   box-sizing: border-box;   margin: 2px 2px;   padding: 10px 10px; }  "
+".col-c {    width: 50%;   float:center; }"
+".col-1 {    width: 50%; }"
+".col-2, .col-3 {    width: 20%; }"
+".row:after {   content: \"\";   display: table;   clear: both; }"));
+}
+
+
 static void send_html_header() {
  
   DECLARE_PREALLOCATED_STRING(s, LARGE_STR);
@@ -151,14 +165,14 @@ void send_main_page() {
   
   // Pattern Setup Table
 
-  for(int preset_step_index=0;preset_step_index<4;preset_step_index++) {
+  for(int sequence_step_index=0;sequence_step_index<MAX_NUMBER_OF_PRESETS_IN_SEQUENCE;sequence_step_index++) {
         body_content+=F("</div><div class=\"row\">");
         // Preset selection
         #ifdef TRACE_WEBUI_PAGE_GENERATION
-          Serial.print(F(">TRACE_WEBUI_PAGE_GENERATION- preset selection #"));
-          Serial.println(preset_step_index);
+          Serial.print(F(">TRACE_WEBUI_PAGE_GENERATION- sequence step #"));
+          Serial.println(sequence_step_index);
         #endif
-        value_as_string= "Preset"+String(preset_step_index+1);
+        value_as_string= "Preset"+String(sequence_step_index);
         body_content+=F("<select id=\"");
         body_content+=value_as_string;
         body_content+=F("\" name=\"");
@@ -169,9 +183,9 @@ void send_main_page() {
         int element_start_index=0;
         for(int select_index=0;select_index<PRESET_NAME_COUNT;select_index++) {
            body_content+=F("<option value=\"");
-           body_content+=String(select_index-1);
-           // 2do add selected tag here for selected option
-           body_content+=F("\">");
+           body_content+=String(select_index-1);  // Preset off = -1
+           if((select_index-1)==g_preset_sequence[sequence_step_index].preset_id) body_content+=F("\" selected>");
+           else body_content+=F("\">");
            body_content+=element_list.substring(element_start_index,element_end_index);
            body_content+=F("</option>");
 
@@ -187,7 +201,7 @@ void send_main_page() {
         #ifdef TRACE_WEBUI_PAGE_GENERATION
           Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- preset speed selection"));
         #endif
-        value_as_string= "Speed"+String(preset_step_index+1);
+        value_as_string= "Speed"+String(sequence_step_index);
         body_content+=F("<select id=\"");
         body_content+=value_as_string;
         body_content+=F("\" name=\"");
@@ -196,7 +210,9 @@ void send_main_page() {
         for(int speed_index=0;speed_index<SPEED_NAME_COUNT;speed_index++) {
            strcpy_P(string_buffer, (char*)pgm_read_dword(&(speed_name_table[speed_index])));
            body_content+=F("<option value=\"");
-           body_content+=String(speed_index-1);
+           body_content+=String(speed_index);
+           if(speed_index==g_preset_sequence[sequence_step_index].preset_speed) body_content+=F("\" selected>");
+           else body_content+=F("\">");
            body_content+=F("\">");
            // 2do add selected tag here for selected option
            body_content+=string_buffer;
@@ -208,12 +224,12 @@ void send_main_page() {
         #ifdef TRACE_WEBUI_PAGE_GENERATION
           Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- preset duration input"));
         #endif
-        value_as_string= "duration"+String(preset_step_index+1);
+        value_as_string= "Duration"+String(sequence_step_index);
         body_content+=F("<input type=\"number\" name=\"");
         body_content+=value_as_string;;
-        body_content+=F("\" value=\"4\" class=\"col-3\">");
-        
-        
+        body_content+=F("\" value=\"");
+        body_content+=String(g_preset_sequence[sequence_step_index].beats_to_run);
+        body_content+=F("\" class=\"col-3\">");
   }// end of loop over preset parameter rows 
   
   // Submit button 
@@ -225,6 +241,46 @@ void send_main_page() {
 
   /*Now get it all out to the user */
   send_html_body(body_content);
+}
+
+void parseFormData()
+{
+  String FormArgument;
+
+  if (server.hasArg("BPM")) {
+      FormArgument = server.arg("BPM");
+      webui_data_bpm=FormArgument.toInt();
+      webui_command=SET_BPM;
+  }
+
+  String argument_name;
+  
+  for(int sequence_step_index=0;sequence_step_index<MAX_NUMBER_OF_PRESETS_IN_SEQUENCE;sequence_step_index++){
+     // Get preset id
+     argument_name="Preset"+String(sequence_step_index);
+     if (server.hasArg(argument_name)) {
+      FormArgument = server.arg(argument_name);
+      g_preset_sequence[sequence_step_index].preset_id=FormArgument.toInt();
+      webui_command=SET_SEQUENCE;
+     }
+
+     // Get speed
+     argument_name="Speed"+String(sequence_step_index);
+     if (server.hasArg(argument_name)) {
+      FormArgument = server.arg(argument_name);
+      g_preset_sequence[sequence_step_index].preset_speed=FormArgument.toInt();
+      webui_command=SET_SEQUENCE;
+     }
+
+     // Get duration
+     argument_name="Duration"+String(sequence_step_index);
+     if (server.hasArg(argument_name)) {
+      FormArgument = server.arg(argument_name);
+      g_preset_sequence[sequence_step_index].beats_to_run=FormArgument.toInt();
+      webui_command=SET_SEQUENCE;
+     }
+    
+  } // end of loop over sequence step index
 }
 
 void handleRoot()
@@ -240,18 +296,6 @@ void handleRoot()
 }
 
 
-void sendStylesheet() {
-   server.send(200, "text/css", F(
-    "body {   font-family: \"Open Sans\", \"Arial\", \"mono\";  color:#ffe036;  background-color: #18006a;  font-size: 14px;  text-align: left; }"
-"h1 {   text-align: center; }"
-"label {  float: left;     margin: 2px 2px;     padding: 10px 10px; }"
-"input[type=\"submit\"] {   background-color: #4CAF50;   border-radius: 4px;   border: none;   color:white;   margin: 2px 2px;   padding: 16px 16px;   width:100% }"
-"input[type=\"number\"], select{   background-color: #432e8b;   border-radius: 4px;   border: none;   color:#ffe036;   box-sizing: border-box;   margin: 2px 2px;   padding: 10px 10px; }  "
-".col-c {    width: 50%;   float:center; }"
-".col-1 {    width: 50%; }"
-".col-2, .col-3 {    width: 20%; }"
-".row:after {   content: \"\";   display: table;   clear: both; }"));
-}
 
 void returnFail(String msg)
 {
@@ -260,16 +304,7 @@ void returnFail(String msg)
   server.send(500, "text/plain", msg + "\r\n");
 }
 
-void parseFormData()
-{
-  String FormArgument;
 
-  if (server.hasArg("BPM")) {
-      FormArgument = server.arg("BPM");
-      webui_data_bpm=FormArgument.toInt();
-      webui_command=SET_BPM;
-  }
-}
 
 void returnOK()
 {

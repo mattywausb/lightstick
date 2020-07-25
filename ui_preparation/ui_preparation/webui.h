@@ -3,7 +3,8 @@
 
 enum WEBUI_COMMAND {
   NONE,
-  SET_BPM
+  SET_BPM,
+  SET_SEQUENCE
 };
 
 typedef enum WEBUI_COMMAND t_webui_command ;
