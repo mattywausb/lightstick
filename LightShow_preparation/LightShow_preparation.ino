@@ -13,23 +13,38 @@
 #endif
 
 typedef struct {
+    char slot_tag; // 
     byte preset_id;       // 0-255
     byte preset_speed_id;       // 0-255
-    byte beats_to_run;       // 0-255
-} t_sequence_entry;
+} t_program_slot;
 
-t_sequence_entry g_preset_sequence[MAX_NUMBER_OF_PRESETS_IN_SEQUENCE]={ /* IDOL 126 BPM*/
-                               {3,STEP_ON_16TH,16}
-                              ,{5,STEP_ON_8TH,16}
-                              ,{1,STEP_ON_BEAT, 8}
-                              ,{3,STEP_ON_16TH, 8}
-                              ,{5,STEP_ON_16TH,32}
-                              ,{255,STEP_ON_8TH, 8}
-                              ,{255,STEP_ON_8TH, 8}
-                              ,{255,STEP_ON_8TH, 8}
-                              ,{255,STEP_ON_8TH, 8}
-                              ,{255,STEP_ON_8TH, 8}
+t_program_slot g_program_slot[MAX_NUMBER_OF_PROGRAM_SLOTS]={ /* IDOL 126 BPM*/
+                               {'A',3,STEP_ON_16TH}
+                              ,{'B',5,STEP_ON_8TH}
+                              ,{'C',1,STEP_ON_BEAT}
+                              ,{'D',5,STEP_ON_16TH}
+                              ,{PROGRAM_TAG_OFF,STEP_ON_8TH}
+                              ,{PROGRAM_TAG_OFF,STEP_ON_8TH}
+                              ,{PROGRAM_TAG_OFF,STEP_ON_8TH}
+                              ,{PROGRAM_TAG_OFF,STEP_ON_8TH}
                               };
+                  
+
+typedef struct {
+    byte slot_index; // 
+    int beats_to_run;       // 0-255
+} t_program_sequence;
+
+
+int g_program_sequence_loop_entry_index=1;
+int g_program_sequence_length=5;
+
+
+t_program_sequence g_program_sequence [MAX_NUMBER_OF_PROGRAM_SEQUENCE_STEPS] = {
+                      {0,16},{1,64},{2,32},{0,32},{3,32}
+                      };
+                     
+                        
 int g_sequence_entry_count=8;
 int g_sequence_index=0;
 
@@ -118,28 +133,27 @@ void manage_tap_input() {
 void trace_sequence()
 {
   Serial.print(F(">TRACE_SEQUENCE_PROGRESS index:")); Serial.print(g_sequence_index);
-  Serial.print(F(" preset_id: ")); Serial.print(g_preset_sequence[g_sequence_index].preset_id);
-  Serial.print(F(" preset_speed_id: ")); Serial.print(g_preset_sequence[g_sequence_index].preset_speed_id);
-  Serial.print(F(" beats_to_run: ")); Serial.println(g_preset_sequence[g_sequence_index].beats_to_run);
+  Serial.print(F(" preset_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_id);
+  Serial.print(F(" preset_speed_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
+  Serial.print(F(" beats_to_run: ")); Serial.println(g_program_sequence[g_sequence_index].beats_to_run);
 }
 #endif
 
 void sequence_start()
 {
   g_sequence_index=0;
-  output_set_pattern_speed(g_preset_sequence[g_sequence_index].preset_speed_id);
-  output_start_preset(g_preset_sequence[g_sequence_index].preset_id);
+  output_set_pattern_speed(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
+  output_start_preset(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_id);
   #ifdef TRACE_SEQUENCE_PROGRESS
     trace_sequence();
   #endif
 }
 
-void sequence_next_pattern()
+void sequence_next_slot()
 {
-    if(++g_sequence_index>=MAX_NUMBER_OF_PRESETS_IN_SEQUENCE)g_sequence_index=0;
-    while(g_preset_sequence[g_sequence_index].preset_id==PRESET_ID_OFF) if(++g_sequence_index>=MAX_NUMBER_OF_PRESETS_IN_SEQUENCE){g_sequence_index=0;break;}
-    output_set_pattern_speed(g_preset_sequence[g_sequence_index].preset_speed_id);
-    output_start_preset(g_preset_sequence[g_sequence_index].preset_id);   
+    if(++g_sequence_index>=g_program_sequence_length)g_sequence_index=g_program_sequence_loop_entry_index;
+    output_set_pattern_speed(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
+    output_start_preset(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_id);   
     #ifdef TRACE_SEQUENCE_PROGRESS
       trace_sequence();
     #endif
@@ -192,8 +206,8 @@ void loop() {
 
   // Manage current sequence 
   if(mode_of_operation==MODE_SEQUENCE) {
-    if(output_get_preset_beat_count()>=g_preset_sequence[g_sequence_index].beats_to_run) {
-      sequence_next_pattern();
+    if(output_get_preset_beat_count()>=g_program_sequence[g_sequence_index].beats_to_run) {
+      sequence_next_slot();
     }
   }
   

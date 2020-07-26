@@ -7,5 +7,5 @@
 #define STEP_ON_32RD   4
 #define STEP_ON_64TH   5
 
-#define PRESET_ID_OFF 255
+#define PROGRAM_TAG_OFF '-'
 #endif
