@@ -8,5 +8,4 @@
 #define STEP_ON_64TH   5
 
 #define PRESET_ID_OFF 255
-
 #endif

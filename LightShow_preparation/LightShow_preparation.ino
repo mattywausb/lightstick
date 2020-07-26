@@ -18,15 +18,17 @@ typedef struct {
     byte beats_to_run;       // 0-255
 } t_sequence_entry;
 
-t_sequence_entry g_preset_sequence[MAX_NUMBER_OF_PRESETS_IN_SEQUENCE]={
-                               {1,STEP_ON_BEAT,16}
-                              ,{1,STEP_ON_8TH,16}
-                              ,{7,STEP_ON_BEAT, 8}
+t_sequence_entry g_preset_sequence[MAX_NUMBER_OF_PRESETS_IN_SEQUENCE]={ /* IDOL 126 BPM*/
+                               {3,STEP_ON_16TH,16}
+                              ,{5,STEP_ON_8TH,16}
+                              ,{1,STEP_ON_BEAT, 8}
                               ,{3,STEP_ON_16TH, 8}
-                              ,{6,STEP_ON_16TH,32}
-                              ,{7,STEP_ON_BEAT, 8}
-                              ,{3,STEP_ON_16TH, 4}
-                              ,{8,STEP_ON_32RD, 4}
+                              ,{5,STEP_ON_16TH,32}
+                              ,{255,STEP_ON_8TH, 8}
+                              ,{255,STEP_ON_8TH, 8}
+                              ,{255,STEP_ON_8TH, 8}
+                              ,{255,STEP_ON_8TH, 8}
+                              ,{255,STEP_ON_8TH, 8}
                               };
 int g_sequence_entry_count=8;
 int g_sequence_index=0;
@@ -56,6 +58,7 @@ void setup() {
   #endif
   input_setup();
   output_setup();
+  output_set_bpm(126);
   sequence_start();
 }
 
@@ -156,6 +159,7 @@ void loop() {
   }
 
   // Manage Serial input
+  input_pollSerial();
   if(input_newSerialCommandAvailable()) {
     String command=input_getSerialCommand();
     if(command.startsWith("b")) {  // b123 <- Change bpm: 
