@@ -7,6 +7,7 @@
 // #define TRACE_OUPUT_PIXEL_RESULT
 #define TRACE_OUTPUT_TIMING
 //#define TRACE_OUTPUT_PATTERN_BEAT
+//#define TRACE_OUTPUT_API_CALL
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
@@ -83,6 +84,9 @@ void output_setup() {
 
 // Change bpm
 void output_set_bpm(int beats_per_minute) {
+  #ifdef TRACE_OUTPUT_API_CALL
+      Serial.print(F(">TRACE_OUTPUT_API_CALL output_set_bpm:"));Serial.println(beats_per_minute);
+  #endif 
   g_beats_per_minute = beats_per_minute;
   output_set_waittimes(60000/g_beats_per_minute);
   output_sync_beat();
@@ -126,11 +130,17 @@ void output_sync_beat() {
 // Change Pattern speed (relative to bpm)
 void output_set_pattern_speed(int wait_index)
 {
+  #ifdef TRACE_OUTPUT_API_CALL
+      Serial.print(F(">TRACE_OUTPUT_API_CALL output_set_pattern_speed:"));Serial.println(wait_index);
+  #endif 
   if(wait_index>=STEP_ON_2BEATS && wait_index<=STEP_ON_64TH) g_pattern_step_wait_index=wait_index;
 }
 
 // Select and start a pattern
 void output_start_preset(int preset_id) {
+  #ifdef TRACE_OUTPUT_API_CALL
+      Serial.print(F(">TRACE_OUTPUT_API_CALL output_start_preset:"));Serial.println(preset_id);
+  #endif 
   output_preset_beat_start_beat=output_get_beat_number_since_sync();
   output_preset_beat_count=0;
   switch (preset_id) {

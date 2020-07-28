@@ -28,7 +28,10 @@ t_program_slot g_program_slot[MAX_NUMBER_OF_PROGRAM_SLOTS]={ /* IDOL 126 BPM*/
                               ,{PROGRAM_TAG_OFF,0,STEP_ON_8TH}
                               ,{PROGRAM_TAG_OFF,0,STEP_ON_8TH}
                               ,{PROGRAM_TAG_OFF,0,STEP_ON_8TH}
-                              };
+                              }; // String P R3-16 A5-8 B1-4 S5-16 I0-4
+    
+      //  Test String P S2-16 I7-16 A6-8 B3-2 R10-8                       
+
                   
 
 typedef struct {
@@ -79,16 +82,21 @@ void setup() {
   sequence_start();
 }
 
-/* Tranlates input over serial into step speed index */
-void change_waittime_for_input(int value) {
-        switch(value) {
-        case 2: output_set_pattern_speed(STEP_ON_2BEATS); break;
-        case 4: output_set_pattern_speed(STEP_ON_BEAT); break;
-        case 8: output_set_pattern_speed(STEP_ON_8TH); break;
-        case 16:  output_set_pattern_speed(STEP_ON_16TH); break;
-        case 32:  output_set_pattern_speed(STEP_ON_32RD); break;
-        case 64:  output_set_pattern_speed(STEP_ON_64TH); break;
+
+/* convert pattern_speed to pattern_speed_id */
+int preset_speed_to_id(String pattern_speed) {
+    #ifdef TRACE_STRING_PARSING
+ //        Serial.print(F(">TRACE_STRING_PARSING preset_speed_to_id:"));Serial.println(pattern_speed);
+  #endif
+      switch(pattern_speed.toInt()) {
+        case 2: return STEP_ON_2BEATS; 
+        case 4: return STEP_ON_BEAT;
+        case 8: return STEP_ON_8TH;
+        case 16:  return STEP_ON_16TH;
+        case 32:  return STEP_ON_32RD;
+        case 64:  return STEP_ON_64TH;
       }
+      return -1;
 }
 
 void manage_tap_input() {
@@ -141,6 +149,55 @@ void trace_sequence()
 }
 #endif
 
+/* Function to load the slot settings  by parsing a string code 
+* Syntax: <letter><number>-<number> ...
+* <number>: declars the presed id
+* <number>: declares the preset speed as 2 4 8 16 32 64 
+*/
+
+
+void parse_slot_settings(String slot_setting_string)  {
+  int slot_index=0;
+  int preset_id=-1;
+  int preset_speed_id=-1;
+  int dash_index;
+  #ifdef TRACE_STRING_PARSING
+         Serial.print(F(">TRACE_STRING_PARSING slot settings to parse:"));Serial.println(slot_setting_string);
+  #endif
+  for(int char_index=0;char_index<slot_setting_string.length();char_index++) {
+    if(slot_setting_string.charAt(char_index)>='A') { // new slot letter in string
+        dash_index=slot_setting_string.substring(char_index+1).indexOf('-');
+        if (dash_index>0) { // dash to separate the speed exists
+          preset_id=slot_setting_string.substring(char_index+1).toInt();
+          preset_speed_id=preset_speed_to_id(slot_setting_string.substring(char_index+dash_index+2));
+          if(preset_id>=0 && preset_speed_id>=0) {  // Parameters are valid, so store it in array
+            g_program_slot[slot_index].slot_tag=slot_setting_string.charAt(char_index);
+            g_program_slot[slot_index].preset_id=preset_id;
+            g_program_slot[slot_index].preset_speed_id=preset_speed_id;
+            #ifdef TRACE_STRING_PARSING
+              Serial.print(F(">TRACE_STRING_PARSING slot setting:"));
+              Serial.print(slot_index);Serial.print("{'");Serial.print(g_program_slot[slot_index].slot_tag);
+              Serial.print("',");Serial.print(g_program_slot[slot_index].preset_id);
+              Serial.print(',');Serial.print(g_program_slot[slot_index].preset_speed_id);
+              Serial.println("},");
+            #endif
+            preset_id=-1;
+            preset_speed_id=-1;
+            if(++slot_index>=MAX_NUMBER_OF_PROGRAM_SLOTS) break;
+          }
+         #ifdef TRACE_STRING_PARSING
+             else {
+              Serial.print(F(">TRACE_STRING_PARSING bad parsing dash_index, preset_id, preset_speed_id:"));
+              Serial.print(dash_index);Serial.print(',');
+              Serial.print(preset_id);Serial.print(',');
+              Serial.println(preset_speed_id);
+             }
+         #endif
+        }
+    }
+  }
+}
+
 /* Function to load the program sequence by parsing a string code 
 * Syntax: <bpmdigit>{2..3}<letter>{1}<beatdigit>{1..n}
 * <bpmdigit>: declars the BPM Speed
@@ -152,17 +209,16 @@ void trace_sequence()
 void parse_sequence(String sequence_string)  
 {
   int newBPM=sequence_string.toInt();
-  int char_index=0;
   int sequence_index=0;
   int beat_sum=0;
   int slot_index=-1;
   g_program_sequence_loop_entry_index=0;
 
   #ifdef TRACE_STRING_PARSING
-         Serial.print(F(">TRACE_STRING_PARSING string to parse:"));Serial.println(sequence_string);
+         Serial.print(F(">TRACE_STRING_PARSING sequence to parse:"));Serial.println(sequence_string);
   #endif
   
-  for(char_index=0;char_index<sequence_string.length();char_index++) {
+  for(int char_index=0;char_index<sequence_string.length();char_index++) {
     if(sequence_string.charAt(char_index)>='A') { // new slot letter in string
       if(beat_sum>0 && slot_index>=0) { // previous phrase is complete and valid
         g_program_sequence[sequence_index].slot_index=slot_index;
@@ -258,23 +314,32 @@ void loop() {
       int bpm=command.substring(1).toInt();
       if(bpm>0) output_set_bpm(bpm);
     }
-    if(command.startsWith("w")) {  // w16 <- Change waittime
-      int wait_value=command.substring(1).toInt();
-      change_waittime_for_input(wait_value);
+
+    if(command.startsWith("w")) {  // w16 <- Change waittime directly
+      int preset_speed_id=preset_speed_to_id(command.substring(1));
+      if(preset_speed_id>=0)output_set_pattern_speed(preset_speed_id);
       mode_of_operation=MODE_FIX_PRESET;
     }
-    if(command.startsWith("p")) { //Change preset
+
+    if(command.startsWith("p")) { //Change preset directly
       int value=command.substring(1).toInt();
       output_start_preset(value);
       mode_of_operation=MODE_FIX_PRESET;
     }
-    int position_of_dash=command.indexOf('-');  
-    if(position_of_dash>0) { //Change preset and waittime
-      int preset_id=command.toInt();
-      int wait_value=command.substring(position_of_dash+1).toInt();
-       change_waittime_for_input(wait_value); 
-       output_start_preset(preset_id);
+    if(command.startsWith("P")) { // Change all preset slots by string 
+      parse_slot_settings(command.substring(1));
+      output_set_pattern_speed(g_program_slot[0].preset_speed_id);
+      output_start_preset(g_program_slot[0].preset_id);      
+      mode_of_operation=MODE_FIX_PRESET;
+    } else {
+      int position_of_dash=command.indexOf('-');  
+      if(position_of_dash>0) { //Change preset and waittime directly 3-16
+        int preset_id=command.toInt();
+        int preset_speed_id=preset_speed_to_id(command.substring(position_of_dash+1));
+        if(preset_speed_id>=0)output_set_pattern_speed(preset_speed_id);
+        output_start_preset(preset_id);
         mode_of_operation=MODE_FIX_PRESET;
+      }
     }
   }
 
