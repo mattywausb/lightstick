@@ -43,7 +43,7 @@ enum STEPPER_TYPE {
   ST_RAINBOW
 };
 
-STEPPER_TYPE g_current_stepper_type=ST_COLOR_WIPE;
+STEPPER_TYPE output_current_stepper_type=ST_COLOR_WIPE;
 
 
 
@@ -55,11 +55,11 @@ int output_preset_beat_start_beat=0;
 int output_preset_beat_count=0;
 
 
-long output_pattern_previous_step_time = 0L;
+long patvar_previous_step_time = 0L;
 
 int patconf_speed_id=STEP_ON_BEAT;
 uint8_t patconf_steps_until_color_change=0;
-uint8_t patconf_step_color_increment=1;
+uint8_t patconf_color_palette_increment=1;
 int patconf_max_step_count=1000;
 float patconf_pattern_lamp_value = 0.5;
 float patconf_rainbow_step_angle_increment=1.0;
@@ -123,7 +123,7 @@ int output_get_preset_beat_count() {
 
 void output_sync_beat() {
   output_beat_sync_time=millis();
-  output_pattern_previous_step_time=output_get_current_beat_start_time();
+  patvar_previous_step_time=output_get_current_beat_start_time();
 }
 
 // Change Pattern speed (relative to bpm)
@@ -145,8 +145,11 @@ void output_start_preset(int preset_id) {
   switch (preset_id) {
     case 0:
          patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
-         patconf_color_palette_lenght=1;
-         start_colorWipe(0.05,true);
+         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=0.0; //WHITE
+         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
+         patconf_color_palette_lenght=4;
+         start_doubleColorOrbit(0.2,16,1);
          break;
     case 1:
          patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
@@ -214,9 +217,10 @@ void output_start_preset(int preset_id) {
 
 // Following function must be called in the loop
 void output_process_pattern() {
-  switch (g_current_stepper_type) {
+  switch (output_current_stepper_type) {
     case ST_COLOR_WIPE: process_colorWipe();      break;
     case ST_DOUBLE_ORBIT: process_doubleOrbit(); break;
+    case ST_DOUBLE_COLOR_ORBIT: process_doubleColorOrbit(); break;
     case ST_RAINBOW: process_rainbow();break;
   }
   
@@ -237,9 +241,9 @@ void output_process_pattern() {
 void start_colorWipe(float lamp_value, boolean over_black){
   // init all globales for the pattern
 
-  g_current_stepper_type=ST_COLOR_WIPE;
+  output_current_stepper_type=ST_COLOR_WIPE;
 
-  output_pattern_previous_step_time = output_get_current_beat_start_time() ;
+  patvar_previous_step_time = output_get_current_beat_start_time() ;
   patvar_current_step_index = 0;
   patconf_max_step_count=over_black ?  (LAMP_COUNT - 1) * 2 : (LAMP_COUNT - 1) ; 
 
@@ -256,8 +260,8 @@ void process_colorWipe() {
   long current_step_time = millis();
   int wait_interval= patconf_speed_id==STEP_ON_2BEATS? output_waittime[patconf_speed_id]:output_waittime[patconf_speed_id]/3;
 
-  if (current_step_time - output_pattern_previous_step_time < wait_interval) return;
-  output_pattern_previous_step_time = current_step_time;
+  if (current_step_time - patvar_previous_step_time < wait_interval) return;
+  patvar_previous_step_time = current_step_time;
 
   // Determine the lamp, this step will change
   int lamp_index = LAMP_COUNT - (patvar_current_step_index % (LAMP_COUNT - 1)) - 1;
@@ -284,8 +288,8 @@ void process_colorWipe() {
  */
 void start_doubleOrbit(float lamp_value,  int steps_per_color){
   // init all globales for the pattern
-  g_current_stepper_type=ST_DOUBLE_ORBIT;
-  output_pattern_previous_step_time = output_get_current_beat_start_time();
+  output_current_stepper_type=ST_DOUBLE_ORBIT;
+  patvar_previous_step_time = output_get_current_beat_start_time();
   patvar_current_step_index = 0;
   patconf_steps_until_color_change=steps_per_color;
   patvar_step_in_color_index=0;
@@ -302,8 +306,8 @@ void start_doubleOrbit(float lamp_value,  int steps_per_color){
 void process_doubleOrbit() {
 
   long current_step_time = millis();
-  if (current_step_time - output_pattern_previous_step_time < output_waittime[patconf_speed_id]) return;
-  output_pattern_previous_step_time = current_step_time;
+  if (current_step_time - patvar_previous_step_time < output_waittime[patconf_speed_id]) return;
+  patvar_previous_step_time = current_step_time;
 
   int angle = patvar_current_step_index % 3; // angle, where the pixel is on
 
@@ -328,16 +332,16 @@ void process_doubleOrbit() {
 }
 
 /*
- *   Double Orbit
+ *   Double Color Orbit
  */
-void start_doubleColorOrbit(float lamp_value,  int steps_per_color, int color_increment){
+void start_doubleColorOrbit(float lamp_value,  int steps_per_color, int color_palette_increment){
   // init all globales for the pattern
-  g_current_stepper_type=ST_DOUBLE_COLOR_ORBIT;
-  output_pattern_previous_step_time = output_get_current_beat_start_time();
-  patvar_current_step_index = 0;
+  output_current_stepper_type=ST_DOUBLE_COLOR_ORBIT;
   patconf_steps_until_color_change=steps_per_color;
+  patvar_previous_step_time = output_get_current_beat_start_time();
+  patvar_current_step_index = 0;
   patvar_step_in_color_index=0;
-  patconf_step_color_increment=color_increment;
+  patconf_color_palette_increment=color_palette_increment;
 
   patconf_pattern_lamp_value = lamp_value;
   patvar_color_palette_index=0;
@@ -351,18 +355,23 @@ void start_doubleColorOrbit(float lamp_value,  int steps_per_color, int color_in
 void process_doubleColorOrbit() {
 
   long current_step_time = millis();
-  if (current_step_time - output_pattern_previous_step_time < output_waittime[patconf_speed_id]) return;
-  output_pattern_previous_step_time = current_step_time;
+  if (current_step_time - patvar_previous_step_time < output_waittime[patconf_speed_id]) return;
+  patvar_previous_step_time = current_step_time;
 
-  int angle = patvar_current_step_index % 3; // angle, where the pixel is on
+  int angle_1 = patvar_current_step_index % 6; // angle, where the first color is shown
+  int angle_2 = (angle_1 + 3)%6; // angle where the second color is shown
+  uint8_t color_index_2=patvar_color_palette_index+1;
+  if(color_index_2>=patconf_color_palette_lenght)color_index_2=0;
 
   for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index) {
-    if (lamp_index % 3 == angle) lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h, patconf_color_palette[patvar_color_palette_index].s, patconf_pattern_lamp_value);
+    if ((lamp_index-1) == angle_1) lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h, patconf_color_palette[patvar_color_palette_index].s, patconf_pattern_lamp_value);
+    else if ((lamp_index-1) == angle_2) lamp[lamp_index].set_hsv(patconf_color_palette[color_index_2].h, patconf_color_palette[color_index_2].s, patconf_pattern_lamp_value);
     else  lamp[lamp_index].set_value(0.0);
   }
 
-  // center pixel lightens every 4th step for 2 ticks
-  if (patvar_current_step_index % 8 == 0 || patvar_current_step_index % 8 == 1) lamp[0].set_hsv(patconf_color_palette[patvar_color_palette_index].h, patconf_color_palette[patvar_color_palette_index].s, patconf_pattern_lamp_value);
+  // center pixel lightens every 4th step for 2 ticks with 3rd color
+  if(++color_index_2>=patconf_color_palette_lenght)color_index_2=0;
+  if (patvar_current_step_index % 8 == 0 || patvar_current_step_index % 8 == 1) lamp[0].set_hsv(patconf_color_palette[color_index_2].h, patconf_color_palette[color_index_2].s, patconf_pattern_lamp_value);
   else  lamp[0].set_value(0.0);
 
   output_push_lamps_to_pixels();
@@ -372,7 +381,8 @@ void process_doubleColorOrbit() {
   if (++patvar_current_step_index >= 24) patvar_current_step_index = 0; // Whole sequence has 24 step because of the blinking
   if (++patvar_step_in_color_index>=patconf_steps_until_color_change) {
         patvar_step_in_color_index=0;
-        if (++patvar_color_palette_index>=patconf_color_palette_lenght) patvar_color_palette_index=0;
+        patvar_color_palette_index+=patconf_color_palette_increment;
+        if (patvar_color_palette_index>=patconf_color_palette_lenght) patvar_color_palette_index-=patconf_color_palette_lenght;
   }
 }
 
@@ -383,8 +393,8 @@ void process_doubleColorOrbit() {
  void start_rainbow(float lamp_value,  float angle_difference, float angle_step){
   // init all globales for the pattern
 
-  g_current_stepper_type=ST_RAINBOW;
-     output_pattern_previous_step_time = output_get_current_beat_start_time();
+  output_current_stepper_type=ST_RAINBOW;
+     patvar_previous_step_time = output_get_current_beat_start_time();
  
   patconf_rainbow_step_angle_increment=angle_step;
    
@@ -404,8 +414,8 @@ void process_doubleColorOrbit() {
 void process_rainbow() {
 
   long current_step_time = millis();
-  if (current_step_time - output_pattern_previous_step_time <  output_waittime[patconf_speed_id]) return;
-  output_pattern_previous_step_time = current_step_time;
+  if (current_step_time - patvar_previous_step_time <  output_waittime[patconf_speed_id]) return;
+  patvar_previous_step_time = current_step_time;
 
   for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index) {
     lamp[lamp_index].add_hue_angle(patconf_rainbow_step_angle_increment);
