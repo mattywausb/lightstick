@@ -7,7 +7,7 @@
 // #define TRACE_OUPUT_PIXEL_RESULT
 #define TRACE_OUTPUT_TIMING
 //#define TRACE_OUTPUT_PATTERN_BEAT
-//#define TRACE_OUTPUT_API_CALL
+#define TRACE_OUTPUT_API_CALL
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
@@ -31,7 +31,7 @@ typedef struct {
     float s;       // a fraction between 0 and 1
 } t_color_hs;
 
-#define COLOR_PALETTE_MAX_ENTRIES  6 
+#define COLOR_PALETTE_MAX_ENTRIES  8 
 t_color_hs patconf_color_palette[COLOR_PALETTE_MAX_ENTRIES];
 uint8_t patconf_color_palette_lenght=0;
 uint8_t patvar_color_palette_index=0;
@@ -40,6 +40,7 @@ enum STEPPER_TYPE {
   ST_COLOR_WIPE,
   ST_DOUBLE_ORBIT,
   ST_DOUBLE_COLOR_ORBIT,
+  ST_PULSE,
   ST_RAINBOW
 };
 
@@ -54,18 +55,21 @@ long output_beat_sync_time=0L;
 int output_preset_beat_start_beat=0;
 int output_preset_beat_count=0;
 
-
-long patvar_previous_step_time = 0L;
+#define PATCONF_FADE_FRAMETIME 25
+#define PATCONF_PULSE_SATURATION_INCREMENT 0.15
 
 int patconf_speed_id=STEP_ON_BEAT;
 uint8_t patconf_steps_until_color_change=0;
 uint8_t patconf_color_palette_increment=1;
 int patconf_max_step_count=1000;
 float patconf_pattern_lamp_value = 0.5;
+float patconf_fade_factor=0.9;
 float patconf_rainbow_step_angle_increment=1.0;
 
 int patvar_current_step_index = 0;
 uint8_t patvar_step_in_color_index=0;
+long patvar_previous_step_time = 0L;
+long patvar_previous_fade_time = 0L;
 
 /* 
  *  API Functions
@@ -144,19 +148,24 @@ void output_start_preset(int preset_id) {
   output_preset_beat_count=0;
   switch (preset_id) {
     case 0:
-         patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=0.0; //WHITE
+         patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0;
          patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
-         patconf_color_palette_lenght=4;
-         start_doubleColorOrbit(0.2,16,1);
-         break;
+         patconf_color_palette[3].h=HUE_BLUE;patconf_color_palette[3].s=0.0;
+         patconf_color_palette[4].h=HUE_RED;patconf_color_palette[4].s=0.0;
+         patconf_color_palette[5].h=HUE_ORANGE;patconf_color_palette[5].s=1.0;
+         patconf_color_palette_lenght=6;
+         start_pulse(0.5, // brightness 
+                      4,  // Steps until color increment
+                      0.8, // Fade to black factor 
+                      4  );
+         break; 
     case 1:
          patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
          patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=1.0;
          patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=0.8;
          patconf_color_palette_lenght=3;
-         start_colorWipe(0.5,true);
+         start_colorWipe(0.5,true);  // brightness, over_black
          break;
     case 2:
          patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
@@ -164,7 +173,7 @@ void output_start_preset(int preset_id) {
          patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
          patconf_color_palette[3].h=HUE_LEMON;patconf_color_palette[3].s=1.0;
          patconf_color_palette_lenght=4;
-         start_colorWipe(0.5,false);
+         start_colorWipe(0.5,false); // brightness, over_black
          break;
     case 3:
          patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
@@ -172,13 +181,13 @@ void output_start_preset(int preset_id) {
          patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
          patconf_color_palette[3].h=HUE_CYAN;patconf_color_palette[3].s=0.1; // WHITE
          patconf_color_palette_lenght=4;
-         start_colorWipe(0.5,false);
+         start_colorWipe(0.5,false); // brightness, over_black
          break;
     case 4:
          patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
          patconf_color_palette[1].h=HUE_CYAN;patconf_color_palette[1].s=1.0; // WHITE
          patconf_color_palette_lenght=2;
-         start_doubleOrbit(0.5,8);
+         start_doubleOrbit(0.5,8);  // brightness, Steps until color increment
          break;
     case 5:
          patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
@@ -186,7 +195,7 @@ void output_start_preset(int preset_id) {
          patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0; 
          patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=1.0; 
          patconf_color_palette_lenght=4;
-         start_doubleOrbit(0.5,32);
+         start_doubleOrbit(0.5,32);  // brightness, Steps until color increment
          break;
     case 6:
          patconf_color_palette[0].h=HUE_LEMON;patconf_color_palette[0].s=1.0;
@@ -194,22 +203,32 @@ void output_start_preset(int preset_id) {
          patconf_color_palette[2].h=HUE_PINK;patconf_color_palette[2].s=0.7;  // PINK
          patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=1.0; 
          patconf_color_palette_lenght=4;
-         start_doubleOrbit(0.5,32);
+         start_doubleOrbit(0.5,32); // brightness, Steps until color increment
          break;
     case 7:
-         start_rainbow(0.5,60.0,60.0); // Full span, hart stepping
+         start_rainbow(0.5,60.0,60.0); // brightness, hue angle distance to neighbour, hue step increment   // Full span, hart stepping
          break;
     case 8:
-         start_rainbow(0.5,-60.0,5.0); // Full span reverse order, soft stepping
+         start_rainbow(0.5,-60.0,5.0); // brightness, hue angle distance to neighbout, hue step increment   // Full span reverse order, soft stepping
          break;
     case 9:
-         start_rainbow(0.5,10.0,5.0); // 1/6  span, soft stepping
+         start_rainbow(0.5,10.0,5.0); // brightness, hue angle distance to neighbout, hue step increment   // 1/6  span, soft stepping
          break;
     case 10:
-         start_rainbow(0.5,20.0,-15.0); // 1/3  span, medium reverse stepping
+         start_rainbow(0.5,20.0,-15.0); // brightness, hue angle distance to neighbout, hue step increment   // 1/3  span, medium reverse stepping
          break;
     case 11:
-         start_rainbow(0.5,0.0,137.0); // 1/3  flat, medium reverse stepping
+         start_rainbow(0.5,0.0,137.0); // brightness, hue angle distance to neighbout, hue step increment   // 1/3  flat, medium reverse stepping
+         break;
+    case 12:                                                                        // Color Dancer 1 (16)
+         patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=0.0; //WHITE
+         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
+         patconf_color_palette[4].h=HUE_LEMON;patconf_color_palette[4].s=1.0;
+         patconf_color_palette[5].h=HUE_RED;patconf_color_palette[5].s=0.5; // Soft red
+         patconf_color_palette_lenght=6;
+         start_doubleColorOrbit(0.5,16,1);  // brightness, Steps until color increment, color palette increment   
          break;
   }
   output_process_pattern();
@@ -221,6 +240,7 @@ void output_process_pattern() {
     case ST_COLOR_WIPE: process_colorWipe();      break;
     case ST_DOUBLE_ORBIT: process_doubleOrbit(); break;
     case ST_DOUBLE_COLOR_ORBIT: process_doubleColorOrbit(); break;
+    case ST_PULSE: process_pulse(); break;
     case ST_RAINBOW: process_rainbow();break;
   }
   
@@ -231,6 +251,77 @@ void output_process_pattern() {
   output_preset_beat_start_beat=output_get_beat_number_since_sync();
   digitalWrite(LED_BUILTIN, output_preset_beat_count%2);
   output_preset_beat_count++;
+}
+
+/*
+ *   Pulse: alternating "Ignite" of ring and center, ramping up saturation first and then fade to black
+ *   Keeping ring step on 2nd subbeat (depend on patconv_speed-id)
+ *   lamp_value: general brightness
+ *   steps_per_color: number of steps to change color index (index alway increments by 2, so you must double a color in palette for uni color effect)
+ *   fade_factor: brightnes to keep after 50ms
+ *   follow_up_time_shift: number of 1/4 waittime between center and ring pulse
+ */
+void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int follow_up_timing){
+  // init all globales for the pattern
+  output_current_stepper_type=ST_PULSE;
+  patvar_previous_step_time = output_get_current_beat_start_time();
+  patvar_previous_fade_time = 0L;
+  
+  patconf_pattern_lamp_value = lamp_value;
+  patconf_fade_factor = fade_factor;
+  patconf_steps_until_color_change=steps_per_color;
+ 
+  patvar_current_step_index = 0;
+  patvar_color_palette_index=0;
+  patvar_step_in_color_index=0;
+  
+  lamp[0].set_value(0.0);
+  for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
+           lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
+  }
+  output_push_lamps_to_pixels();
+}
+
+void process_pulse() {
+
+  long current_time = millis();
+  boolean trigger_push=false;
+
+  if (current_time - patvar_previous_fade_time >= PATCONF_FADE_FRAMETIME) {  // calculate fading effect
+    patvar_previous_fade_time=current_time;
+    trigger_push=true;
+     for (int lamp_index = 0; lamp_index < LAMP_COUNT; ++lamp_index){
+       if(lamp[lamp_index].get_saturation()<1.0) {
+         lamp[lamp_index].add_saturation(0.1);
+        } else {
+          lamp[lamp_index].multiply_value(patconf_fade_factor);
+        }
+      } // loop over lamp ring
+  }  // end of fading calculation
+
+   if (current_time - patvar_previous_step_time >= output_waittime[patconf_speed_id]) { // next step
+      patvar_previous_step_time = current_time;
+      ++patvar_current_step_index;   // Step index will not be reset (would take 32000 steps to overflow)
+      trigger_push=true;
+      if (++patvar_step_in_color_index>=patconf_steps_until_color_change) {  // Forward color pallette if necessary
+            patvar_step_in_color_index=0;
+            patvar_color_palette_index+=2;
+            if (patvar_color_palette_index>=patconf_color_palette_lenght) patvar_color_palette_index-=patconf_color_palette_lenght;
+      }
+
+       
+      if(patvar_current_step_index%2==0) {  // ignite ring
+         for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
+            lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
+         }
+      } else { // ignite cencter
+         int follow_up_palette_entry= patvar_color_palette_index+1;
+         if( follow_up_palette_entry>=patconf_color_palette_lenght)follow_up_palette_entry-=patconf_color_palette_lenght;
+         lamp[0].set_hsv(patconf_color_palette[follow_up_palette_entry].h,patconf_color_palette[follow_up_palette_entry].s,patconf_pattern_lamp_value);
+      }
+   }
+     
+  if(trigger_push) output_push_lamps_to_pixels();  
 }
 
 /*
@@ -291,8 +382,9 @@ void start_doubleOrbit(float lamp_value,  int steps_per_color){
   output_current_stepper_type=ST_DOUBLE_ORBIT;
   patvar_previous_step_time = output_get_current_beat_start_time();
   patvar_current_step_index = 0;
-  patconf_steps_until_color_change=steps_per_color;
   patvar_step_in_color_index=0;
+
+  patconf_steps_until_color_change=steps_per_color;
 
   patconf_pattern_lamp_value = lamp_value;
   patvar_color_palette_index=0;

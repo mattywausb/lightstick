@@ -45,7 +45,7 @@ int g_program_sequence_length=5;
 
 
 t_program_sequence g_program_sequence [MAX_NUMBER_OF_PROGRAM_SEQUENCE_STEPS] = {
-                      {5,16},{1,64},{2,32},{0,32},{3,32}
+                      {4,160},{1,64},{2,32},{0,32},{3,32}
                       }; // Extended Version to S126 I88 >A8888 8888 B8888 R8888 S8888 A8888 8888 B8888 R8888 S8888 B8888 R8888 S8888 A8888 
 
 // Other test: S80 A22 B4 >C8 D4                     
@@ -142,7 +142,8 @@ void manage_tap_input() {
 #ifdef TRACE_SEQUENCE_PROGRESS
 void trace_sequence()
 {
-  Serial.print(F(">TRACE_SEQUENCE_PROGRESS index:")); Serial.print(g_sequence_index);
+  Serial.print(F(">TRACE_SEQUENCE_PROGRESS sequence_index:")); Serial.print(g_sequence_index);
+  Serial.print(F(" sequence slot: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].slot_tag);
   Serial.print(F(" preset_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_id);
   Serial.print(F(" preset_speed_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
   Serial.print(F(" beats_to_run: ")); Serial.println(g_program_sequence[g_sequence_index].beats_to_run);

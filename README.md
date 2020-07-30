@@ -31,7 +31,7 @@ The software is split up into the following modules
   
 # What you will find in the repository
 * Main arduino sketch for the firmware
-* Additional sketches for separate  developtment of light pattern and web interface
+* Additional sketches for separate  developtment of light pattern(Arduino UNO compatible) and web interface(only on ESP8266)
 * Additional sketches for simple demos of light control and web interface
 * Fritzing sketch for wireing used in the implementation
 * Manuals

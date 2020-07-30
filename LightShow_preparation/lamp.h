@@ -33,9 +33,10 @@ class Lamp {
         void set_hsv(float h,float s,float v);
         void add_hue_angle(float angle) ;
         void set_hue_angle(float angle) ;
-        void add_saturation(float saturation)  ;
+        void add_saturation(float increment)  ;
         void set_saturation(float saturation)  ;
-        void add_value(float value);
+        float get_saturation(){return m_color_hsv.s;}  ;
+        void multiply_value(float fact);
         void set_value(float value);
         void trace_hsv();
         void trace_rgb(t_color_rgb_int color_rgb );
