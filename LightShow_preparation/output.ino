@@ -65,11 +65,14 @@ int patconf_max_step_count=1000;
 float patconf_pattern_lamp_value = 0.5;
 float patconf_fade_factor=0.9;
 float patconf_rainbow_step_angle_increment=1.0;
+int patconf_step_0_waittime=0;
+int patconf_step_1_waittime=0;
 
 int patvar_current_step_index = 0;
 uint8_t patvar_step_in_color_index=0;
 long patvar_previous_step_time = 0L;
 long patvar_previous_fade_time = 0L;
+
 
 /* 
  *  API Functions
@@ -152,13 +155,13 @@ void output_start_preset(int preset_id) {
          patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0;
          patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
          patconf_color_palette[3].h=HUE_BLUE;patconf_color_palette[3].s=0.0;
-         patconf_color_palette[4].h=HUE_RED;patconf_color_palette[4].s=0.0;
-         patconf_color_palette[5].h=HUE_ORANGE;patconf_color_palette[5].s=1.0;
+         patconf_color_palette[4].h=HUE_ORANGE;patconf_color_palette[4].s=0.0;
+         patconf_color_palette[5].h=HUE_RED;patconf_color_palette[5].s=1.0;
          patconf_color_palette_lenght=6;
-         start_pulse(0.5, // brightness 
-                      4,  // Steps until color increment
-                      0.8, // Fade to black factor 
-                      4  );
+         start_pulse(0.8, // brightness 
+                      8,  // Steps until color increment
+                      0.9, // preserve brightnes factor 
+                      6  );
          break; 
     case 1:
          patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
@@ -279,6 +282,12 @@ void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int f
   for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
            lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
   }
+  patconf_step_0_waittime=follow_up_timing*output_waittime[patconf_speed_id]/4;
+  patconf_step_1_waittime=output_waittime[patconf_speed_id]*2-patconf_step_0_waittime;
+  #ifdef TRACE_OUTPUT_TIMING
+    Serial.print(F(">TRACE_OUTPUT_TIMING patconf_step_0_waittime ")); Serial.println(patconf_step_0_waittime);
+    Serial.print(F(">TRACE_OUTPUT_TIMING patconf_step_1_waittime ")); Serial.println(patconf_step_1_waittime);
+  #endif
   output_push_lamps_to_pixels();
 }
 
@@ -293,13 +302,14 @@ void process_pulse() {
      for (int lamp_index = 0; lamp_index < LAMP_COUNT; ++lamp_index){
        if(lamp[lamp_index].get_saturation()<1.0) {
          lamp[lamp_index].add_saturation(0.1);
-        } else {
-          lamp[lamp_index].multiply_value(patconf_fade_factor);
-        }
+        } 
+        lamp[lamp_index].multiply_value(patconf_fade_factor);
       } // loop over lamp ring
   }  // end of fading calculation
 
-   if (current_time - patvar_previous_step_time >= output_waittime[patconf_speed_id]) { // next step
+   if ((patvar_current_step_index%2==0 && (current_time - patvar_previous_step_time >= patconf_step_0_waittime))|| 
+       (patvar_current_step_index%2==1 && (current_time - patvar_previous_step_time >= patconf_step_1_waittime))){ // next step
+
       patvar_previous_step_time = current_time;
       ++patvar_current_step_index;   // Step index will not be reset (would take 32000 steps to overflow)
       trigger_push=true;
@@ -314,7 +324,7 @@ void process_pulse() {
          for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
             lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
          }
-      } else { // ignite cencter
+      } else { // ignite center
          int follow_up_palette_entry= patvar_color_palette_index+1;
          if( follow_up_palette_entry>=patconf_color_palette_lenght)follow_up_palette_entry-=patconf_color_palette_lenght;
          lamp[0].set_hsv(patconf_color_palette[follow_up_palette_entry].h,patconf_color_palette[follow_up_palette_entry].s,patconf_pattern_lamp_value);

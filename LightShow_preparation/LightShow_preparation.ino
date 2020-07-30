@@ -45,7 +45,7 @@ int g_program_sequence_length=5;
 
 
 t_program_sequence g_program_sequence [MAX_NUMBER_OF_PROGRAM_SEQUENCE_STEPS] = {
-                      {4,160},{1,64},{2,32},{0,32},{3,32}
+                      {4,16},{1,64},{2,32},{0,32},{3,32}
                       }; // Extended Version to S126 I88 >A8888 8888 B8888 R8888 S8888 A8888 8888 B8888 R8888 S8888 B8888 R8888 S8888 A8888 
 
 // Other test: S80 A22 B4 >C8 D4                     
