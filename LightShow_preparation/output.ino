@@ -8,6 +8,7 @@
 #define TRACE_OUTPUT_TIMING
 //#define TRACE_OUTPUT_PATTERN_BEAT
 #define TRACE_OUTPUT_API_CALL
+#define TRACE_COLOR_PALETTE_SETTING
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
@@ -95,6 +96,9 @@ void output_reset_color_palette(float hue, float saturation){
   patconf_color_palette[0].h=hue;
   patconf_color_palette[0].s=saturation; 
   patconf_color_palette_lenght=1;
+  #ifdef TRACE_COLOR_PALETTE_SETTING
+    dump_color_palette_to_serial();
+  #endif
 }
 
 void output_add_color_palette_entry(float hue, float saturation){
@@ -103,12 +107,18 @@ void output_add_color_palette_entry(float hue, float saturation){
     patconf_color_palette[patconf_color_palette_lenght].s=saturation; 
     patconf_color_palette_lenght++;
   }
+  #ifdef TRACE_COLOR_PALETTE_SETTING
+    dump_color_palette_to_serial();
+  #endif
 }
 
 void output_set_color_palette_entry(int index,float hue, float saturation){
   if(index<0 || index>patconf_color_palette_lenght) return;
   patconf_color_palette[index].h=hue;
   patconf_color_palette[index].s=saturation; 
+  #ifdef TRACE_COLOR_PALETTE_SETTING
+    dump_color_palette_to_serial();
+  #endif
 }
 
 
@@ -579,4 +589,16 @@ void output_push_lamps_to_pixels()
   }
   strip.show();
 }
+
+#ifdef TRACE_COLOR_PALETTE_SETTING
+void dump_color_palette_to_serial()
+{
+  Serial.println(F(">TRACE_COLOR_PALETTE_SETTING")); 
+  for(int i=0;i<patconf_color_palette_lenght;i++) {
+    Serial.print('(');Serial.print(patconf_color_palette[i].h);
+    Serial.print(',');Serial.print(patconf_color_palette[i].s);
+    Serial.println(')');
+  }
+}
+#endif
 
