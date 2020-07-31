@@ -342,6 +342,31 @@ void loop() {
         mode_of_operation=MODE_FIX_PRESET;
       }
     }
+    if(command.startsWith("c")) { // Color entry "index: Hue, Saturation"
+      int position_of_comma=command.indexOf(',');
+      if(position_of_comma>0) {
+        float saturation=command.substring(position_of_comma+1).toFloat();
+        int position_of_colon=command.indexOf(':');
+        int palette_entry_index=-1;
+        float hue=0.0;
+        if(position_of_colon>0) {
+          palette_entry_index=command.substring(1).toInt();
+          hue=command.substring(position_of_colon+1).toFloat();
+          output_set_color_palette_entry(palette_entry_index,hue,saturation);
+        } else {
+          hue=command.substring(1).toFloat();
+          output_add_color_palette_entry(hue,saturation);
+        }
+      }
+    }
+    if(command.startsWith("C")) { // Color entry "Hue, Saturation"
+      int position_of_comma=command.indexOf(',');
+      if(position_of_comma>0) {
+        float saturation=command.substring(position_of_comma+1).toFloat();
+        float hue=command.substring(1).toFloat();
+        output_reset_color_palette(hue,saturation);
+      }
+    }
   }
 
   // Manage current sequence 

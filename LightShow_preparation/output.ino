@@ -67,6 +67,7 @@ float patconf_fade_factor=0.9;
 float patconf_rainbow_step_angle_increment=1.0;
 int patconf_step_0_waittime=0;
 int patconf_step_1_waittime=0;
+byte patconf_follow_up_ticks=4;
 
 int patvar_current_step_index = 0;
 uint8_t patvar_step_in_color_index=0;
@@ -87,6 +88,29 @@ void output_setup() {
   output_set_bpm(40);
   output_set_pattern_speed(STEP_ON_BEAT);
 }
+
+
+// Manage color palette
+void output_reset_color_palette(float hue, float saturation){
+  patconf_color_palette[0].h=hue;
+  patconf_color_palette[0].s=saturation; 
+  patconf_color_palette_lenght=1;
+}
+
+void output_add_color_palette_entry(float hue, float saturation){
+  if(patconf_color_palette_lenght<COLOR_PALETTE_MAX_ENTRIES) {
+    patconf_color_palette[patconf_color_palette_lenght].h=hue;
+    patconf_color_palette[patconf_color_palette_lenght].s=saturation; 
+    patconf_color_palette_lenght++;
+  }
+}
+
+void output_set_color_palette_entry(int index,float hue, float saturation){
+  if(index<0 || index>patconf_color_palette_lenght) return;
+  patconf_color_palette[index].h=hue;
+  patconf_color_palette[index].s=saturation; 
+}
+
 
 // Change bpm
 void output_set_bpm(int beats_per_minute) {
@@ -151,13 +175,12 @@ void output_start_preset(int preset_id) {
   output_preset_beat_count=0;
   switch (preset_id) {
     case 0:
-         patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0;
-         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_BLUE;patconf_color_palette[3].s=0.0;
-         patconf_color_palette[4].h=HUE_ORANGE;patconf_color_palette[4].s=0.0;
-         patconf_color_palette[5].h=HUE_RED;patconf_color_palette[5].s=1.0;
-         patconf_color_palette_lenght=6;
+         output_reset_color_palette(HUE_GREEN, 1.0);
+         output_add_color_palette_entry(HUE_BLUE,0.0);
+         output_add_color_palette_entry(HUE_BLUE,1.0);
+         output_add_color_palette_entry(HUE_BLUE,0.0);
+         output_add_color_palette_entry(HUE_ORANGE,0.0);
+         output_add_color_palette_entry(HUE_RED,1.0);
          start_pulse(0.8, // brightness 
                       8,  // Steps until color increment
                       0.9, // preserve brightnes factor 
@@ -264,7 +287,7 @@ void output_process_pattern() {
  *   fade_factor: brightnes to keep after 50ms
  *   follow_up_time_shift: number of 1/4 waittime between center and ring pulse
  */
-void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int follow_up_timing){
+void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int follow_up_ticks){
   // init all globales for the pattern
   output_current_stepper_type=ST_PULSE;
   patvar_previous_step_time = output_get_current_beat_start_time();
@@ -273,6 +296,7 @@ void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int f
   patconf_pattern_lamp_value = lamp_value;
   patconf_fade_factor = fade_factor;
   patconf_steps_until_color_change=steps_per_color;
+  patconf_follow_up_ticks=follow_up_ticks;
  
   patvar_current_step_index = 0;
   patvar_color_palette_index=0;
@@ -282,7 +306,7 @@ void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int f
   for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
            lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
   }
-  patconf_step_0_waittime=follow_up_timing*output_waittime[patconf_speed_id]/4;
+  patconf_step_0_waittime=follow_up_ticks*output_waittime[patconf_speed_id]/4;
   patconf_step_1_waittime=output_waittime[patconf_speed_id]*2-patconf_step_0_waittime;
   #ifdef TRACE_OUTPUT_TIMING
     Serial.print(F(">TRACE_OUTPUT_TIMING patconf_step_0_waittime ")); Serial.println(patconf_step_0_waittime);
@@ -316,14 +340,19 @@ void process_pulse() {
       if (++patvar_step_in_color_index>=patconf_steps_until_color_change) {  // Forward color pallette if necessary
             patvar_step_in_color_index=0;
             patvar_color_palette_index+=2;
-            if (patvar_color_palette_index>=patconf_color_palette_lenght) patvar_color_palette_index-=patconf_color_palette_lenght;
+            if (patvar_color_palette_index>=patconf_color_palette_lenght) {
+              patvar_color_palette_index-=(patconf_color_palette_lenght);
+              if(patvar_color_palette_index>=patconf_color_palette_lenght)patvar_color_palette_index=0;
+            }
       }
 
-       
       if(patvar_current_step_index%2==0) {  // ignite ring
          for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
             lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
          }
+         // Recalculate waittimes if speed changed
+         patconf_step_0_waittime=patconf_follow_up_ticks*output_waittime[patconf_speed_id]/4;
+         patconf_step_1_waittime=output_waittime[patconf_speed_id]*2-patconf_step_0_waittime;
       } else { // ignite center
          int follow_up_palette_entry= patvar_color_palette_index+1;
          if( follow_up_palette_entry>=patconf_color_palette_lenght)follow_up_palette_entry-=patconf_color_palette_lenght;
