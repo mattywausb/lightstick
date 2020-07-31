@@ -4,15 +4,37 @@
 #include "mainSettings.h"
 
 #define HUE_RED 0.0
-#define HUE_YELLOW 60.0
-#define HUE_GREEN 120.0
-#define HUE_CYAN 180.0
-#define HUE_BLUE 240.0
-#define HUE_PINK 300.0
+#define SAT_ROSE 0.7
 
-#define HUE_PURPLE 250.0
-#define HUE_ORANGE 25.0
+#define HUE_ORANGE 15.0
+#define HUE_LORANGE 25.0
+
+#define HUE_YELLOW 60.0
+#define SAT_LYELLOW 0.8
+
 #define HUE_LEMON 95.0
+
+#define HUE_GREEN 120.0
+#define SAT_LGREEN 0.8
+
+#define HUE_CYAN 180.0
+#define SAT_LCYAN 0.7
+
+#define HUE_SKYBLUE 220.0
+
+#define HUE_BLUE 240.0
+#define HUE_LBLUE 230.0
+#define SAT_LBLUE 0.8
+
+#define HUE_MAGENTA 300.0
+
+#define HUE_PINK 340.0
+#define SAT_LPINK 0.85
+
+#define HUE_PURPLE 245.0
+#define SAT_LPURPLE 0.8
+
+
 
 typedef struct {
     int r;       // 0-255
