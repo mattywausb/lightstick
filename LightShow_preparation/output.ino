@@ -185,16 +185,13 @@ void output_start_preset(int preset_id) {
   output_preset_beat_count=0;
   switch (preset_id) {
     case 0:
-         output_reset_color_palette(HUE_GREEN, 1.0);
+         output_reset_color_palette(HUE_BLUE, 1.0);
+         output_add_color_palette_entry(HUE_GREEN,1.0);
          output_add_color_palette_entry(HUE_BLUE,0.0);
-         output_add_color_palette_entry(HUE_BLUE,1.0);
-         output_add_color_palette_entry(HUE_BLUE,0.0);
-         output_add_color_palette_entry(HUE_ORANGE,0.0);
-         output_add_color_palette_entry(HUE_RED,1.0);
          start_pulse(0.8, // brightness 
-                      8,  // Steps until color increment
-                      0.9, // preserve brightnes factor 
-                      6  );
+                      4,  // Steps until color increment
+                      0.85, // preserve brightnes factor 
+                      4  ); // follow up tick count (4= equally spaced)
          break; 
     case 1:
          patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
@@ -265,6 +262,18 @@ void output_start_preset(int preset_id) {
          patconf_color_palette[5].h=HUE_RED;patconf_color_palette[5].s=0.5; // Soft red
          patconf_color_palette_lenght=6;
          start_doubleColorOrbit(0.5,16,1);  // brightness, Steps until color increment, color palette increment   
+         break;
+    case 13:
+         output_reset_color_palette(HUE_GREEN, 1.0);
+         output_add_color_palette_entry(HUE_BLUE,0.0);
+         output_add_color_palette_entry(HUE_BLUE,1.0);
+         output_add_color_palette_entry(HUE_BLUE,0.0);
+         output_add_color_palette_entry(HUE_ORANGE,0.0);
+         output_add_color_palette_entry(HUE_RED,1.0);
+         start_pulse(0.8, // brightness 
+                      8,  // Steps until color increment
+                      0.9, // preserve brightnes factor 
+                      6  );
          break;
   }
   output_process_pattern();

@@ -353,9 +353,11 @@ void loop() {
           palette_entry_index=command.substring(1).toInt();
           hue=command.substring(position_of_colon+1).toFloat();
           output_set_color_palette_entry(palette_entry_index,hue,saturation);
+          mode_of_operation=MODE_FIX_PRESET;
         } else {
           hue=command.substring(1).toFloat();
           output_add_color_palette_entry(hue,saturation);
+          mode_of_operation=MODE_FIX_PRESET;
         }
       }
     }
@@ -365,9 +367,57 @@ void loop() {
         float saturation=command.substring(position_of_comma+1).toFloat();
         float hue=command.substring(1).toFloat();
         output_reset_color_palette(hue,saturation);
+        mode_of_operation=MODE_FIX_PRESET;
       }
     }
-  }
+    if(command.startsWith("t")) { // start pattern
+      int position_of_colon=command.indexOf(':');
+      if(position_of_colon>0) {
+        mode_of_operation=MODE_FIX_PRESET;
+        int pattern=command.substring(1).toInt();
+        int position_of_comma=command.indexOf(',');
+        switch(pattern){
+          case 1:  // PULSE
+                  if(position_of_comma>0) {
+                  int steps_until_next_color=command.substring(position_of_colon+1).toInt();
+                  int follow_up_tick_count=command.substring(position_of_comma+1).toInt();
+                  start_pulse(0.8, // brightness 
+                        steps_until_next_color,  // Steps until color increment
+                        0.87, // preserve brightnes factor 
+                        follow_up_tick_count  );
+                  }
+                  break;
+          case 2: // WHIPE
+                  {int over_black=command.substring(position_of_colon+1).toInt();
+                  start_colorWipe(0.5,over_black);
+                  }
+                  break;
+          case 3: // DOUBLE ORBIT
+                  {int steps_until_next_color=command.substring(position_of_colon+1).toInt();
+                  start_doubleOrbit(0.5,steps_until_next_color);
+                  }
+                  break;
+          case 4: // COLOR ORBIT
+                  if(position_of_comma<0) break;
+                  {int steps_until_next_color=command.substring(position_of_colon+1).toInt();
+                  int color_palette_increment=command.substring(position_of_comma+1).toInt();
+                  start_doubleColorOrbit(0.5,steps_until_next_color,color_palette_increment);
+                  }
+                  break;
+          case 5: // RAINBOW
+                  if(position_of_comma<0) break;
+                  {float distance_to_neighbour=command.substring(position_of_colon+1).toInt();
+                  float increment=command.substring(position_of_comma+1).toInt();
+                  start_rainbow(0.5,distance_to_neighbour,increment);
+                  break;
+                  }
+            } // end switch
+        } // end if colon present
+                
+
+      }  // end "t" command
+
+  }  // end Serial command available
 
   // Manage current sequence 
   if(mode_of_operation==MODE_SEQUENCE) {
