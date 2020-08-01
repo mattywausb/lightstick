@@ -31,7 +31,7 @@ t_program_slot g_program_slot[MAX_NUMBER_OF_PROGRAM_SLOTS]={ /* IDOL 126 BPM*/
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
                               }; // String P  I97/4:0  A25/8:0 B11/4:41  R97/16:0  S10/16:
     
-      //  Test String P S2-16 I7-16 A6-8 B3-2 R10-8                       
+      //  Test String P A6/4:20 B10/8:40
 
                   
 
@@ -49,7 +49,8 @@ t_program_sequence g_program_sequence [MAX_NUMBER_OF_PROGRAM_SEQUENCE_STEPS] = {
                       {0,16},{1,64},{2,32},{3,32},{4,32}
                       }; // Extended Version to S126 I88 >A8888 8888 B8888 R8888 S8888 A8888 8888 B8888 R8888 S8888 B8888 R8888 S8888 A8888 
 
-// Other test: S80 A22 B4 >C8 D4                     
+// Pattern Slots: P A6/4:20 B10/4:40 C11/8:40 D65/4:40
+// Sequence setting: S80 A2222 >B44 C8 D8                     
                         
 int g_sequence_entry_count=8;
 int g_sequence_index=0;
@@ -147,14 +148,16 @@ void trace_sequence()
   Serial.print(F(" sequence slot: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].slot_tag);
   Serial.print(F(" pattern_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);
   Serial.print(F(" preset_speed_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
+  Serial.print(F(" color_palette_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
   Serial.print(F(" beats_to_run: ")); Serial.println(g_program_sequence[g_sequence_index].beats_to_run);
 }
 #endif
 
 /* Function to load the slot settings  by parsing a string code 
-* Syntax: <letter><number>-<number> ...
-* <number>: declars the presed id
-* <number>: declares the preset speed as 2 4 8 16 32 64 
+* Syntax: <letter><pattern_id>/<speed>:<color palette id> ...
+* <pattern_id>: declares the pattern id (0-99)
+* <speed>: declares the pattern speed as 2 4 8 16 32 64 
+* <color palette id>: declares the color palette id (0-255)
 */
 
 
@@ -162,42 +165,57 @@ void parse_slot_settings(String slot_setting_string)  {
   int slot_index=0;
   int pattern_id=-1;
   int preset_speed_id=-1;
-  int dash_index;
+  int color_palette_id;
+  int slash_index;
+  int colon_index;
+  int token_end_index;
+  String current_token;
   #ifdef TRACE_STRING_PARSING
          Serial.print(F(">TRACE_STRING_PARSING slot settings to parse:"));Serial.println(slot_setting_string);
   #endif
   for(int char_index=0;char_index<slot_setting_string.length();char_index++) {
     if(slot_setting_string.charAt(char_index)>='A') { // new slot letter in string
-        dash_index=slot_setting_string.substring(char_index+1).indexOf('-');
-        if (dash_index>0) { // dash to separate the speed exists
-          pattern_id=slot_setting_string.substring(char_index+1).toInt();
-          preset_speed_id=preset_speed_to_id(slot_setting_string.substring(char_index+dash_index+2));
-          if(pattern_id>=0 && preset_speed_id>=0) {  // Parameters are valid, so store it in array
-            g_program_slot[slot_index].slot_tag=slot_setting_string.charAt(char_index);
-            g_program_slot[slot_index].pattern_id=pattern_id;
-            g_program_slot[slot_index].preset_speed_id=preset_speed_id;
-            #ifdef TRACE_STRING_PARSING
-              Serial.print(F(">TRACE_STRING_PARSING slot setting:"));
-              Serial.print(slot_index);Serial.print("{'");Serial.print(g_program_slot[slot_index].slot_tag);
-              Serial.print("',");Serial.print(g_program_slot[slot_index].pattern_id);
-              Serial.print(',');Serial.print(g_program_slot[slot_index].preset_speed_id);
-              Serial.println("},");
-            #endif
-            pattern_id=-1;
-            preset_speed_id=-1;
-            if(++slot_index>=MAX_NUMBER_OF_PROGRAM_SLOTS) break;
-          }
+        for (token_end_index=char_index+1; token_end_index<slot_setting_string.length() && slot_setting_string.charAt(token_end_index)<'A';token_end_index++); // search for end of token
+        current_token=slot_setting_string.substring(char_index,token_end_index);
+         #ifdef TRACE_STRING_PARSING
+            Serial.print(F(">TRACE_STRING_PARSING current_token:"));Serial.println(current_token);
+          #endif
+        slash_index=current_token.indexOf('/');
+        if (slash_index>0) { // dash to separate the speed exists
+          colon_index=current_token.indexOf(':',slash_index);
+          if(colon_index>0) {
+            pattern_id=current_token.substring(1).toInt();
+            preset_speed_id=preset_speed_to_id(current_token.substring(slash_index+1));
+            color_palette_id=current_token.substring(colon_index+1).toInt();
+            if(pattern_id>=0 && preset_speed_id>=0 && color_palette_id>=0) {  // Parameters are valid, so store it in array
+              g_program_slot[slot_index].slot_tag=slot_setting_string.charAt(char_index);
+              g_program_slot[slot_index].pattern_id=pattern_id;
+              g_program_slot[slot_index].preset_speed_id=preset_speed_id;
+              g_program_slot[slot_index].color_palette_id=color_palette_id;
+              #ifdef TRACE_STRING_PARSING
+                Serial.print(F(">TRACE_STRING_PARSING slot setting:"));
+                Serial.print(slot_index);Serial.print("{'");Serial.print(g_program_slot[slot_index].slot_tag);
+                Serial.print("',");Serial.print(g_program_slot[slot_index].pattern_id);
+                Serial.print(',');Serial.print(g_program_slot[slot_index].preset_speed_id);
+                Serial.print(',');Serial.print(g_program_slot[slot_index].color_palette_id);
+                Serial.println("},");
+              #endif
+              pattern_id=-1;
+              preset_speed_id=-1;
+              if(++slot_index>=MAX_NUMBER_OF_PROGRAM_SLOTS) break;
+            }
+          } // end colon found
          #ifdef TRACE_STRING_PARSING
              else {
-              Serial.print(F(">TRACE_STRING_PARSING bad parsing dash_index, pattern_id, preset_speed_id:"));
-              Serial.print(dash_index);Serial.print(',');
+              Serial.print(F(">TRACE_STRING_PARSING bad parsing slash_index, pattern_id, preset_speed_id:"));
+              Serial.print(slash_index);Serial.print(',');
               Serial.print(pattern_id);Serial.print(',');
               Serial.println(preset_speed_id);
              }
          #endif
-        }
-    }
-  }
+        } // end Slash found
+    }  // end letter found
+  } // end for char_index
 }
 
 /* Function to load the program sequence by parsing a string code 
@@ -336,21 +354,22 @@ void loop() {
       output_start_pattern(value);
       mode_of_operation=MODE_FIX_PRESET;
     }
-    /* if(command.startsWith("P")) { // Change all preset slots by string 
+    if(command.startsWith("P")) { // Change all preset slots by string 
       parse_slot_settings(command.substring(1));
       output_set_pattern_speed(g_program_slot[0].preset_speed_id);
-      output_start_preset(g_program_slot[0].pattern_id);      
+      output_load_color_palette(g_program_slot[0].color_palette_id);
+      output_start_pattern(g_program_slot[0].pattern_id);      
       mode_of_operation=MODE_FIX_PRESET;
     } else {
-      int position_of_dash=command.indexOf('-');  
-      if(position_of_dash>0) { //Change preset and waittime directly 3-16
+      int position_of_slash=command.indexOf('/');  
+      if(position_of_slash>0) { //Change preset and waittime directly 3-16
         int pattern_id=command.toInt();
-        int preset_speed_id=preset_speed_to_id(command.substring(position_of_dash+1));
+        int preset_speed_id=preset_speed_to_id(command.substring(position_of_slash+1));
         if(preset_speed_id>=0)output_set_pattern_speed(preset_speed_id);
         output_start_pattern(pattern_id);
         mode_of_operation=MODE_FIX_PRESET;
       }
-    } */
+    } 
     if(command.startsWith("c")) { // Color entry "index: Hue, Saturation"
       int position_of_comma=command.indexOf(',');
       if(position_of_comma>0) {
