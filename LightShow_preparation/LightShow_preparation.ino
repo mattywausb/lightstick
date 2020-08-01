@@ -24,8 +24,8 @@ t_program_slot g_program_slot[MAX_NUMBER_OF_PROGRAM_SLOTS]={ /* IDOL 126 BPM*/
                               {'I',97,STEP_ON_BEAT,0}
                               ,{'A',25,STEP_ON_8TH,0}
                               ,{'B',11,STEP_ON_BEAT,41}
-                              ,{'R',10,STEP_ON_16TH,0}
-                              ,{'S',97,STEP_ON_16TH,1}
+                              ,{'R',10,STEP_ON_16TH,1}
+                              ,{'S',97,STEP_ON_16TH,0}
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}

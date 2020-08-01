@@ -291,7 +291,7 @@ void output_start_pattern(int pattern_id) {
     case 9:           // RAINBOW FLAT 90-99  increment  1,6,12,18,24 ,55,85,115,145,175
          if(pattern_id==90) {
                start_rainbow(0.5,0.0,1.0); 
-         }
+         } else
          if(pattern_id<95) {
                start_rainbow(0.5,0.0,6*(pattern_id-90)); 
          }
