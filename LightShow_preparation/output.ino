@@ -176,6 +176,15 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=SAT_ROSE;
          patconf_color_palette_lenght=3;
          break;
+  // -- Pulse Section
+   case 100: 
+   // blue green  
+         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; 
+         patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=0.0; 
+         patconf_color_palette_lenght=4;
+         break;
   }
   #ifdef TRACE_COLOR_PALETTE_SETTING
     dump_color_palette_to_serial();

@@ -33,7 +33,7 @@ t_program_slot g_program_slot[MAX_NUMBER_OF_PROGRAM_SLOTS]={ /* IDOL 126 BPM*/
     
       //  Test String P A6/4:20 B10/8:40
 
-                  
+int g_program_slot_count=0;                  
 
 typedef struct {
     byte slot_index; // 
@@ -216,6 +216,7 @@ void parse_slot_settings(String slot_setting_string)  {
         } // end Slash found
     }  // end letter found
   } // end for char_index
+  g_program_slot_count=slot_index;
 }
 
 /* Function to load the program sequence by parsing a string code 
@@ -251,7 +252,7 @@ void parse_sequence(String sequence_string)
         sequence_index++;
       }
       beat_sum=0;
-      for(slot_index=MAX_NUMBER_OF_PROGRAM_SLOTS-1;slot_index>=0;slot_index--) { // find proper slot
+      for(slot_index=g_program_slot_count-1;slot_index>=0;slot_index--) { // find proper slot
         if(sequence_string.charAt(char_index)==g_program_slot[slot_index].slot_tag) break;
       }
       #ifdef TRACE_STRING_PARSING
