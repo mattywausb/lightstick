@@ -15,20 +15,21 @@
 
 typedef struct {
     char slot_tag; // 
-    byte preset_id;       // 0-255
+    byte pattern_id;       // 0-255
     byte preset_speed_id;       // 0-255
+    byte color_palette_id;
 } t_program_slot;
 
 t_program_slot g_program_slot[MAX_NUMBER_OF_PROGRAM_SLOTS]={ /* IDOL 126 BPM*/
-                               {'R',3,STEP_ON_16TH}
-                              ,{'A',5,STEP_ON_8TH}
-                              ,{'B',1,STEP_ON_BEAT}
-                              ,{'S',5,STEP_ON_16TH}
-                              ,{'I',0,STEP_ON_BEAT}
-                              ,{PROGRAM_TAG_OFF,0,STEP_ON_8TH}
-                              ,{PROGRAM_TAG_OFF,0,STEP_ON_8TH}
-                              ,{PROGRAM_TAG_OFF,0,STEP_ON_8TH}
-                              }; // String P R3-16 A5-8 B1-4 S5-16 I0-4
+                              {'I',97,STEP_ON_BEAT,0}
+                              ,{'A',25,STEP_ON_8TH,0}
+                              ,{'B',11,STEP_ON_BEAT,41}
+                              ,{'R',10,STEP_ON_16TH,0}
+                              ,{'S',97,STEP_ON_16TH,1}
+                              ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
+                              ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
+                              ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
+                              }; // String P  I97/4:0  A25/8:0 B11/4:41  R97/16:0  S10/16:
     
       //  Test String P S2-16 I7-16 A6-8 B3-2 R10-8                       
 
@@ -45,7 +46,7 @@ int g_program_sequence_length=5;
 
 
 t_program_sequence g_program_sequence [MAX_NUMBER_OF_PROGRAM_SEQUENCE_STEPS] = {
-                      {4,16},{1,64},{2,32},{0,32},{3,32}
+                      {0,16},{1,64},{2,32},{3,32},{4,32}
                       }; // Extended Version to S126 I88 >A8888 8888 B8888 R8888 S8888 A8888 8888 B8888 R8888 S8888 B8888 R8888 S8888 A8888 
 
 // Other test: S80 A22 B4 >C8 D4                     
@@ -144,7 +145,7 @@ void trace_sequence()
 {
   Serial.print(F(">TRACE_SEQUENCE_PROGRESS sequence_index:")); Serial.print(g_sequence_index);
   Serial.print(F(" sequence slot: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].slot_tag);
-  Serial.print(F(" preset_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_id);
+  Serial.print(F(" pattern_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);
   Serial.print(F(" preset_speed_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
   Serial.print(F(" beats_to_run: ")); Serial.println(g_program_sequence[g_sequence_index].beats_to_run);
 }
@@ -159,7 +160,7 @@ void trace_sequence()
 
 void parse_slot_settings(String slot_setting_string)  {
   int slot_index=0;
-  int preset_id=-1;
+  int pattern_id=-1;
   int preset_speed_id=-1;
   int dash_index;
   #ifdef TRACE_STRING_PARSING
@@ -169,28 +170,28 @@ void parse_slot_settings(String slot_setting_string)  {
     if(slot_setting_string.charAt(char_index)>='A') { // new slot letter in string
         dash_index=slot_setting_string.substring(char_index+1).indexOf('-');
         if (dash_index>0) { // dash to separate the speed exists
-          preset_id=slot_setting_string.substring(char_index+1).toInt();
+          pattern_id=slot_setting_string.substring(char_index+1).toInt();
           preset_speed_id=preset_speed_to_id(slot_setting_string.substring(char_index+dash_index+2));
-          if(preset_id>=0 && preset_speed_id>=0) {  // Parameters are valid, so store it in array
+          if(pattern_id>=0 && preset_speed_id>=0) {  // Parameters are valid, so store it in array
             g_program_slot[slot_index].slot_tag=slot_setting_string.charAt(char_index);
-            g_program_slot[slot_index].preset_id=preset_id;
+            g_program_slot[slot_index].pattern_id=pattern_id;
             g_program_slot[slot_index].preset_speed_id=preset_speed_id;
             #ifdef TRACE_STRING_PARSING
               Serial.print(F(">TRACE_STRING_PARSING slot setting:"));
               Serial.print(slot_index);Serial.print("{'");Serial.print(g_program_slot[slot_index].slot_tag);
-              Serial.print("',");Serial.print(g_program_slot[slot_index].preset_id);
+              Serial.print("',");Serial.print(g_program_slot[slot_index].pattern_id);
               Serial.print(',');Serial.print(g_program_slot[slot_index].preset_speed_id);
               Serial.println("},");
             #endif
-            preset_id=-1;
+            pattern_id=-1;
             preset_speed_id=-1;
             if(++slot_index>=MAX_NUMBER_OF_PROGRAM_SLOTS) break;
           }
          #ifdef TRACE_STRING_PARSING
              else {
-              Serial.print(F(">TRACE_STRING_PARSING bad parsing dash_index, preset_id, preset_speed_id:"));
+              Serial.print(F(">TRACE_STRING_PARSING bad parsing dash_index, pattern_id, preset_speed_id:"));
               Serial.print(dash_index);Serial.print(',');
-              Serial.print(preset_id);Serial.print(',');
+              Serial.print(pattern_id);Serial.print(',');
               Serial.println(preset_speed_id);
              }
          #endif
@@ -270,7 +271,8 @@ void sequence_start()
 {
   g_sequence_index=0;
   output_set_pattern_speed(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
-  output_start_preset(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_id);
+  output_load_color_palette(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
+  output_start_pattern(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);
   #ifdef TRACE_SEQUENCE_PROGRESS
     trace_sequence();
   #endif
@@ -280,7 +282,8 @@ void sequence_next_slot()
 {
     if(++g_sequence_index>=g_program_sequence_length)g_sequence_index=g_program_sequence_loop_entry_index;
     output_set_pattern_speed(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
-    output_start_preset(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_id);   
+    output_load_color_palette(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
+    output_start_pattern(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);   
     #ifdef TRACE_SEQUENCE_PROGRESS
       trace_sequence();
     #endif
@@ -322,26 +325,32 @@ void loop() {
       mode_of_operation=MODE_FIX_PRESET;
     }
 
-    if(command.startsWith("p")) { //Change preset directly
+    if(command.startsWith("l")) { //load color pallette
       int value=command.substring(1).toInt();
-      output_start_preset(value);
+      output_load_color_palette(value);
       mode_of_operation=MODE_FIX_PRESET;
     }
-    if(command.startsWith("P")) { // Change all preset slots by string 
+    
+    if(command.startsWith("p")) { //Change pattern directly
+      int value=command.substring(1).toInt();
+      output_start_pattern(value);
+      mode_of_operation=MODE_FIX_PRESET;
+    }
+    /* if(command.startsWith("P")) { // Change all preset slots by string 
       parse_slot_settings(command.substring(1));
       output_set_pattern_speed(g_program_slot[0].preset_speed_id);
-      output_start_preset(g_program_slot[0].preset_id);      
+      output_start_preset(g_program_slot[0].pattern_id);      
       mode_of_operation=MODE_FIX_PRESET;
     } else {
       int position_of_dash=command.indexOf('-');  
       if(position_of_dash>0) { //Change preset and waittime directly 3-16
-        int preset_id=command.toInt();
+        int pattern_id=command.toInt();
         int preset_speed_id=preset_speed_to_id(command.substring(position_of_dash+1));
         if(preset_speed_id>=0)output_set_pattern_speed(preset_speed_id);
-        output_start_preset(preset_id);
+        output_start_pattern(pattern_id);
         mode_of_operation=MODE_FIX_PRESET;
       }
-    }
+    } */
     if(command.startsWith("c")) { // Color entry "index: Hue, Saturation"
       int position_of_comma=command.indexOf(',');
       if(position_of_comma>0) {
@@ -361,7 +370,7 @@ void loop() {
         }
       }
     }
-    if(command.startsWith("C")) { // Color entry "Hue, Saturation"
+    if(command.startsWith("C")) { // Color palette reset to  "Hue, Saturation"
       int position_of_comma=command.indexOf(',');
       if(position_of_comma>0) {
         float saturation=command.substring(position_of_comma+1).toFloat();
@@ -370,7 +379,7 @@ void loop() {
         mode_of_operation=MODE_FIX_PRESET;
       }
     }
-    if(command.startsWith("t")) { // start pattern
+    if(command.startsWith("t")) { // start pattern manually
       int position_of_colon=command.indexOf(':');
       if(position_of_colon>0) {
         mode_of_operation=MODE_FIX_PRESET;
@@ -406,8 +415,8 @@ void loop() {
                   break;
           case 5: // RAINBOW
                   if(position_of_comma<0) break;
-                  {float distance_to_neighbour=command.substring(position_of_colon+1).toInt();
-                  float increment=command.substring(position_of_comma+1).toInt();
+                  {float distance_to_neighbour=command.substring(position_of_colon+1).toFloat();
+                  float increment=command.substring(position_of_comma+1).toFloat();
                   start_rainbow(0.5,distance_to_neighbour,increment);
                   break;
                   }

@@ -9,6 +9,7 @@
 //#define TRACE_OUTPUT_PATTERN_BEAT
 #define TRACE_OUTPUT_API_CALL
 #define TRACE_COLOR_PALETTE_SETTING
+#define TRACE_PATTERN_SETTING
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
@@ -121,6 +122,66 @@ void output_set_color_palette_entry(int index,float hue, float saturation){
   #endif
 }
 
+void output_load_color_palette(int palette_id)
+{
+  switch(palette_id) {
+    // broad  section
+    case 0:                 // Prime Colors and Yellow
+         patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=1.0;
+         patconf_color_palette_lenght=4;
+         break;
+    case 1:                 // Police USA (red,white (over blue) ,blue,white over red)
+         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; //WHITE
+         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0; //WHITE
+         patconf_color_palette_lenght=4;
+         break;
+   /// ---------- Cold section       
+   case 20:                // blue green  
+         patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette_lenght=2;
+         break;
+   case 21:                 // blue white cyan geen 
+         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; //WHITE
+         patconf_color_palette[2].h=HUE_CYAN;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_PURPLE;patconf_color_palette[3].s=1.0;
+         patconf_color_palette_lenght=4;
+         break;
+   case 22:                 // blue white(on blue) cyan geen 
+         patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0;
+         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=0.0; //WHITE
+         patconf_color_palette[3].h=HUE_PURPLE;patconf_color_palette[3].s=1.0;
+         patconf_color_palette[4].h=HUE_BLUE;patconf_color_palette[4].s=1.0;
+         patconf_color_palette[5].h=HUE_CYAN;patconf_color_palette[5].s=SAT_LCYAN;
+         patconf_color_palette_lenght=6;
+         break;
+   /// -- Warm Section
+   case 40:                   // yellow, skyblue, orange, pink
+         patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
+         patconf_color_palette_lenght=4;
+         break;
+   case 41:                   // red, orange, rose
+         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=SAT_ROSE;
+         patconf_color_palette_lenght=3;
+         break;
+  }
+  #ifdef TRACE_COLOR_PALETTE_SETTING
+    dump_color_palette_to_serial();
+  #endif  
+}
+
 
 // Change bpm
 void output_set_bpm(int beats_per_minute) {
@@ -177,103 +238,57 @@ void output_set_pattern_speed(int wait_index)
 }
 
 // Select and start a pattern
-void output_start_preset(int preset_id) {
+void output_start_pattern(int pattern_id) {
   #ifdef TRACE_OUTPUT_API_CALL
-      Serial.print(F(">TRACE_OUTPUT_API_CALL output_start_preset:"));Serial.println(preset_id);
+      Serial.print(F(">TRACE_OUTPUT_API_CALL output_start_preset:"));Serial.println(pattern_id);
   #endif 
   output_preset_beat_start_beat=output_get_beat_number_since_sync();
   output_preset_beat_count=0;
-  switch (preset_id) {
-    case 0:
-         output_reset_color_palette(HUE_BLUE, 1.0);
-         output_add_color_palette_entry(HUE_GREEN,1.0);
-         output_add_color_palette_entry(HUE_BLUE,0.0);
+  switch (pattern_id/10) {
+    case 0:                       // PULSE  0-3: Regular, 4-7: Heartbeat (2,4,8,16 Steps)
+         {
+          int followup_tick=pattern_id<4?4:6;  
+         
          start_pulse(0.8, // brightness 
-                      4,  // Steps until color increment
+                      1<<(1+(pattern_id%4)),  // Steps until color increment
                       0.85, // preserve brightnes factor 
-                      4  ); // follow up tick count (4= equally spaced)
-         break; 
-    case 1:
-         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=1.0;
-         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=0.8;
-         patconf_color_palette_lenght=3;
-         start_colorWipe(0.5,true);  // brightness, over_black
+                      followup_tick  ); // follow up tick count (4= equally spaced)
+         }
          break;
-    case 2:
-         patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_CYAN;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_LEMON;patconf_color_palette[3].s=1.0;
-         patconf_color_palette_lenght=4;
-         start_colorWipe(0.5,false); // brightness, over_black
+    case 1:            // WHIPE  10 = direct , 11= over black
+         start_colorWipe(0.5,pattern_id%2);  // brightness, over_black
          break;
-    case 3:
-         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_CYAN;patconf_color_palette[1].s=0.1; // WHITE
-         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_CYAN;patconf_color_palette[3].s=0.1; // WHITE
-         patconf_color_palette_lenght=4;
-         start_colorWipe(0.5,false); // brightness, over_black
+    case 2:            // DOUBLE ORBIT 20-26: Color step 1,2,4,8,16,32,64
+          start_doubleOrbit(0.5,1<<(pattern_id-20));  // brightness, Steps until color increment
+          break;
+    case 3:           // DOUBLE COLOR ORBIT 30-36 palette increment 1 
+         start_doubleColorOrbit(0.5,1<<(pattern_id-30),1);  // brightness, Steps until color increment, color palette increment   
          break;
-    case 4:
-         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_CYAN;patconf_color_palette[1].s=1.0; // WHITE
-         patconf_color_palette_lenght=2;
-         start_doubleOrbit(0.5,8);  // brightness, Steps until color increment
+    case 4:           // DOUBLE COLOR ORBIT 40-46 palette increment 2 
+         start_doubleColorOrbit(0.5,1<<(pattern_id-40),2);  // brightness, Steps until color increment, color palette increment   
          break;
-    case 5:
-         patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_PURPLE;patconf_color_palette[1].s=1.0;
-         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0; 
-         patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=1.0; 
-         patconf_color_palette_lenght=4;
-         start_doubleOrbit(0.5,32);  // brightness, Steps until color increment
+    case 5:           // DOUBLE COLOR ORBIT 50-56 palette increment 3 
+         start_doubleColorOrbit(0.5,1<<(pattern_id-50),3);  // brightness, Steps until color increment, color palette increment   
          break;
-    case 6:
-         patconf_color_palette[0].h=HUE_LEMON;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_CYAN;patconf_color_palette[1].s=1.0;
-         patconf_color_palette[2].h=HUE_PINK;patconf_color_palette[2].s=0.7;  // PINK
-         patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=1.0; 
-         patconf_color_palette_lenght=4;
-         start_doubleOrbit(0.5,32); // brightness, Steps until color increment
+    case 6:           // RAINBOW FULL 60-69  increment  6.0° to 60° 
+         start_rainbow(0.5,60.0,(pattern_id-59)*6.0); // brightness, hue angle distance to neighbour, hue step increment   // Full span, hart stepping
          break;
-    case 7:
-         start_rainbow(0.5,60.0,60.0); // brightness, hue angle distance to neighbour, hue step increment   // Full span, hart stepping
+    case 7:           // RAINBOW HALF 70-79  increment  6.0° to 60° 
+         start_rainbow(0.5,30.0,(pattern_id-69)*6.0); // brightness, hue angle distance to neighbour, hue step increment   // Full span, hart stepping
          break;
-    case 8:
-         start_rainbow(0.5,-60.0,5.0); // brightness, hue angle distance to neighbout, hue step increment   // Full span reverse order, soft stepping
+    case 8:           // RAINBOW QUATER 80-89  increment  6.0° to 60° 
+         start_rainbow(0.5,15.0,(pattern_id-79)*6.0); // brightness, hue angle distance to neighbour, hue step increment   // Full span, hart stepping
          break;
-    case 9:
-         start_rainbow(0.5,10.0,5.0); // brightness, hue angle distance to neighbout, hue step increment   // 1/6  span, soft stepping
-         break;
-    case 10:
-         start_rainbow(0.5,20.0,-15.0); // brightness, hue angle distance to neighbout, hue step increment   // 1/3  span, medium reverse stepping
-         break;
-    case 11:
-         start_rainbow(0.5,0.0,137.0); // brightness, hue angle distance to neighbout, hue step increment   // 1/3  flat, medium reverse stepping
-         break;
-    case 12:                                                                        // Color Dancer 1 (16)
-         patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=0.0; //WHITE
-         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
-         patconf_color_palette[4].h=HUE_LEMON;patconf_color_palette[4].s=1.0;
-         patconf_color_palette[5].h=HUE_RED;patconf_color_palette[5].s=0.5; // Soft red
-         patconf_color_palette_lenght=6;
-         start_doubleColorOrbit(0.5,16,1);  // brightness, Steps until color increment, color palette increment   
-         break;
-    case 13:
-         output_reset_color_palette(HUE_GREEN, 1.0);
-         output_add_color_palette_entry(HUE_BLUE,0.0);
-         output_add_color_palette_entry(HUE_BLUE,1.0);
-         output_add_color_palette_entry(HUE_BLUE,0.0);
-         output_add_color_palette_entry(HUE_ORANGE,0.0);
-         output_add_color_palette_entry(HUE_RED,1.0);
-         start_pulse(0.8, // brightness 
-                      8,  // Steps until color increment
-                      0.9, // preserve brightnes factor 
-                      6  );
+    case 9:           // RAINBOW FLAT 90-99  increment  1,6,12,18,24 ,55,85,115,145,175
+         if(pattern_id==90) {
+               start_rainbow(0.5,0.0,1.0); 
+         }
+         if(pattern_id<95) {
+               start_rainbow(0.5,0.0,6*(pattern_id-90)); 
+         }
+         else {
+               start_rainbow(0.5,0.0,30*(pattern_id-94)+25); 
+         }
          break;
   }
   output_process_pattern();
@@ -307,6 +322,12 @@ void output_process_pattern() {
  *   follow_up_time_shift: number of 1/4 waittime between center and ring pulse
  */
 void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int follow_up_ticks){
+  #ifdef TRACE_PATTERN_SETTING
+      Serial.print(F(">TRACE_PATTERN_SETTING start_pulse:"));
+      Serial.print(steps_per_color);Serial.print(',');
+      Serial.print(fade_factor);Serial.print(',');
+      Serial.println(follow_up_ticks);
+  #endif
   // init all globales for the pattern
   output_current_stepper_type=ST_PULSE;
   patvar_previous_step_time = output_get_current_beat_start_time();
@@ -389,7 +410,10 @@ void process_pulse() {
 // 
 void start_colorWipe(float lamp_value, boolean over_black){
   // init all globales for the pattern
-
+  #ifdef TRACE_PATTERN_SETTING
+      Serial.print(F(">TRACE_PATTERN_SETTING start_colorWipe:"));
+      Serial.println(over_black);
+  #endif
   output_current_stepper_type=ST_COLOR_WIPE;
 
   patvar_previous_step_time = output_get_current_beat_start_time() ;
@@ -436,6 +460,10 @@ void process_colorWipe() {
  *   Double Orbit
  */
 void start_doubleOrbit(float lamp_value,  int steps_per_color){
+    #ifdef TRACE_PATTERN_SETTING
+      Serial.print(F(">TRACE_PATTERN_SETTING start_doubleOrbit:"));
+      Serial.println(steps_per_color);
+  #endif
   // init all globales for the pattern
   output_current_stepper_type=ST_DOUBLE_ORBIT;
   patvar_previous_step_time = output_get_current_beat_start_time();
@@ -485,6 +513,11 @@ void process_doubleOrbit() {
  *   Double Color Orbit
  */
 void start_doubleColorOrbit(float lamp_value,  int steps_per_color, int color_palette_increment){
+  #ifdef TRACE_PATTERN_SETTING
+      Serial.print(F(">TRACE_PATTERN_SETTING start_doubleColorOrbit:"));
+      Serial.print(steps_per_color);Serial.print(',');
+      Serial.println(color_palette_increment);
+  #endif
   // init all globales for the pattern
   output_current_stepper_type=ST_DOUBLE_COLOR_ORBIT;
   patconf_steps_until_color_change=steps_per_color;
@@ -542,7 +575,12 @@ void process_doubleColorOrbit() {
 
  void start_rainbow(float lamp_value,  float angle_difference, float angle_step){
   // init all globales for the pattern
-
+  #ifdef TRACE_PATTERN_SETTING
+      Serial.print(F(">TRACE_PATTERN_SETTING start_rainbow:"));
+      Serial.print(angle_difference);Serial.print(',');
+      Serial.println(angle_step);
+  #endif
+  
   output_current_stepper_type=ST_RAINBOW;
      patvar_previous_step_time = output_get_current_beat_start_time();
  
