@@ -31,9 +31,16 @@
 #define HUE_PINK 340.0
 #define SAT_LPINK 0.85
 
-#define HUE_PURPLE 245.0
+#define HUE_PURPLE 250.0
 #define SAT_LPURPLE 0.8
 
+/* pattern list
+1:PULSE Steps_until_next_color,followup_tick_count
+2:WHIPE: over black(true/false)
+3:DOUBLE_ORBIT: Steps_until_next_color
+4:COLOR_ORBIT: Steps_until_next_color,Palette_increment
+5:RAINBOW: neighbour_distance, Increment
+ */
 
 
 typedef struct {
