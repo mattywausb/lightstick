@@ -8,8 +8,8 @@
 //#define TR_OUT_TIMING
 //#define TR_OUT_PATTERN_BEAT
 #define TR_OUT_API_CALL
-//#define TR_COLOR_PALETTE_SETTING
-//#define TR_PATTERN_SETTING
+#define TR_COLOR_PALETTE_SETTING
+#define TR_PATTERN_SETTING
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
@@ -252,7 +252,7 @@ void output_set_pattern_speed(int wait_index)
 // Select and start a pattern
 void output_start_pattern(int pattern_id) {
   #ifdef TR_OUT_API_CALL
-      Serial.print(F("TR_OUT_API_CALL> output_start_preset:"));Serial.println(pattern_id);
+      Serial.print(F("TR_OUT_API_CALL> output_start_pattern:"));Serial.println(pattern_id);
   #endif 
   output_preset_beat_start_beat=output_get_beat_number_since_sync();
   output_preset_beat_count=0;

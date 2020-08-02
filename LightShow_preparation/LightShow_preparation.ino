@@ -354,16 +354,39 @@ void loop() {
   }
 
   // Manage Serial input
+  /*
+   * Commands:
+   * #<id>               load song preset
+   * S <slot settings>   load the slot settings from string syntax
+   * s <sequence string> load the sequence from string syntax
+   * +                   restart sequence
+   * 
+   * b <bpm>             set bpm
+   * w {2,4,8,16,32,64}  set step waittime
+   * 
+   * p <pattern id>      start predefined pattern per id (0 Pulse, 10 Whipe, 
+   * <id>/{2,4,8,16,32,64}  start predefined pattern per id with waittime
+   * 
+   * l <pallette id>     load color palette
+   * C <hue>,<sat>       reset color palette and set first color
+   * c [<i>:]<hue>,<sat> add color to palette or change color on palette index <i>
+   * t <id>:<p1>,<p2>    start free pattern: 
+   *                     0=PULSE <steps_until_next_color>,<follow_up_tick_count>
+   *                     1=WHIPE <over_black>
+   *                     2=DOUBLE ORBIT <steps_until_next_color>
+   *                     3=COLOR ORBIT <steps_until_next_color>,<color_palette_increment>
+   *                     6=RAINBOW <distance>, <increment>
+   */
   input_pollSerial();
   if(input_newSerialCommandAvailable()) {
     String command=input_getSerialCommand();
     if(command.startsWith("#")) { //Change sequence by string
       song_preset_start(command.substring(1).toInt());
     }
-    if(command.startsWith("S")) { //Change sequence by string
+    if(command.startsWith("s")) { //Change sequence by string
       parse_sequence(command.substring(1));
     }
-    if(command.startsWith("s")) {  // restart sequence mode
+    if(command.startsWith("+")) {  // restart sequence mode
       sequence_start();
     }
     if(command.startsWith("b")) {  // b123 <- Change bpm: 
@@ -388,7 +411,7 @@ void loop() {
       output_start_pattern(value);
       mode_of_operation=MODE_FIX_PRESET;
     }
-    if(command.startsWith("P")) { // Change all preset slots by string 
+    if(command.startsWith("o")) { // Change all preset slots by string 
       parse_slot_settings(command.substring(1));
       output_set_pattern_speed(g_program_slot[0].preset_speed_id);
       output_load_color_palette(g_program_slot[0].color_palette_id);
@@ -439,7 +462,7 @@ void loop() {
         int pattern=command.substring(1).toInt();
         int position_of_comma=command.indexOf(',');
         switch(pattern){
-          case 1:  // PULSE
+          case 0:  // PULSE <steps_until_next_color>,<follow_up_tick_count>
                   if(position_of_comma>0) {
                   int steps_until_next_color=command.substring(position_of_colon+1).toInt();
                   int follow_up_tick_count=command.substring(position_of_comma+1).toInt();
@@ -449,24 +472,24 @@ void loop() {
                         follow_up_tick_count  );
                   }
                   break;
-          case 2: // WHIPE
+          case 1: // WHIPE <over_black>
                   {int over_black=command.substring(position_of_colon+1).toInt();
                   start_colorWipe(0.5,over_black);
                   }
                   break;
-          case 3: // DOUBLE ORBIT
+          case 2: // DOUBLE ORBIT <steps_until_next_color>
                   {int steps_until_next_color=command.substring(position_of_colon+1).toInt();
                   start_doubleOrbit(0.5,steps_until_next_color);
                   }
                   break;
-          case 4: // COLOR ORBIT
+          case 3: // COLOR ORBIT <steps_until_next_color>,<color_palette_increment>
                   if(position_of_comma<0) break;
                   {int steps_until_next_color=command.substring(position_of_colon+1).toInt();
                   int color_palette_increment=command.substring(position_of_comma+1).toInt();
                   start_doubleColorOrbit(0.5,steps_until_next_color,color_palette_increment);
                   }
                   break;
-          case 5: // RAINBOW
+          case 6: // RAINBOW <distance>, <increment>
                   if(position_of_comma<0) break;
                   {float distance_to_neighbour=command.substring(position_of_colon+1).toFloat();
                   float increment=command.substring(position_of_comma+1).toFloat();
