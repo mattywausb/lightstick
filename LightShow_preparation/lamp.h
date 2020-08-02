@@ -23,8 +23,8 @@
 #define HUE_SKYBLUE 220.0
 
 #define HUE_BLUE 240.0
-#define HUE_LBLUE 230.0
-#define SAT_LBLUE 0.8
+#define HUE_LBLUE 220.0
+#define SAT_LBLUE 0.75
 
 #define HUE_MAGENTA 300.0
 

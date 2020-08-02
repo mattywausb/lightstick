@@ -29,9 +29,9 @@ t_program_slot g_program_slot[MAX_NUMBER_OF_PROGRAM_SLOTS]={ /* IDOL 126 BPM*/
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
-                              }; // String P  I97/4:0  A25/8:0 B11/4:41  R97/16:0  S10/16:
+                              }; // String o  I97/4:0  A25/8:0 B11/4:41  R97/16:0  S10/16:
     
-      //  Test String P A6/4:20 B10/8:40
+      //  Test String o A6/4:20 B10/8:40
 
 int g_program_slot_count=0;                  
 
@@ -50,8 +50,8 @@ t_program_sequence g_program_sequence [MAX_NUMBER_OF_PROGRAM_SEQUENCE_STEPS] = {
                       {0,16},{1,64},{2,32},{3,32},{4,32}
                       }; // Extended Version to S126 I88 >A8888 8888 B8888 R8888 S8888 A8888 8888 B8888 R8888 S8888 B8888 R8888 S8888 A8888 
 
-// Pattern Slots: P A6/4:20 B10/4:40 C11/8:40 D65/4:40
-// Sequence setting: S80 A1# B44 >C8 D8                     
+// Pattern Slots: o A6/4:20 B10/4:40 C11/8:40 D65/4:40
+// Sequence setting: s80 A1# B44 >C8 D8                     
                         
 int g_sequence_entry_count=8;
 int g_sequence_index=0;

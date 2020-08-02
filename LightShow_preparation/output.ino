@@ -165,6 +165,13 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[5].h=HUE_CYAN;patconf_color_palette[5].s=SAT_LCYAN;
          patconf_color_palette_lenght=6;
          break;
+   case 23:                 // blue sky lblue cyan
+         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_LBLUE;patconf_color_palette[2].s=SAT_LBLUE;
+         patconf_color_palette[3].h=HUE_CYAN;patconf_color_palette[3].s=1.0;
+         patconf_color_palette_lenght=4;
+         break;
    /// -- Warm Section
    case 40:                   // yellow, skyblue, orange, pink
          patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
@@ -188,6 +195,10 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=0.0; 
          patconf_color_palette_lenght=4;
          break;
+   default:
+   #ifdef TR_COLOR_PALETTE_SETTING
+        Serial.print(F("#!# TR_COLOR_PALETTE_SETTING> unkown color pallette:"));Serial.println(palette_id);
+   #endif TR_COLOR_PALETTE_SETTING        
   }
   #ifdef TR_COLOR_PALETTE_SETTING
     dump_color_palette_to_serial();
