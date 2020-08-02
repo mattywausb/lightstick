@@ -153,13 +153,13 @@ void manage_tap_input() {
 #ifdef TR_SEQUENCE_PROGRESS
 void TR_sequence()
 {
-  Serial.print(F(">TR_SEQUENCE_PROGRESS sequence_index:")); Serial.print(g_sequence_index);
-  Serial.print(F(" sequence slot: ")); Serial.println(g_program_slot[g_program_sequence[g_sequence_index].slot_index].slot_tag);
-  Serial.print(F(" pattern_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);
-  Serial.print(F(" preset_speed_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
-  Serial.print(F(" color_palette_id: ")); Serial.println(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
-  Serial.print(F(" beats_to_run: ")); Serial.print(g_program_sequence[g_sequence_index].beats_to_run);
-  Serial.print(F(" mode_of_operation:"));Serial.println(mode_of_operation);
+  Serial.print(F("TR_SEQUENCE_PROGRESS>")); Serial.print(g_sequence_index);
+  Serial.print('='); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].slot_tag);
+  Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);
+  Serial.print('/'); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
+  Serial.print(':'); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
+  Serial.print('*'); Serial.print(g_program_sequence[g_sequence_index].beats_to_run);
+  Serial.print(F(" mode:"));Serial.println(mode_of_operation);
 
 }
 #endif
@@ -305,19 +305,19 @@ void parse_sequence(String sequence_string)
 }
 
 void sequence_load() {
+  #ifdef TR_SEQUENCE_PROGRESS
+    TR_sequence();
+  #endif
   output_set_pattern_speed(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
   output_load_color_palette(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
   output_start_pattern(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);
   if(g_sequence_index==g_program_sequence_hold_entry_index){
     mode_of_operation=MODE_SEQUENCE_HOLD;
-    #ifdef TR_SEQUENCE_PROGRESS
-        Serial.println(F(">TR_SEQUENCE_PROGRESS Hold index reached"));
-    #endif        
+ //   #ifdef TR_SEQUENCE_PROGRESS
+ //       Serial.println(F(">TR_SEQUENCE_PROGRESS Hold index reached"));
+ //   #endif        
   }
   else mode_of_operation=MODE_SEQUENCE;
-  #ifdef TR_SEQUENCE_PROGRESS
-    TR_sequence();
-  #endif
 }
 
 void sequence_start()
@@ -379,7 +379,7 @@ void loop() {
   input_pollSerial();
   if(input_newSerialCommandAvailable()) {
     String command=input_getSerialCommand();
-    if(command.startsWith("#")) { //Change sequence by string
+    if(command.startsWith("S")) { //Load sequence from Library
       song_preset_start(command.substring(1).toInt());
     }
     if(command.startsWith("s")) { //Change sequence by string

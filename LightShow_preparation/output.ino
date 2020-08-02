@@ -7,8 +7,9 @@
 //#define TR_OUT_PIXEL_RESULT
 //#define TR_OUT_TIMING
 //#define TR_OUT_PATTERN_BEAT
-#define TR_OUT_API_CALL
+//#define TR_OUT_API_CALL
 #define TR_COLOR_PALETTE_SETTING
+//#define TR_COLOR_PRESET_PALETTE_SETTING
 #define TR_PATTERN_SETTING
 //#define TR_COLOR_ORBIT_COLOR
 #endif
@@ -196,14 +197,16 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=0.0; 
          patconf_color_palette_lenght=4;
          break;
+   #ifdef TR_COLOR_PRESET_PALETTE_SETTING
    default:
-   #ifdef TR_COLOR_PALETTE_SETTING
-        Serial.print(F("#!# TR_COLOR_PALETTE_SETTING> unkown color pallette:"));Serial.println(palette_id);
-   #endif TR_COLOR_PALETTE_SETTING        
+        Serial.print(F("#!# TR_COLOR_PRESET_PALETTE_SETTING> unkown color pallette:"));Serial.println(palette_id);
+   #endif         
   }
+  #ifdef TR_COLOR_PRESET_PALETTE_SETTING
   #ifdef TR_COLOR_PALETTE_SETTING
     dump_color_palette_to_serial();
   #endif  
+  #endif
 }
 
 
@@ -464,8 +467,10 @@ void start_colorWipe(float lamp_value, boolean over_black){
 
   // init all lamps
   lamp[0].set_value(0.0); // Switch of center lamp
-  // Preset color, but set value to 0
-  for (int i = 1; i < PIXEL_COUNT; i++) lamp[i].set_hsv(patconf_color_palette[patvar_color_palette_index].h, patconf_color_palette[patvar_color_palette_index].s, 0.0);
+  // init lamps
+  for (int i = 1; i < PIXEL_COUNT; i++) if (over_black) lamp[i].set_hsv(patconf_color_palette[patvar_color_palette_index].h, patconf_color_palette[patvar_color_palette_index].s, 0.0);
+                                        else lamp[i].set_hsv(patconf_color_palette[patconf_color_palette_lenght-1].h, patconf_color_palette[patconf_color_palette_lenght-1].s, 1.0);
+  output_push_lamps_to_pixels(); 
 }
 
 void process_colorWipe() {
@@ -518,6 +523,7 @@ void start_doubleOrbit(float lamp_value,  int steps_per_color){
   lamp[0].set_value(0.0); // Switch of center lamp
   // Preset color, but set value to 0
   for (int i = 1; i < PIXEL_COUNT; i++) lamp[i].set_hsv(patconf_color_palette[patvar_color_palette_index].h, patconf_color_palette[patvar_color_palette_index].s, 0.0);
+  output_push_lamps_to_pixels(); 
 }
 
 void process_doubleOrbit() {
