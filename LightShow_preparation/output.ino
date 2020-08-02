@@ -10,6 +10,7 @@
 #define TR_OUT_API_CALL
 #define TR_COLOR_PALETTE_SETTING
 #define TR_PATTERN_SETTING
+//#define TR_COLOR_ORBIT_COLOR
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
@@ -41,7 +42,7 @@ uint8_t patvar_color_palette_index=0;
 enum STEPPER_TYPE {
   ST_COLOR_WIPE,
   ST_DOUBLE_ORBIT,
-  ST_DOUBLE_COLOR_ORBIT,
+  ST_COLOR_ORBIT,
   ST_PULSE,
   ST_RAINBOW
 };
@@ -296,13 +297,13 @@ void output_start_pattern(int pattern_id) {
           start_doubleOrbit(0.5,1<<(pattern_id-20));  // brightness, Steps until color increment
           break;
     case 3:           // DOUBLE COLOR ORBIT 30-36 palette increment 1 
-         start_doubleColorOrbit(0.5,1<<(pattern_id-30),1);  // brightness, Steps until color increment, color palette increment   
+         start_colorOrbit(0.5,1<<(pattern_id-30),1);  // brightness, Steps until color increment, color palette increment   
          break;
     case 4:           // DOUBLE COLOR ORBIT 40-46 palette increment 2 
-         start_doubleColorOrbit(0.5,1<<(pattern_id-40),2);  // brightness, Steps until color increment, color palette increment   
+         start_colorOrbit(0.5,1<<(pattern_id-40),2);  // brightness, Steps until color increment, color palette increment   
          break;
     case 5:           // DOUBLE COLOR ORBIT 50-56 palette increment 3 
-         start_doubleColorOrbit(0.5,1<<(pattern_id-50),3);  // brightness, Steps until color increment, color palette increment   
+         start_colorOrbit(0.5,1<<(pattern_id-50),3);  // brightness, Steps until color increment, color palette increment   
          break;
     case 6:           // RAINBOW FULL 60-69  increment  6.0° to 60° 
          start_rainbow(0.5,60.0,(pattern_id-59)*6.0); // brightness, hue angle distance to neighbour, hue step increment   // Full span, hart stepping
@@ -344,7 +345,7 @@ void output_process_pattern() {
   switch (output_current_stepper_type) {
     case ST_COLOR_WIPE: process_colorWipe();      break;
     case ST_DOUBLE_ORBIT: process_doubleOrbit(); break;
-    case ST_DOUBLE_COLOR_ORBIT: process_doubleColorOrbit(); break;
+    case ST_COLOR_ORBIT: process_colorOrbit(); break;
     case ST_PULSE: process_pulse(); break;
     case ST_RAINBOW: process_rainbow();break;
   }
@@ -548,16 +549,17 @@ void process_doubleOrbit() {
 }
 
 /*
- *   Double Color Orbit
+ *   Color Orbit (triple coik
+ *   
  */
-void start_doubleColorOrbit(float lamp_value,  int steps_per_color, int color_palette_increment){
+void start_colorOrbit(float lamp_value,  int steps_per_color, int color_palette_increment){
   #ifdef TR_PATTERN_SETTING
-      Serial.print(F("TR_PATTERN_SETTING> start_doubleColorOrbit:"));
+      Serial.print(F("TR_PATTERN_SETTING> start_colorOrbit:"));
       Serial.print(steps_per_color);Serial.print(',');
       Serial.println(color_palette_increment);
   #endif
   // init all globales for the pattern
-  output_current_stepper_type=ST_DOUBLE_COLOR_ORBIT;
+  output_current_stepper_type=ST_COLOR_ORBIT;
   patconf_steps_until_color_change=steps_per_color;
   patvar_previous_step_time = output_get_current_beat_start_time();
   patvar_current_step_index = 0;
@@ -573,27 +575,40 @@ void start_doubleColorOrbit(float lamp_value,  int steps_per_color, int color_pa
   for (int i = 1; i < PIXEL_COUNT; i++) lamp[i].set_hsv(patconf_color_palette[patvar_color_palette_index].h, patconf_color_palette[patvar_color_palette_index].s, 0.0);
 }
 
-void process_doubleColorOrbit() {
+void process_colorOrbit() {
 
   long current_step_time = millis();
   if (current_step_time - patvar_previous_step_time < output_waittime[patconf_speed_id]) return;
   patvar_previous_step_time = current_step_time;
 
-  int angle_1 = patvar_current_step_index % 6; // angle, where the first color is shown
-  int angle_2 = (angle_1 + 3)%6; // angle where the second color is shown
-  uint8_t color_index_2=patvar_color_palette_index+1;
-  if(color_index_2>=patconf_color_palette_lenght)color_index_2=0;
+  int angle_a = patvar_current_step_index % 6; // angle, where the first color is shown
+  int angle_b = (angle_a + 3)%6; // angle where the second color is shown
+  int color_index_c=patvar_color_palette_index+1;
+  if(color_index_c>=patconf_color_palette_lenght)color_index_c=0;
+  int color_index_b=color_index_c+1;
+  if(color_index_b>=patconf_color_palette_lenght)color_index_b=0;
 
+  #ifdef TR_COLOR_ORBIT_COLOR
+   Serial.print(F("TR_COLOR_ORBIT_COLOR> colorr index (c,a,b):"));
+   Serial.print(color_index_c);Serial.print(',');
+   Serial.print(patvar_color_palette_index);Serial.print(',');
+   Serial.println(color_index_b);
+  #endif
+
+  // center pixel lightens every 4th step for 2 ticks with 1st color
+  if (patvar_current_step_index % 8 == 0 || patvar_current_step_index % 8 == 1) {
+    lamp[0].set_hsv(patconf_color_palette[color_index_c].h, patconf_color_palette[color_index_c].s, patconf_pattern_lamp_value);
+  }
+  else  lamp[0].set_value(0.0);
+
+  // Orbit pixels user 2rd and 3rd color in palette order
   for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index) {
-    if ((lamp_index-1) == angle_1) lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h, patconf_color_palette[patvar_color_palette_index].s, patconf_pattern_lamp_value);
-    else if ((lamp_index-1) == angle_2) lamp[lamp_index].set_hsv(patconf_color_palette[color_index_2].h, patconf_color_palette[color_index_2].s, patconf_pattern_lamp_value);
+    if ((lamp_index-1) == angle_a) lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h, patconf_color_palette[patvar_color_palette_index].s, patconf_pattern_lamp_value);
+    else if ((lamp_index-1) == angle_b) lamp[lamp_index].set_hsv(patconf_color_palette[color_index_b].h, patconf_color_palette[color_index_b].s, patconf_pattern_lamp_value);
     else  lamp[lamp_index].set_value(0.0);
   }
 
-  // center pixel lightens every 4th step for 2 ticks with 3rd color
-  if(++color_index_2>=patconf_color_palette_lenght)color_index_2=0;
-  if (patvar_current_step_index % 8 == 0 || patvar_current_step_index % 8 == 1) lamp[0].set_hsv(patconf_color_palette[color_index_2].h, patconf_color_palette[color_index_2].s, patconf_pattern_lamp_value);
-  else  lamp[0].set_value(0.0);
+
 
   output_push_lamps_to_pixels();
 
@@ -603,8 +618,8 @@ void process_doubleColorOrbit() {
   if (++patvar_step_in_color_index>=patconf_steps_until_color_change) {
         patvar_step_in_color_index=0;
         patvar_color_palette_index+=patconf_color_palette_increment;
-        if (patvar_color_palette_index>=patconf_color_palette_lenght) patvar_color_palette_index-=patconf_color_palette_lenght;
   }
+  while(patvar_color_palette_index>=patconf_color_palette_lenght) patvar_color_palette_index-=patconf_color_palette_lenght;
 }
 
 /*

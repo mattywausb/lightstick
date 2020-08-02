@@ -29,8 +29,7 @@ t_program_slot g_program_slot[MAX_NUMBER_OF_PROGRAM_SLOTS]={ /* IDOL 126 BPM*/
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
                               ,{PROGRAM_TAG_OFF,0,0,STEP_ON_8TH}
-                              }; // String o  I97/4:0  A25/8:0 B11/4:41  R97/16:0  S10/16:
-    
+                              }; // String o  I98/4:0  A25/8:0 B11/8:41  R10/16:1 S98/8:0    
       //  Test String o A6/4:20 B10/8:40
 
 int g_program_slot_count=0;                  
@@ -48,7 +47,7 @@ int g_program_sequence_length=5;
 
 t_program_sequence g_program_sequence [MAX_NUMBER_OF_PROGRAM_SEQUENCE_STEPS] = {
                       {0,16},{1,64},{2,32},{3,32},{4,32}
-                      }; // Extended Version to S126 I88 >A8888 8888 B8888 R8888 S8888 A8888 8888 B8888 R8888 S8888 B8888 R8888 S8888 A8888 
+                      }; // Full Version: s 126 I88# >A8888 8888 B8888 R8888 S8888 A8888 8888 B8888 R8888 S8888 B8888 R8888 S8888 A8888 
 
 // Pattern Slots: o A6/4:20 B10/4:40 C11/8:40 D65/4:40
 // Sequence setting: s80 A1# B44 >C8 D8                     
@@ -486,7 +485,7 @@ void loop() {
                   if(position_of_comma<0) break;
                   {int steps_until_next_color=command.substring(position_of_colon+1).toInt();
                   int color_palette_increment=command.substring(position_of_comma+1).toInt();
-                  start_doubleColorOrbit(0.5,steps_until_next_color,color_palette_increment);
+                  start_colorOrbit(0.5,steps_until_next_color,color_palette_increment);
                   }
                   break;
           case 6: // RAINBOW <distance>, <increment>
