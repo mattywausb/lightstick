@@ -278,15 +278,15 @@ void output_start_pattern(int pattern_id) {
                       followup_tick  ); // follow up tick count (4= equally spaced)
          } else {
          if(pattern_id==8)  
-          start_pulse(0.1, // brightness 
+          start_pulse(0.05, // brightness 
                       8,  // Steps until color increment
-                      0.8, // preserve brightnes factor 
+                      0.9, // preserve brightnes factor 
                       4  ); // follow up tick count (4= equally spaced)
          else                      
-          start_pulse(0.1, // brightness 
+          start_pulse(0.05, // brightness 
                       8,  // Steps until color increment
-                      0.8, // preserve brightnes factor 
-                      1  ); // follow up tick count (4= equally spaced)
+                      0.9, // preserve brightnes factor 
+                      2  ); // follow up tick count (4= equally spaced)
          }
          break;
     case 1:            // WHIPE  10 = direct , 11= over black
