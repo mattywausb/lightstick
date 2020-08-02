@@ -258,7 +258,7 @@ void output_start_pattern(int pattern_id) {
          
          if( pattern_id<8) {
           int followup_tick=pattern_id<4?4:6;  
-          start_pulse(0.8, // brightness 
+          start_pulse(1, // brightness 
                       1<<(1+(pattern_id%4)),  // Steps until color increment
                       0.85, // preserve brightnes factor 
                       followup_tick  ); // follow up tick count (4= equally spaced)
@@ -266,12 +266,12 @@ void output_start_pattern(int pattern_id) {
          if(pattern_id==8)  
           start_pulse(0.1, // brightness 
                       8,  // Steps until color increment
-                      0.91, // preserve brightnes factor 
+                      0.8, // preserve brightnes factor 
                       4  ); // follow up tick count (4= equally spaced)
          else                      
-          start_pulse(0.2, // brightness 
+          start_pulse(0.1, // brightness 
                       8,  // Steps until color increment
-                      0.91, // preserve brightnes factor 
+                      0.8, // preserve brightnes factor 
                       1  ); // follow up tick count (4= equally spaced)
          }
          break;
@@ -412,7 +412,7 @@ void process_pulse() {
 
       if(patvar_current_step_index%2==0) {  // ignite ring
          for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
-            lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
+            lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value*0.6);
          }
          // Recalculate waittimes if speed changed
          patconf_step_0_waittime=patconf_follow_up_ticks*output_waittime[patconf_speed_id]/4;
