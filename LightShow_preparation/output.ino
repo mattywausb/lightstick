@@ -4,12 +4,12 @@
 #include "mainSettings.h"
 
 #ifdef TRACE_ON
-//#define TRACE_OUPUT_PIXEL_RESULT
-//#define TRACE_OUTPUT_TIMING
-//#define TRACE_OUTPUT_PATTERN_BEAT
-//#define TRACE_OUTPUT_API_CALL
-//#define TRACE_COLOR_PALETTE_SETTING
-//#define TRACE_PATTERN_SETTING
+//#define TR_OUT_PIXEL_RESULT
+//#define TR_OUT_TIMING
+//#define TR_OUT_PATTERN_BEAT
+#define TR_OUT_API_CALL
+//#define TR_COLOR_PALETTE_SETTING
+//#define TR_PATTERN_SETTING
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
@@ -97,7 +97,7 @@ void output_reset_color_palette(float hue, float saturation){
   patconf_color_palette[0].h=hue;
   patconf_color_palette[0].s=saturation; 
   patconf_color_palette_lenght=1;
-  #ifdef TRACE_COLOR_PALETTE_SETTING
+  #ifdef TR_COLOR_PALETTE_SETTING
     dump_color_palette_to_serial();
   #endif
 }
@@ -108,7 +108,7 @@ void output_add_color_palette_entry(float hue, float saturation){
     patconf_color_palette[patconf_color_palette_lenght].s=saturation; 
     patconf_color_palette_lenght++;
   }
-  #ifdef TRACE_COLOR_PALETTE_SETTING
+  #ifdef TR_COLOR_PALETTE_SETTING
     dump_color_palette_to_serial();
   #endif
 }
@@ -117,13 +117,16 @@ void output_set_color_palette_entry(int index,float hue, float saturation){
   if(index<0 || index>patconf_color_palette_lenght) return;
   patconf_color_palette[index].h=hue;
   patconf_color_palette[index].s=saturation; 
-  #ifdef TRACE_COLOR_PALETTE_SETTING
+  #ifdef TR_COLOR_PALETTE_SETTING
     dump_color_palette_to_serial();
   #endif
 }
 
 void output_load_color_palette(int palette_id)
 {
+  #ifdef TR_OUT_API_CALL
+      Serial.print(F("TR_OUT_API_CALL> output_load_color_palette:"));Serial.println(palette_id);
+  #endif 
   switch(palette_id) {
     // broad  section
     case 0:                 // Prime Colors and Yellow
@@ -186,7 +189,7 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette_lenght=4;
          break;
   }
-  #ifdef TRACE_COLOR_PALETTE_SETTING
+  #ifdef TR_COLOR_PALETTE_SETTING
     dump_color_palette_to_serial();
   #endif  
 }
@@ -194,8 +197,8 @@ void output_load_color_palette(int palette_id)
 
 // Change bpm
 void output_set_bpm(int beats_per_minute) {
-  #ifdef TRACE_OUTPUT_API_CALL
-      Serial.print(F(">TRACE_OUTPUT_API_CALL output_set_bpm:"));Serial.println(beats_per_minute);
+  #ifdef TR_OUT_API_CALL
+      Serial.print(F("TR_OUT_API_CALL> output_set_bpm:"));Serial.println(beats_per_minute);
   #endif 
   output_beats_per_minute = beats_per_minute;
   output_set_waittimes(60000/output_beats_per_minute);
@@ -211,11 +214,11 @@ void output_set_waittimes(int time_for_beat) {
   output_waittime[STEP_ON_16TH] = output_waittime[STEP_ON_8TH] /2;
   output_waittime[STEP_ON_32RD] = output_waittime[STEP_ON_16TH] /2;
   output_waittime[STEP_ON_64TH] = output_waittime[STEP_ON_32RD] /2;
-  #ifdef TRACE_OUTPUT_TIMING
-    Serial.print(F(">TRACE_OUTPUT_TIMING calculated BPM ")); Serial.println(60000/time_for_beat);
-    Serial.print(F(">TRACE_OUTPUT_TIMING STEP_ON_BEAT ")); Serial.println(output_waittime[STEP_ON_BEAT]);
-    //Serial.print(F(">TRACE_OUTPUT_TIMING STEP_ON_32RD ")); Serial.println(output_waittime[STEP_ON_32RD]);
-    //Serial.print(F(">TRACE_OUTPUT_TIMING STEP_ON_64TH ")); Serial.println(output_waittime[STEP_ON_64TH]);
+  #ifdef TR_OUT_TIMING
+    Serial.print(F(">TR_OUT_TIMING calculated BPM ")); Serial.println(60000/time_for_beat);
+    Serial.print(F(">TR_OUT_TIMING STEP_ON_BEAT ")); Serial.println(output_waittime[STEP_ON_BEAT]);
+    //Serial.print(F(">TR_OUT_TIMING STEP_ON_32RD ")); Serial.println(output_waittime[STEP_ON_32RD]);
+    //Serial.print(F(">TR_OUT_TIMING STEP_ON_64TH ")); Serial.println(output_waittime[STEP_ON_64TH]);
   #endif
 }
 
@@ -240,16 +243,16 @@ void output_sync_beat() {
 // Change Pattern speed (relative to bpm)
 void output_set_pattern_speed(int wait_index)
 {
-  #ifdef TRACE_OUTPUT_API_CALL
-      Serial.print(F(">TRACE_OUTPUT_API_CALL output_set_pattern_speed:"));Serial.println(wait_index);
+  #ifdef TR_OUT_API_CALL
+      Serial.print(F("TR_OUT_API_CALL> output_set_pattern_speed:"));Serial.println(wait_index);
   #endif 
   if(wait_index>=STEP_ON_2BEATS && wait_index<=STEP_ON_64TH) patconf_speed_id=wait_index;
 }
 
 // Select and start a pattern
 void output_start_pattern(int pattern_id) {
-  #ifdef TRACE_OUTPUT_API_CALL
-      Serial.print(F(">TRACE_OUTPUT_API_CALL output_start_preset:"));Serial.println(pattern_id);
+  #ifdef TR_OUT_API_CALL
+      Serial.print(F("TR_OUT_API_CALL> output_start_preset:"));Serial.println(pattern_id);
   #endif 
   output_preset_beat_start_beat=output_get_beat_number_since_sync();
   output_preset_beat_count=0;
@@ -317,8 +320,8 @@ void output_start_pattern(int pattern_id) {
 void output_determine_beat()
 {
   if(output_preset_beat_start_beat==output_get_beat_number_since_sync())  return;
-  #ifdef TRACE_OUTPUT_PATTERN_BEAT
-    Serial.print(F(">TRACE_OUTPUT_PATTERN_BEAT Beat = ")); Serial.println(output_preset_beat_count);
+  #ifdef TR_OUT_PATTERN_BEAT
+    Serial.print(F("TR_OUT_PATTERN_BEAT> Beat = ")); Serial.println(output_preset_beat_count);
   #endif 
   output_preset_beat_start_beat=output_get_beat_number_since_sync();
   digitalWrite(LED_BUILTIN, output_preset_beat_count%2);
@@ -346,8 +349,8 @@ void output_process_pattern() {
  *   follow_up_time_shift: number of 1/4 waittime between center and ring pulse
  */
 void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int follow_up_ticks){
-  #ifdef TRACE_PATTERN_SETTING
-      Serial.print(F(">TRACE_PATTERN_SETTING start_pulse:"));
+  #ifdef TR_PATTERN_SETTING
+      Serial.print(F("TR_PATTERN_SETTING> start_pulse:"));
       Serial.print(steps_per_color);Serial.print(',');
       Serial.print(fade_factor);Serial.print(',');
       Serial.println(follow_up_ticks);
@@ -372,9 +375,9 @@ void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int f
   }
   patconf_step_0_waittime=follow_up_ticks*output_waittime[patconf_speed_id]/4;
   patconf_step_1_waittime=output_waittime[patconf_speed_id]*2-patconf_step_0_waittime;
-  #ifdef TRACE_OUTPUT_TIMING
-    Serial.print(F(">TRACE_OUTPUT_TIMING patconf_step_0_waittime ")); Serial.println(patconf_step_0_waittime);
-    Serial.print(F(">TRACE_OUTPUT_TIMING patconf_step_1_waittime ")); Serial.println(patconf_step_1_waittime);
+  #ifdef TR_OUT_TIMING
+    Serial.print(F(">TR_OUT_TIMING patconf_step_0_waittime ")); Serial.println(patconf_step_0_waittime);
+    Serial.print(F(">TR_OUT_TIMING patconf_step_1_waittime ")); Serial.println(patconf_step_1_waittime);
   #endif
   output_push_lamps_to_pixels();
 }
@@ -434,8 +437,8 @@ void process_pulse() {
 // 
 void start_colorWipe(float lamp_value, boolean over_black){
   // init all globales for the pattern
-  #ifdef TRACE_PATTERN_SETTING
-      Serial.print(F(">TRACE_PATTERN_SETTING start_colorWipe:"));
+  #ifdef TR_PATTERN_SETTING
+      Serial.print(F("TR_PATTERN_SETTING> start_colorWipe:"));
       Serial.println(over_black);
   #endif
   output_current_stepper_type=ST_COLOR_WIPE;
@@ -484,8 +487,8 @@ void process_colorWipe() {
  *   Double Orbit
  */
 void start_doubleOrbit(float lamp_value,  int steps_per_color){
-    #ifdef TRACE_PATTERN_SETTING
-      Serial.print(F(">TRACE_PATTERN_SETTING start_doubleOrbit:"));
+    #ifdef TR_PATTERN_SETTING
+      Serial.print(F("TR_PATTERN_SETTING> start_doubleOrbit:"));
       Serial.println(steps_per_color);
   #endif
   // init all globales for the pattern
@@ -537,8 +540,8 @@ void process_doubleOrbit() {
  *   Double Color Orbit
  */
 void start_doubleColorOrbit(float lamp_value,  int steps_per_color, int color_palette_increment){
-  #ifdef TRACE_PATTERN_SETTING
-      Serial.print(F(">TRACE_PATTERN_SETTING start_doubleColorOrbit:"));
+  #ifdef TR_PATTERN_SETTING
+      Serial.print(F("TR_PATTERN_SETTING> start_doubleColorOrbit:"));
       Serial.print(steps_per_color);Serial.print(',');
       Serial.println(color_palette_increment);
   #endif
@@ -599,8 +602,8 @@ void process_doubleColorOrbit() {
 
  void start_rainbow(float lamp_value,  float angle_difference, float angle_step){
   // init all globales for the pattern
-  #ifdef TRACE_PATTERN_SETTING
-      Serial.print(F(">TRACE_PATTERN_SETTING start_rainbow:"));
+  #ifdef TR_PATTERN_SETTING
+      Serial.print(F("TR_PATTERN_SETTING> start_rainbow:"));
       Serial.print(angle_difference);Serial.print(',');
       Serial.println(angle_step);
   #endif
@@ -648,10 +651,10 @@ void output_push_lamps_to_pixels()
     lamp_color = lamp[p].get_color_rgb( output_master_light_value);
     strip.setPixelColor(p, strip.Color(lamp_color.r, lamp_color.g, lamp_color.b ));
     
-#ifdef TRACE_OUPUT_PIXEL_RESULT
-    Serial.print(F(">TRACE_OUPUT_PIXEL_RESULT hsv "));
+#ifdef TR_OUT_PIXEL_RESULT
+    Serial.print(F("TR_OUT_PIXEL_RESULT> hsv "));
     lamp[p].trace_hsv();
-    Serial.print(F("\n>TRACE_OUPUT_PIXEL_RESULT rgb "));
+    Serial.print(F("\nTR_OUT_PIXEL_RESULT> rgb "));
     Serial.print(lamp_color.r); Serial.print(F(","));
     Serial.print(lamp_color.g); Serial.print(F(","));
     Serial.println(lamp_color.b);
@@ -661,10 +664,10 @@ void output_push_lamps_to_pixels()
   strip.show();
 }
 
-#ifdef TRACE_COLOR_PALETTE_SETTING
+#ifdef TR_COLOR_PALETTE_SETTING
 void dump_color_palette_to_serial()
 {
-  Serial.println(F(">TRACE_COLOR_PALETTE_SETTING")); 
+  Serial.println(F("TR_COLOR_PALETTE_SETTING>")); 
   for(int i=0;i<patconf_color_palette_lenght;i++) {
     Serial.print('(');Serial.print(patconf_color_palette[i].h);
     Serial.print(',');Serial.print(patconf_color_palette[i].s);
