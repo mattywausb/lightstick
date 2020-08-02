@@ -303,16 +303,8 @@ void output_start_pattern(int pattern_id) {
   output_process_pattern();
 }
 
-// Following function must be called in the loop
-void output_process_pattern() {
-  switch (output_current_stepper_type) {
-    case ST_COLOR_WIPE: process_colorWipe();      break;
-    case ST_DOUBLE_ORBIT: process_doubleOrbit(); break;
-    case ST_DOUBLE_COLOR_ORBIT: process_doubleColorOrbit(); break;
-    case ST_PULSE: process_pulse(); break;
-    case ST_RAINBOW: process_rainbow();break;
-  }
-  
+void output_determine_beat()
+{
   if(output_preset_beat_start_beat==output_get_beat_number_since_sync())  return;
   #ifdef TRACE_OUTPUT_PATTERN_BEAT
     Serial.print(F(">TRACE_OUTPUT_PATTERN_BEAT Beat = ")); Serial.println(output_preset_beat_count);
@@ -321,6 +313,18 @@ void output_process_pattern() {
   digitalWrite(LED_BUILTIN, output_preset_beat_count%2);
   output_preset_beat_count++;
 }
+
+// Following function must be called in the loop at last
+void output_process_pattern() {
+  switch (output_current_stepper_type) {
+    case ST_COLOR_WIPE: process_colorWipe();      break;
+    case ST_DOUBLE_ORBIT: process_doubleOrbit(); break;
+    case ST_DOUBLE_COLOR_ORBIT: process_doubleColorOrbit(); break;
+    case ST_PULSE: process_pulse(); break;
+    case ST_RAINBOW: process_rainbow();break;
+  }
+}
+
 
 /*
  *   Pulse: alternating "Ignite" of ring and center, ramping up saturation first and then fade to black

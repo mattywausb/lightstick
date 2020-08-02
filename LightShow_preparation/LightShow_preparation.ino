@@ -67,7 +67,7 @@ long g_tap_track_prev_time=0L;
 
 enum MODE_OF_OPERATION {
   MODE_SEQUENCE,
-  MODE_FIX_PRESET
+  MODE_FIX_PRESET,
 };
 
 MODE_OF_OPERATION mode_of_operation=MODE_SEQUENCE;
@@ -81,7 +81,11 @@ void setup() {
   input_setup();
   output_setup();
   output_set_bpm(126);
-  sequence_start();
+  mode_of_operation=MODE_FIX_PRESET;
+  output_set_pattern_speed(STEP_ON_BEAT);
+  output_load_color_palette(22);
+  output_sync_beat();
+  output_start_pattern(10);
 }
 
 
@@ -448,6 +452,10 @@ void loop() {
 
   }  // end Serial command available
 
+  // ------ here starts the final processing 
+  
+  output_determine_beat();
+  
   // Manage current sequence 
   if(mode_of_operation==MODE_SEQUENCE) {
     if(output_get_preset_beat_count()>=g_program_sequence[g_sequence_index].beats_to_run) {
