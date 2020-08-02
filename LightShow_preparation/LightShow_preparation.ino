@@ -42,6 +42,7 @@ typedef struct {
 
 
 int g_program_sequence_loop_entry_index=1;
+int g_program_sequence_hold_entry_index=0;
 int g_program_sequence_length=5;
 
 
@@ -50,7 +51,7 @@ t_program_sequence g_program_sequence [MAX_NUMBER_OF_PROGRAM_SEQUENCE_STEPS] = {
                       }; // Extended Version to S126 I88 >A8888 8888 B8888 R8888 S8888 A8888 8888 B8888 R8888 S8888 B8888 R8888 S8888 A8888 
 
 // Pattern Slots: P A6/4:20 B10/4:40 C11/8:40 D65/4:40
-// Sequence setting: S80 A2222 >B44 C8 D8                     
+// Sequence setting: S80 A1# B44 >C8 D8                     
                         
 int g_sequence_entry_count=8;
 int g_sequence_index=0;
@@ -67,6 +68,7 @@ long g_tap_track_prev_time=0L;
 
 enum MODE_OF_OPERATION {
   MODE_SEQUENCE,
+  MODE_SEQUENCE_HOLD,
   MODE_FIX_PRESET,
 };
 
@@ -237,12 +239,11 @@ void parse_sequence(String sequence_string)
   int sequence_index=0;
   int beat_sum=0;
   int slot_index=-1;
-  g_program_sequence_loop_entry_index=0;
-
   #ifdef TRACE_STRING_PARSING
          Serial.print(F(">TRACE_STRING_PARSING sequence to parse:"));Serial.println(sequence_string);
   #endif
-  
+  g_program_sequence_hold_entry_index=-1;
+  g_program_sequence_loop_entry_index=0;
   for(int char_index=0;char_index<sequence_string.length();char_index++) {
     if(sequence_string.charAt(char_index)>='A') { // new slot letter in string
       if(beat_sum>0 && slot_index>=0) { // previous phrase is complete and valid
@@ -262,16 +263,24 @@ void parse_sequence(String sequence_string)
       #ifdef TRACE_STRING_PARSING
          Serial.print(F(">TRACE_STRING_PARSING slot_index:"));Serial.println(slot_index);
       #endif
-    } else 
+    } // end if letter found 
+    else 
     if(sequence_string.charAt(char_index)>='1' && sequence_string.charAt(char_index)<='9') { // beat digit
       beat_sum+=sequence_string.substring(char_index,char_index+1).toInt();
     } else
-    if(sequence_string.charAt(char_index)>='>') {  // Loop marker
+    if(sequence_string.charAt(char_index)=='>') {  // Loop marker
       g_program_sequence_loop_entry_index=sequence_index+1;
       #ifdef TRACE_STRING_PARSING
          Serial.print(F(">TRACE_STRING_PARSING loop entry at:"));Serial.println(g_program_sequence_loop_entry_index);
       #endif
+    } else
+    if(sequence_string.charAt(char_index)=='#') {  // Hold marker
+      g_program_sequence_hold_entry_index=sequence_index;
+      #ifdef TRACE_STRING_PARSING
+         Serial.print(F(">TRACE_STRING_PARSING hold entry at:"));Serial.println(g_program_sequence_loop_entry_index);
+      #endif
     }
+    
   } // end loop over characters of the string
   if(beat_sum>0 || slot_index>=0) { // previous phrase is complete and valid
         g_program_sequence[sequence_index].slot_index=slot_index;
@@ -296,6 +305,8 @@ void sequence_start()
   output_set_pattern_speed(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
   output_load_color_palette(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
   output_start_pattern(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);
+  if(g_sequence_index==g_program_sequence_hold_entry_index) mode_of_operation=MODE_SEQUENCE_HOLD;
+  else mode_of_operation=MODE_SEQUENCE;
   #ifdef TRACE_SEQUENCE_PROGRESS
     trace_sequence();
   #endif
@@ -306,7 +317,9 @@ void sequence_next_slot()
     if(++g_sequence_index>=g_program_sequence_length)g_sequence_index=g_program_sequence_loop_entry_index;
     output_set_pattern_speed(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
     output_load_color_palette(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
-    output_start_pattern(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);   
+    output_start_pattern(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);  
+    if(g_sequence_index==g_program_sequence_hold_entry_index) mode_of_operation=MODE_SEQUENCE_HOLD; 
+    else mode_of_operation=MODE_SEQUENCE;
     #ifdef TRACE_SEQUENCE_PROGRESS
       trace_sequence();
     #endif
@@ -322,6 +335,7 @@ void loop() {
         Serial.println(F(">TRACE_BUTTON_INPUT step got pressed"));
       #endif
       output_sync_beat();
+      if(mode_of_operation==MODE_SEQUENCE_HOLD) sequence_next_slot();
       manage_tap_input();
   }
 

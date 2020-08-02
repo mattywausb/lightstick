@@ -254,14 +254,25 @@ void output_start_pattern(int pattern_id) {
   output_preset_beat_start_beat=output_get_beat_number_since_sync();
   output_preset_beat_count=0;
   switch (pattern_id/10) {
-    case 0:                       // PULSE  0-3: Regular, 4-7: Heartbeat (2,4,8,16 Steps)
-         {
-          int followup_tick=pattern_id<4?4:6;  
+    case 0:                       // PULSE  0-3: Regular, 4-7: Heartbeat (2,4,8,16 Steps) 8 Regular low light
          
-         start_pulse(0.8, // brightness 
+         if( pattern_id<8) {
+          int followup_tick=pattern_id<4?4:6;  
+          start_pulse(0.8, // brightness 
                       1<<(1+(pattern_id%4)),  // Steps until color increment
                       0.85, // preserve brightnes factor 
                       followup_tick  ); // follow up tick count (4= equally spaced)
+         } else {
+         if(pattern_id==8)  
+          start_pulse(0.1, // brightness 
+                      8,  // Steps until color increment
+                      0.91, // preserve brightnes factor 
+                      4  ); // follow up tick count (4= equally spaced)
+         else                      
+          start_pulse(0.2, // brightness 
+                      8,  // Steps until color increment
+                      0.91, // preserve brightnes factor 
+                      1  ); // follow up tick count (4= equally spaced)
          }
          break;
     case 1:            // WHIPE  10 = direct , 11= over black
