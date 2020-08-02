@@ -4,12 +4,12 @@
 #include "mainSettings.h"
 
 #ifdef TRACE_ON
-// #define TRACE_OUPUT_PIXEL_RESULT
-#define TRACE_OUTPUT_TIMING
+//#define TRACE_OUPUT_PIXEL_RESULT
+//#define TRACE_OUTPUT_TIMING
 //#define TRACE_OUTPUT_PATTERN_BEAT
-#define TRACE_OUTPUT_API_CALL
-#define TRACE_COLOR_PALETTE_SETTING
-#define TRACE_PATTERN_SETTING
+//#define TRACE_OUTPUT_API_CALL
+//#define TRACE_COLOR_PALETTE_SETTING
+//#define TRACE_PATTERN_SETTING
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU

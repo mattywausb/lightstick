@@ -6,8 +6,8 @@
 // Activate general trace output
 
 #ifdef TRACE_ON
-#define TRACE_INPUT 
-#define TRACE_INPUT_HIGH
+//#define TRACE_INPUT 
+//#define TRACE_INPUT_HIGH
 //#define TRACE_INPUT_TIMING 
 #endif
 

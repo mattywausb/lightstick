@@ -8,9 +8,9 @@
 
 
 #ifdef TRACE_ON
-#define TRACE_SEQUENCE_PROGRESS
-#define TRACE_BUTTON_INPUT
-#define TRACE_STRING_PARSING
+#define TR_SEQUENCE_PROGRESS
+//#define TR_STRING_PARSING
+//#define TR_WATCH_MODE_CHANGE
 #endif
 
 typedef struct {
@@ -73,11 +73,15 @@ enum MODE_OF_OPERATION {
 };
 
 MODE_OF_OPERATION mode_of_operation=MODE_SEQUENCE;
+#ifdef TR_WATCH_MODE_CHANGE
+MODE_OF_OPERATION prev_mode_of_operation=MODE_SEQUENCE;
+#endif
+
 
 void setup() {
+  Serial.begin(9600);
   #ifdef TRACE_ON 
     char compile_signature[] = "--- START (Build: " __DATE__ " " __TIME__ ") ---";   
-    Serial.begin(9600);
     Serial.println(compile_signature); 
   #endif
   input_setup();
@@ -93,8 +97,8 @@ void setup() {
 
 /* convert pattern_speed to pattern_speed_id */
 int preset_speed_to_id(String pattern_speed) {
-    #ifdef TRACE_STRING_PARSING
- //        Serial.print(F(">TRACE_STRING_PARSING preset_speed_to_id:"));Serial.println(pattern_speed);
+    #ifdef TR_STRING_PARSING
+ //        Serial.print(F(">TR_STRING_PARSING preset_speed_to_id:"));Serial.println(pattern_speed);
   #endif
       switch(pattern_speed.toInt()) {
         case 2: return STEP_ON_2BEATS; 
@@ -121,8 +125,8 @@ void manage_tap_input() {
   if(abs(g_tap_track_interval[g_tap_track_index]-prev_tap_track_interval)>300) {  // no valid lenght compared to previous
     g_tap_track_count=1; // Reset Counter and sum to latest measure
     g_tap_track_sum=g_tap_track_interval[g_tap_track_index];
-    #ifdef TRACE_BUTTON_INPUT
-            Serial.print(F(">TRACE_BUTTON_INPUT Tap prev check failed by ")); Serial.println(abs(g_tap_track_interval[g_tap_track_index]-prev_tap_track_interval));
+    #ifdef TR_BUTTON_INPUT
+            Serial.print(F(">TR_BUTTON_INPUT Tap prev check failed by ")); Serial.println(abs(g_tap_track_interval[g_tap_track_index]-prev_tap_track_interval));
     #endif
   } else g_tap_track_count++;
   
@@ -134,8 +138,8 @@ void manage_tap_input() {
         if(abs(average_tap_lenght-g_tap_track_interval[i])>300) { // Reset on deviation more then 150 ms to average
                  g_tap_track_count=1;
                  g_tap_track_sum=g_tap_track_interval[g_tap_track_index];
-                   #ifdef TRACE_BUTTON_INPUT
-                      Serial.print(F(">TRACE_BUTTON_INPUT Tap avg check failed by ")); Serial.println(abs(average_tap_lenght-g_tap_track_interval[i]));
+                   #ifdef TR_BUTTON_INPUT
+                      Serial.print(F(">TR_BUTTON_INPUT Tap avg check failed by ")); Serial.println(abs(average_tap_lenght-g_tap_track_interval[i]));
                    #endif
                  return; // Get  out in case of fail
         }
@@ -147,15 +151,17 @@ void manage_tap_input() {
      
 }
 
-#ifdef TRACE_SEQUENCE_PROGRESS
-void trace_sequence()
+#ifdef TR_SEQUENCE_PROGRESS
+void TR_sequence()
 {
-  Serial.print(F(">TRACE_SEQUENCE_PROGRESS sequence_index:")); Serial.print(g_sequence_index);
-  Serial.print(F(" sequence slot: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].slot_tag);
+  Serial.print(F(">TR_SEQUENCE_PROGRESS sequence_index:")); Serial.print(g_sequence_index);
+  Serial.print(F(" sequence slot: ")); Serial.println(g_program_slot[g_program_sequence[g_sequence_index].slot_index].slot_tag);
   Serial.print(F(" pattern_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);
   Serial.print(F(" preset_speed_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
-  Serial.print(F(" color_palette_id: ")); Serial.print(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
-  Serial.print(F(" beats_to_run: ")); Serial.println(g_program_sequence[g_sequence_index].beats_to_run);
+  Serial.print(F(" color_palette_id: ")); Serial.println(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
+  Serial.print(F(" beats_to_run: ")); Serial.print(g_program_sequence[g_sequence_index].beats_to_run);
+  Serial.print(F(" mode_of_operation:"));Serial.println(mode_of_operation);
+
 }
 #endif
 
@@ -176,15 +182,15 @@ void parse_slot_settings(String slot_setting_string)  {
   int colon_index;
   int token_end_index;
   String current_token;
-  #ifdef TRACE_STRING_PARSING
-         Serial.print(F(">TRACE_STRING_PARSING slot settings to parse:"));Serial.println(slot_setting_string);
+  #ifdef TR_STRING_PARSING
+         Serial.print(F(">TR_STRING_PARSING slot settings to parse:"));Serial.println(slot_setting_string);
   #endif
   for(int char_index=0;char_index<slot_setting_string.length();char_index++) {
     if(slot_setting_string.charAt(char_index)>='A') { // new slot letter in string
         for (token_end_index=char_index+1; token_end_index<slot_setting_string.length() && slot_setting_string.charAt(token_end_index)<'A';token_end_index++); // search for end of token
         current_token=slot_setting_string.substring(char_index,token_end_index);
-         #ifdef TRACE_STRING_PARSING
-            Serial.print(F(">TRACE_STRING_PARSING current_token:"));Serial.println(current_token);
+         #ifdef TR_STRING_PARSING
+            Serial.print(F(">TR_STRING_PARSING current_token:"));Serial.println(current_token);
           #endif
         slash_index=current_token.indexOf('/');
         if (slash_index>0) { // dash to separate the speed exists
@@ -198,8 +204,8 @@ void parse_slot_settings(String slot_setting_string)  {
               g_program_slot[slot_index].pattern_id=pattern_id;
               g_program_slot[slot_index].preset_speed_id=preset_speed_id;
               g_program_slot[slot_index].color_palette_id=color_palette_id;
-              #ifdef TRACE_STRING_PARSING
-                Serial.print(F(">TRACE_STRING_PARSING slot setting:"));
+              #ifdef TR_STRING_PARSING
+                Serial.print(F(">TR_STRING_PARSING slot setting:"));
                 Serial.print(slot_index);Serial.print("{'");Serial.print(g_program_slot[slot_index].slot_tag);
                 Serial.print("',");Serial.print(g_program_slot[slot_index].pattern_id);
                 Serial.print(',');Serial.print(g_program_slot[slot_index].preset_speed_id);
@@ -211,9 +217,9 @@ void parse_slot_settings(String slot_setting_string)  {
               if(++slot_index>=MAX_NUMBER_OF_PROGRAM_SLOTS) break;
             }
           } // end colon found
-         #ifdef TRACE_STRING_PARSING
+         #ifdef TR_STRING_PARSING
              else {
-              Serial.print(F(">TRACE_STRING_PARSING bad parsing slash_index, pattern_id, preset_speed_id:"));
+              Serial.print(F(">TR_STRING_PARSING bad parsing slash_index, pattern_id, preset_speed_id:"));
               Serial.print(slash_index);Serial.print(',');
               Serial.print(pattern_id);Serial.print(',');
               Serial.println(preset_speed_id);
@@ -239,8 +245,8 @@ void parse_sequence(String sequence_string)
   int sequence_index=0;
   int beat_sum=0;
   int slot_index=-1;
-  #ifdef TRACE_STRING_PARSING
-         Serial.print(F(">TRACE_STRING_PARSING sequence to parse:"));Serial.println(sequence_string);
+  #ifdef TR_STRING_PARSING
+         Serial.print(F(">TR_STRING_PARSING sequence to parse:"));Serial.println(sequence_string);
   #endif
   g_program_sequence_hold_entry_index=-1;
   g_program_sequence_loop_entry_index=0;
@@ -249,8 +255,8 @@ void parse_sequence(String sequence_string)
       if(beat_sum>0 && slot_index>=0) { // previous phrase is complete and valid
         g_program_sequence[sequence_index].slot_index=slot_index;
         g_program_sequence[sequence_index].beats_to_run=beat_sum;
-        #ifdef TRACE_STRING_PARSING
-         Serial.print(F(">TRACE_STRING_PARSING sequence_index:"));Serial.print(sequence_index);
+        #ifdef TR_STRING_PARSING
+         Serial.print(F(">TR_STRING_PARSING sequence_index:"));Serial.print(sequence_index);
          Serial.print(F(" slot_index:"));Serial.print(slot_index);
          Serial.print(F(" beat_sum:"));Serial.println(beat_sum);
         #endif
@@ -260,8 +266,8 @@ void parse_sequence(String sequence_string)
       for(slot_index=g_program_slot_count-1;slot_index>=0;slot_index--) { // find proper slot
         if(sequence_string.charAt(char_index)==g_program_slot[slot_index].slot_tag) break;
       }
-      #ifdef TRACE_STRING_PARSING
-         Serial.print(F(">TRACE_STRING_PARSING slot_index:"));Serial.println(slot_index);
+      #ifdef TR_STRING_PARSING
+         Serial.print(F(">TR_STRING_PARSING slot_index:"));Serial.println(slot_index);
       #endif
     } // end if letter found 
     else 
@@ -270,14 +276,14 @@ void parse_sequence(String sequence_string)
     } else
     if(sequence_string.charAt(char_index)=='>') {  // Loop marker
       g_program_sequence_loop_entry_index=sequence_index+1;
-      #ifdef TRACE_STRING_PARSING
-         Serial.print(F(">TRACE_STRING_PARSING loop entry at:"));Serial.println(g_program_sequence_loop_entry_index);
+      #ifdef TR_STRING_PARSING
+         Serial.print(F(">TR_STRING_PARSING loop entry at:"));Serial.println(g_program_sequence_loop_entry_index);
       #endif
     } else
     if(sequence_string.charAt(char_index)=='#') {  // Hold marker
       g_program_sequence_hold_entry_index=sequence_index;
-      #ifdef TRACE_STRING_PARSING
-         Serial.print(F(">TRACE_STRING_PARSING hold entry at:"));Serial.println(g_program_sequence_loop_entry_index);
+      #ifdef TR_STRING_PARSING
+         Serial.print(F(">TR_STRING_PARSING hold entry at:"));Serial.println(g_program_sequence_loop_entry_index);
       #endif
     }
     
@@ -285,8 +291,8 @@ void parse_sequence(String sequence_string)
   if(beat_sum>0 || slot_index>=0) { // previous phrase is complete and valid
         g_program_sequence[sequence_index].slot_index=slot_index;
         g_program_sequence[sequence_index].beats_to_run=beat_sum;
-         #ifdef TRACE_STRING_PARSING
-         Serial.print(F(">TRACE_STRING_PARSING sequence_index:"));Serial.print(sequence_index);
+         #ifdef TR_STRING_PARSING
+         Serial.print(F(">TR_STRING_PARSING sequence_index:"));Serial.print(sequence_index);
          Serial.print(F(" slot_index:"));Serial.print(slot_index);
          Serial.print(F(" beat_sum:"));Serial.println(beat_sum);
         #endif
@@ -299,30 +305,38 @@ void parse_sequence(String sequence_string)
   sequence_start();
 }
 
-void sequence_start()
-{
-  g_sequence_index=0;
+void sequence_load() {
   output_set_pattern_speed(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
   output_load_color_palette(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
   output_start_pattern(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);
-  if(g_sequence_index==g_program_sequence_hold_entry_index) mode_of_operation=MODE_SEQUENCE_HOLD;
+  if(g_sequence_index==g_program_sequence_hold_entry_index){
+    mode_of_operation=MODE_SEQUENCE_HOLD;
+    #ifdef TR_SEQUENCE_PROGRESS
+        Serial.println(F(">TR_SEQUENCE_PROGRESS Hold index reached"));
+    #endif        
+  }
   else mode_of_operation=MODE_SEQUENCE;
-  #ifdef TRACE_SEQUENCE_PROGRESS
-    trace_sequence();
+  #ifdef TR_SEQUENCE_PROGRESS
+    TR_sequence();
   #endif
+}
+
+void sequence_start()
+{
+  #ifdef TR_SEQUENCE_PROGRESS
+        Serial.println(F(">TR_SEQUENCE_PROGRESS sequence_start"));
+  #endif
+  g_sequence_index=0;
+  sequence_load();
 }
 
 void sequence_next_slot()
 {
-    if(++g_sequence_index>=g_program_sequence_length)g_sequence_index=g_program_sequence_loop_entry_index;
-    output_set_pattern_speed(g_program_slot[g_program_sequence[g_sequence_index].slot_index].preset_speed_id);
-    output_load_color_palette(g_program_slot[g_program_sequence[g_sequence_index].slot_index].color_palette_id);
-    output_start_pattern(g_program_slot[g_program_sequence[g_sequence_index].slot_index].pattern_id);  
-    if(g_sequence_index==g_program_sequence_hold_entry_index) mode_of_operation=MODE_SEQUENCE_HOLD; 
-    else mode_of_operation=MODE_SEQUENCE;
-    #ifdef TRACE_SEQUENCE_PROGRESS
-      trace_sequence();
-    #endif
+   #ifdef TR_SEQUENCE_PROGRESS
+        Serial.println(F(">TR_SEQUENCE_PROGRESS sequence_next_slot"));
+   #endif
+   if(++g_sequence_index>=g_program_sequence_length)g_sequence_index=g_program_sequence_loop_entry_index;
+   sequence_load();
 }
 
 
@@ -331,8 +345,8 @@ void loop() {
   // Manage Button Press
   input_switches_scan_tick();
   if (input_stepGotPressed()) {
-      #ifdef TRACE_BUTTON_INPUT
-        Serial.println(F(">TRACE_BUTTON_INPUT step got pressed"));
+      #ifdef TR_BUTTON_INPUT
+        Serial.println(F(">TR_BUTTON_INPUT step got pressed"));
       #endif
       output_sync_beat();
       if(mode_of_operation==MODE_SEQUENCE_HOLD) sequence_next_slot();
@@ -343,12 +357,13 @@ void loop() {
   input_pollSerial();
   if(input_newSerialCommandAvailable()) {
     String command=input_getSerialCommand();
+    if(command.startsWith("#")) { //Change sequence by string
+      song_preset_start(command.substring(1).toInt());
+    }
     if(command.startsWith("S")) { //Change sequence by string
       parse_sequence(command.substring(1));
-      mode_of_operation=MODE_SEQUENCE;
     }
     if(command.startsWith("s")) {  // restart sequence mode
-      mode_of_operation=MODE_SEQUENCE;
       sequence_start();
     }
     if(command.startsWith("b")) {  // b123 <- Change bpm: 
@@ -467,6 +482,13 @@ void loop() {
   }  // end Serial command available
 
   // ------ here starts the final processing 
+  
+  #ifdef TR_WATCH_MODE_CHANGE
+      if(mode_of_operation!=prev_mode_of_operation) {
+        Serial.print(F("TR_WATCH_MODE_CHANGE> new mode: "));Serial.println(mode_of_operation);
+        prev_mode_of_operation=mode_of_operation;
+      }
+  #endif
   
   output_determine_beat();
   
