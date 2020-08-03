@@ -213,7 +213,12 @@ void parse_slot_settings(String slot_setting_string)  {
               #endif
               pattern_id=-1;
               preset_speed_id=-1;
-              if(++slot_index>=MAX_NUMBER_OF_PROGRAM_SLOTS) break;
+              if(++slot_index>=MAX_NUMBER_OF_PROGRAM_SLOTS) {
+               #ifdef TR_WARNING
+                    Serial.print(F("#!# TR_WARNING> max slots reached"));Serial.println(slot_index);
+               #endif                    
+                break;
+              }
             }
           } // end colon found
          #ifdef TR_STRING_PARSING
@@ -356,7 +361,7 @@ void loop() {
   /*
    * Commands:
    * #<id>               load song preset
-   * S <slot settings>   load the slot settings from string syntax
+   * o <slot settings>   load the slot settings from string syntax
    * s <sequence string> load the sequence from string syntax
    * +                   restart sequence
    * 
@@ -379,7 +384,7 @@ void loop() {
   input_pollSerial();
   if(input_newSerialCommandAvailable()) {
     String command=input_getSerialCommand();
-    if(command.startsWith("S")) { //Load sequence from Library
+    if(command.startsWith("x")) { //Load sequence from Library
       song_preset_start(command.substring(1).toInt());
     }
     if(command.startsWith("s")) { //Change sequence by string

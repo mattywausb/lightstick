@@ -12,6 +12,8 @@
 //#define TR_COLOR_PRESET_PALETTE_SETTING
 #define TR_PATTERN_SETTING
 //#define TR_COLOR_ORBIT_COLOR
+
+
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
@@ -145,6 +147,14 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0; //WHITE
          patconf_color_palette_lenght=4;
          break;
+    case 2:                 // Red blue variant (red,blue,orange,white,skyblue)
+         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0; // WHITE
+         patconf_color_palette[4].h=HUE_SKYBLUE;patconf_color_palette[4].s=1.0; 
+         patconf_color_palette_lenght=5;
+         break;
    /// ---------- Cold section       
    case 20:                // blue green  
          patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
@@ -197,9 +207,17 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=0.0; 
          patconf_color_palette_lenght=4;
          break;
-   #ifdef TR_COLOR_PRESET_PALETTE_SETTING
+  case 101: 
+  // red red+w oragne orange+w
+         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=0.0; 
+         patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0; 
+         patconf_color_palette_lenght=4;
+         break;
+   #ifdef TR_WARNING
    default:
-        Serial.print(F("#!# TR_COLOR_PRESET_PALETTE_SETTING> unkown color pallette:"));Serial.println(palette_id);
+        Serial.print(F("#!# TR_WARNING> unkown color pallette:"));Serial.println(palette_id);
    #endif         
   }
   #ifdef TR_COLOR_PRESET_PALETTE_SETTING
@@ -294,19 +312,19 @@ void output_start_pattern(int pattern_id) {
          }
          break;
     case 1:            // WHIPE  10 = direct , 11= over black
-         start_colorWipe(0.5,pattern_id%2);  // brightness, over_black
+         start_colorWipe(0.8,pattern_id%2);  // brightness, over_black
          break;
     case 2:            // DOUBLE ORBIT 20-26: Color step 1,2,4,8,16,32,64
-          start_doubleOrbit(0.5,1<<(pattern_id-20));  // brightness, Steps until color increment
+          start_doubleOrbit(0.8,1<<(pattern_id-20));  // brightness, Steps until color increment
           break;
     case 3:           // DOUBLE COLOR ORBIT 30-36 palette increment 1 
-         start_colorOrbit(0.5,1<<(pattern_id-30),1);  // brightness, Steps until color increment, color palette increment   
+         start_colorOrbit(0.8,1<<(pattern_id-30),1);  // brightness, Steps until color increment, color palette increment   
          break;
     case 4:           // DOUBLE COLOR ORBIT 40-46 palette increment 2 
-         start_colorOrbit(0.5,1<<(pattern_id-40),2);  // brightness, Steps until color increment, color palette increment   
+         start_colorOrbit(0.8,1<<(pattern_id-40),2);  // brightness, Steps until color increment, color palette increment   
          break;
     case 5:           // DOUBLE COLOR ORBIT 50-56 palette increment 3 
-         start_colorOrbit(0.5,1<<(pattern_id-50),3);  // brightness, Steps until color increment, color palette increment   
+         start_colorOrbit(0.8,1<<(pattern_id-50),3);  // brightness, Steps until color increment, color palette increment   
          break;
     case 6:           // RAINBOW FULL 60-69  increment  6.0° to 60° 
          start_rainbow(0.5,60.0,(pattern_id-59)*6.0); // brightness, hue angle distance to neighbour, hue step increment   // Full span, hart stepping

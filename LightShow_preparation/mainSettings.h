@@ -2,6 +2,10 @@
 #define __MAINSETTINGS_H__
 
 #define TRACE_ON 
+#ifdef TRACE_ON
+#define TR_WARNING
+#endif
+
 #define MAX_NUMBER_OF_PROGRAM_SLOTS 8
 
 #define MAX_NUMBER_OF_PROGRAM_SEQUENCE_STEPS 30
