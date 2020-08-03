@@ -147,13 +147,16 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0; //WHITE
          patconf_color_palette_lenght=4;
          break;
-    case 2:                 // Red blue variant (red,blue,orange,white,skyblue)
-         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0; // WHITE
-         patconf_color_palette[4].h=HUE_SKYBLUE;patconf_color_palette[4].s=1.0; 
-         patconf_color_palette_lenght=5;
+    case 2:                 // Red blue variant (w,sb,r,b,o,sb,r,b) "not today"
+         patconf_color_palette[0].h=HUE_SKYBLUE;patconf_color_palette[0].s=0.0; //WHITE
+         patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_BLUE;patconf_color_palette[3].s=1.0; 
+         patconf_color_palette[4].h=HUE_ORANGE;patconf_color_palette[4].s=1.0; 
+         patconf_color_palette[5].h=HUE_SKYBLUE;patconf_color_palette[5].s=1.0; 
+         patconf_color_palette[6].h=HUE_RED;patconf_color_palette[6].s=1.0;
+         patconf_color_palette[7].h=HUE_BLUE;patconf_color_palette[7].s=1.0; 
+         patconf_color_palette_lenght=8;
          break;
    /// ---------- Cold section       
    case 20:                // blue green  
