@@ -201,23 +201,41 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=SAT_ROSE;
          patconf_color_palette_lenght=3;
          break;
-  // -- Pulse Section
-   case 100: 
-   // blue green  
+   case 42:                   // pu pi wpu pi
+         patconf_color_palette[0].h=HUE_PURPLE;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_PINK;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_PURPLE;patconf_color_palette[2].s=0.0;
+         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
+         patconf_color_palette_lenght=4;
+         break;
+  // -- Pulse specials  Section
+   case 100:                                        // blue green  
          patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
          patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; 
          patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
          patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=0.0; 
          patconf_color_palette_lenght=4;
          break;
-  case 101: 
-  // red red+w oragne orange+w
+  case 101:                                        // r w+r oe w+o
          patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
          patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=0.0; 
          patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
          patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0; 
          patconf_color_palette_lenght=4;
          break;
+  // -- Whipe specials Section
+  case 120:                                        // pu pu pi pi wpu wpu pi pi
+         patconf_color_palette[0].h=HUE_PURPLE;patconf_color_palette[0].s=1.0; //WHITE
+         patconf_color_palette[1].h=HUE_PURPLE;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_PINK;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0; 
+         patconf_color_palette[4].h=HUE_PURPLE;patconf_color_palette[4].s=0.0; 
+         patconf_color_palette[5].h=HUE_PURPLE;patconf_color_palette[5].s=0.0; 
+         patconf_color_palette[6].h=HUE_PINK;patconf_color_palette[6].s=1.0;
+         patconf_color_palette[7].h=HUE_PINK;patconf_color_palette[7].s=1.0; 
+         patconf_color_palette_lenght=8;
+         break;
+          
    #ifdef TR_WARNING
    default:
         Serial.print(F("#!# TR_WARNING> unkown color pallette:"));Serial.println(palette_id);
