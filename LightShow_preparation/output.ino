@@ -208,7 +208,18 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
          patconf_color_palette_lenght=4;
          break;
-  // -- Pulse specials  Section
+   case 43:                   // o wo o wo r wo r wo 
+         patconf_color_palette[0].h=HUE_ORANGE;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=0.0; 
+         patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0;
+         patconf_color_palette[4].h=HUE_RED;patconf_color_palette[4].s=1.0;
+         patconf_color_palette[5].h=HUE_ORANGE;patconf_color_palette[5].s=0.0;
+         patconf_color_palette[6].h=HUE_RED;patconf_color_palette[6].s=1.0;
+         patconf_color_palette[7].h=HUE_ORANGE;patconf_color_palette[7].s=0.0;
+         patconf_color_palette_lenght=8;
+         break;
+ // -- Pulse specials  Section
    case 100:                                        // blue green  
          patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
          patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; 
@@ -223,6 +234,14 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0; 
          patconf_color_palette_lenght=4;
          break;
+  case 102:                                        // o wo r wo wo
+         patconf_color_palette[0].h=HUE_ORANGE;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=0.0; 
+         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0; 
+         patconf_color_palette[4].h=HUE_ORANGE;patconf_color_palette[4].s=0.0; 
+         patconf_color_palette_lenght=5;
+         break;
   // -- Whipe specials Section
   case 120:                                        // pu pu pi pi wpu wpu pi pi
          patconf_color_palette[0].h=HUE_PURPLE;patconf_color_palette[0].s=1.0; //WHITE
@@ -235,6 +254,8 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[7].h=HUE_PINK;patconf_color_palette[7].s=1.0; 
          patconf_color_palette_lenght=8;
          break;
+
+    // -- Color OrbWhipe specials Section         
           
    #ifdef TR_WARNING
    default:
@@ -663,8 +684,8 @@ void process_colorOrbit() {
   if (++patvar_step_in_color_index>=patconf_steps_until_color_change) {
         patvar_step_in_color_index=0;
         patvar_color_palette_index+=patconf_color_palette_increment;
+        while(patvar_color_palette_index>=patconf_color_palette_lenght) patvar_color_palette_index-=patconf_color_palette_lenght;
   }
-  while(patvar_color_palette_index>=patconf_color_palette_lenght) patvar_color_palette_index-=patconf_color_palette_lenght;
 }
 
 /*
