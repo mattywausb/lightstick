@@ -24,8 +24,8 @@
 #include "mainSettings.h"
 
 #ifdef TRACE_ON
-#define TRACE_WEBUI
-#define TRACE_WEBUI_PAGE_GENERATION
+#define TR_WEBUI
+#define TR_WEBUI_PAGE_GENERATION
 #endif
 
 /* Macro to declare Strings with reserved buffer */
@@ -70,15 +70,15 @@ const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
 
 void sendStylesheet() {
    server.send(200, "text/css", F(
-    "body {   font-family: \"Open Sans\", \"Arial\", \"mono\";  color:#ffe036;  background-color: #18006a;  font-size: 14px;  text-align: left; }"
-"h1 {   text-align: center; }"
-"label {  float: left;     margin: 2px 2px;     padding: 10px 10px; }"
-"input[type=\"submit\"] {   background-color: #4CAF50;   border-radius: 4px;   border: none;   color:white;   margin: 2px 2px;   padding: 16px 16px;   width:100% }"
-"input[type=\"number\"], select{   background-color: #432e8b;   border-radius: 4px;   border: none;   color:#ffe036;   box-sizing: border-box;   margin: 2px 2px;   padding: 10px 10px; }  "
-".col-c {    width: 50%;   float:center; }"
-".col-1 {    width: 50%; }"
-".col-2, .col-3 {    width: 20%; }"
-".row:after {   content: \"\";   display: table;   clear: both; }"));
+"body{font-family:\"OpenSans\",\"Arial\",\"mono\";color:#f7d53d;background-color:#193c3d;font-size:16px ;text-align:left;}"
+"h1{margin:2px 2px ;font-size:18px ;padding:2px 2px ;}"
+"label{float:left;margin:2px 2px ;font-size:18px ;padding:2px 2px ;}"
+"input[type=\"submit\"]{background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;margin:2px 2px ;padding:16px 16px ;font-size:16px ;cursor:pointer; width:100%}"
+"input[type=\"submit\"]:hover{background-color:#a6449f;color:#fff;}"
+"textarea{background-color:#317577;border-radius:4px ;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px ;padding:10px 10px ;}"
+".link_button{display:block;background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;margin:8px 2px ;padding:10px 10px ;font-size:16px ;cursor:pointer;text-decoration:none;width:100%}"
+".link_button:hover{background-color:#a6449f;color:#fff;}"
+".annotations{font-size:10px ;margin:2px 2px ;}"));
 }
 
 
@@ -101,44 +101,13 @@ static void send_html_body(String& body_content) {
     server.sendContent(F("<h1>Ooops. There was no/nada/nix content assembled for the html page body</h1>"));
   }
   server.sendContent_P(WEB_PAGE_FOOTER);
-  #ifdef TRACE_WEBUI
-    Serial.println(F(">TRACE_WEBUI- Page sent "));
+  #ifdef TR_WEBUI
+    Serial.println(F("TR_WEBUI> Page sent "));
   #endif
       
 }
 
-const char PRESET_NAME_LIST_STR[] PROGMEM ="-off-|" 
-                                          "Alarm Gelb|"
-                                          "Alarm Rot/Orange/Rosa|"
-                                          "Fade Grün/Cyan/Lemon|"
-                                          "Fade Blau/Weiß|"
-                                          "Orbit Blau/Cyan|"
-                                          "Orbit Gelb/Lila/Rot/Grün|"
-                                          "Orbit Lemon/Cyan/Pink/Orange|"
-                                          "Rainbow 60° Step|"
-                                          "Rainbow 1° Step|"
-                                          "1/4 Rainbow 1° Step|"
-                                          "1/4 Rainbow 10° Step|"
-                                          "Einfarbig 100° Farbstep|";
-
-#define PRESET_NAME_COUNT 13
-
-const char speed_name_0[] PROGMEM ="2 Beats";
-const char speed_name_1[] PROGMEM ="1 Beat";
-const char speed_name_2[] PROGMEM ="8th Note";
-const char speed_name_3[] PROGMEM ="16th Note";
-const char speed_name_4[] PROGMEM ="32nd Note";
-const char speed_name_5[] PROGMEM ="64th Note";
-
-
-const char * const speed_name_table[] PROGMEM  = {speed_name_0
-                                                 ,speed_name_1
-                                                 ,speed_name_2
-                                                 ,speed_name_3
-                                                 ,speed_name_4
-                                                 ,speed_name_5};
-#define SPEED_NAME_COUNT 6
-                                                 
+                                              
 
 void send_main_page() {
   DECLARE_PREALLOCATED_STRING(body_content,XLARGE_STR);
@@ -152,92 +121,50 @@ void send_main_page() {
   body_content+=F("<form action=\"/\" method=\"post\">"); 
   body_content+=F("<div class=\"row\">");
 
-  // BPM input
-  #ifdef TRACE_WEBUI_PAGE_GENERATION
-    Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- BPM Input"));
-  #endif
-  body_content+=F("<label for=\"BPM\" class=\"col-1\"> Beats per minute</label>");
-  value_as_string= String(output_get_bpm());
-  body_content+=F("<input type=\"number\" id=\"BPM\" name=\"BPM\" value=\"");
-  body_content+=value_as_string;
-  body_content+=F("\" class=\"col-2\">");
+  body_content+=F("<div> <form action=\"/\" method=\"post\">");
+  body_content+=F("<div> <label for=\"Sequence\" >Song Sequence</label>");
+  body_content+=F("<textarea  id=\"Sequence\" name=\"Sequence\" style=\"width:100%; height:3;\" >");
 
+  body_content+="### put current SEQUENCE String  here ###";
   
-  // Pattern Setup Table
-
-  for(int sequence_step_index=0;sequence_step_index<MAX_NUMBER_OF_PRESETS_IN_SEQUENCE;sequence_step_index++) {
-        body_content+=F("</div><div class=\"row\">");
-        // Preset selection
-        #ifdef TRACE_WEBUI_PAGE_GENERATION
-          Serial.print(F(">TRACE_WEBUI_PAGE_GENERATION- sequence step #"));
-          Serial.println(sequence_step_index);
-        #endif
-        value_as_string= "Preset"+String(sequence_step_index);
-        body_content+=F("<select id=\"");
-        body_content+=value_as_string;
-        body_content+=F("\" name=\"");
-        body_content+=value_as_string;
-        body_content+=F("\" class=\"col-1\" >");  
-        String element_list=FPSTR(PRESET_NAME_LIST_STR);
-        int element_end_index=element_list.indexOf('|');
-        int element_start_index=0;
-        for(int select_index=0;select_index<PRESET_NAME_COUNT;select_index++) {
-           body_content+=F("<option value=\"");
-           body_content+=String(select_index-1);  // Preset off = -1
-           if((select_index-1)==g_preset_sequence[sequence_step_index].preset_id) body_content+=F("\" selected>");
-           else body_content+=F("\">");
-           body_content+=element_list.substring(element_start_index,element_end_index);
-           body_content+=F("</option>");
-
-           // Foreward to next list element
-           element_start_index=element_end_index+1;
-           if(element_start_index>=element_list.length()) element_start_index =0;
-           element_end_index=element_list.indexOf('|',element_start_index);
-        }
-        body_content+=F("</select>");
-        
-        // Preset Speed selection 
-        
-        char string_buffer[50];
-        #ifdef TRACE_WEBUI_PAGE_GENERATION
-          Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- preset speed selection"));
-        #endif
-        value_as_string= "Speed"+String(sequence_step_index);
-        body_content+=F("<select id=\"");
-        body_content+=value_as_string;
-        body_content+=F("\" name=\"");
-        body_content+=value_as_string;
-        body_content+=F("\" class=\"col-2\" >");
-        for(int speed_index=0;speed_index<SPEED_NAME_COUNT;speed_index++) {
-           strcpy_P(string_buffer, (char*)pgm_read_dword(&(speed_name_table[speed_index])));
-           body_content+=F("<option value=\"");
-           body_content+=String(speed_index);
-           if(speed_index==g_preset_sequence[sequence_step_index].preset_speed) body_content+=F("\" selected>");
-           else body_content+=F("\">");
-           body_content+=string_buffer;
-           body_content+=F("</option>");
-        }
-        body_content+=F("</select>");
-
-        // preset beat duration input 
-        
-        #ifdef TRACE_WEBUI_PAGE_GENERATION
-          Serial.println(F(">TRACE_WEBUI_PAGE_GENERATION- preset duration input"));
-        #endif
-        value_as_string= "Duration"+String(sequence_step_index);
-        body_content+=F("<input type=\"number\" name=\"");
-        body_content+=value_as_string;;
-        body_content+=F("\" value=\"");
-        body_content+=String(g_preset_sequence[sequence_step_index].beats_to_run);
-        body_content+=F("\" class=\"col-3\">");
-  }// end of loop over preset parameter rows 
+  body_content+=F("</textarea> </div>");
+  body_content+=F("<div class=\"annotations\">");
+    body_content+=F("Syntax: &lt;bpm&gt; &lt;Part Letter&gt; &lt;Beats&gt;&lt;Beats&gt;... &lt;Part Letter&gt;...<br/>");
+  body_content+=F("# = Forward immediatly to next on button press <br/>");
+  body_content+=F("&gt; = Jump back here after end<br/>");
+  body_content+=F("Part Letter is defined in Song part configuration<br/>");
+  body_content+=F("Beats are one digit numbers, that get accumulated: 8888=32 Beats <br/>");
+  body_content+=F("248 =14 Beats");
+  body_content+=F("</div>");
   
-  // Submit button 
-  body_content+=F("</div><div class=\"row\">");
+  body_content+=F("<div > <label for=\"Parts\" >Song Parts</label>");
+  body_content+=F("<textarea  id=\"Parts\" name=\"Parts\" style=\"width:100%; height:1; \" >");
+
+  body_content+="### put current PART String  here ###";
+
+  body_content+=F("</textarea> </div>");
+  body_content+=F("<div class=\"annotations\">");
+  body_content+=F("Syntax:  &lt;Part Letter&gt;&lt;Pattern&gt;/&lt;Speed&gt;:&lt;color&gt;... <br/>");
+  body_content+=F("Pattern: identifies the pattern of light change (see pattern catalog)<br/>");
+  body_content+=F("Speed: Speed of the pattern 2=Haft Beat 4=Beat 8=8th, 16,32,64 <br/>");
+  body_content+=F("Color: defines the color palette (see color catalog)");
+  body_content+=F("</div>");
   body_content+=F("<input type=\"submit\" value=\"Start\">");
+  body_content+=F("</form>");
+  body_content+=F("<hr/>");
+  body_content+=F("<h1>Song Presets</h1>");
 
-  // End of Form
-  body_content+=F("</div></form>");
+  
+  char string_buffer[MAX_DEFINITON_STRING_LENGTH];
+
+  for(int song_index=0;song_index<song_catalog_count;song_index++) {
+        body_content+=F("<a class=\"link_button\"  href=\"song?song_index=");
+        body_content+=song_index;
+        body_content+=F("\">");
+        strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_name)));
+        body_content+=string_buffer;
+        body_content+=F("</a>");
+  } // Loop over song catalog
 
   /*Now get it all out to the user */
   send_html_body(body_content);
@@ -246,55 +173,46 @@ void send_main_page() {
 void parseFormData()
 {
   String FormArgument;
-
-  if (server.hasArg("BPM")) {
-      FormArgument = server.arg("BPM");
-      webui_data_bpm=FormArgument.toInt();
-      webui_command=SET_BPM;
+   if (server.hasArg("Parts")) {
+      FormArgument = server.arg("Parts");
+      // Parse Parts here
   }
 
-  String argument_name;
-  
-  for(int sequence_step_index=0;sequence_step_index<MAX_NUMBER_OF_PRESETS_IN_SEQUENCE;sequence_step_index++){
-     // Get preset id
-     argument_name="Preset"+String(sequence_step_index);
-     if (server.hasArg(argument_name)) {
-      FormArgument = server.arg(argument_name);
-      g_preset_sequence[sequence_step_index].preset_id=FormArgument.toInt();
-      webui_command=SET_SEQUENCE;
-     }
-
-     // Get speed
-     argument_name="Speed"+String(sequence_step_index);
-     if (server.hasArg(argument_name)) {
-      FormArgument = server.arg(argument_name);
-      g_preset_sequence[sequence_step_index].preset_speed=FormArgument.toInt();
-      webui_command=SET_SEQUENCE;
-     }
-
-     // Get duration
-     argument_name="Duration"+String(sequence_step_index);
-     if (server.hasArg(argument_name)) {
-      FormArgument = server.arg(argument_name);
-      g_preset_sequence[sequence_step_index].beats_to_run=FormArgument.toInt();
-      webui_command=SET_SEQUENCE;
-     }
-    
-  } // end of loop over sequence step index
+  if (server.hasArg("Sequence")) {
+      FormArgument = server.arg("Sequence");
+      // Parse and start Sequence here
+  }
 }
 
 void handleRoot()
 {
-  #ifdef TRACE_WEBUI
-    Serial.println(F(">TRACE_WEBUI- handleRoot started"));
+  #ifdef TR_WEBUI
+    Serial.println(F("TR_WEBUI> handleRoot started"));
   #endif
-  if (server.hasArg("BPM")) {
+  if (server.hasArg("Parts")) {
     parseFormData();
     process_webui_command();
   }
   send_main_page() ;
 }
 
+void handleSong()
+{
+  #ifdef TR_WEBUI
+    Serial.println(F("TR_WEBUI> handleSong started"));
+  #endif
+  
+  String urlParameterValue;
+  
+  if (server.hasArg("song_index")) {
+    urlParameterValue=server.arg("song_index");
+     #ifdef TR_WEBUI
+       Serial.print(F("TR_WEBUI> song_index:"));Serial.println(urlParameterValue);
+    #endif   
+    /* ########## Load song here ############# */
+  }
+  send_main_page() ;
+}
 
 
 void returnFail(String msg)
@@ -337,7 +255,7 @@ void handleLEDoff()
 
 void handleNotFound()
 {
-  String message = "File Not Found\n\n";
+  String message = "Not a valid request\n";
   message += "URI: ";
   message += server.uri();
   message += "\nMethod: ";
@@ -348,6 +266,7 @@ void handleNotFound()
   for (uint8_t i=0; i<server.args(); i++){
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
+  //message += "<a href=\"/\">Get Back to start</a>\n";
   server.send(404, "text/plain", message);
 }
 
@@ -373,6 +292,7 @@ void webui_setup(void)
   }
 
   server.on("/", handleRoot);
+  server.on("/song", handleSong);
   server.on("/default.css", sendStylesheet);
   server.on("/ledon", handleLEDon);
   server.on("/ledoff", handleLEDoff);
