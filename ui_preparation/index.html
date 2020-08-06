@@ -8,117 +8,59 @@
 </head>
 
 <BODY class="body">
-<body><h1>Show Control</h1>
+<body>
 <div>
 <form action="/" method="post">
 <div class="row">
-<label for="BPM" class="col-1"> Beats per minute</label>
-<input type="number" id="BPM" name="BPM" value="120" class="col-2">
+<label for="Sequence" >Song Sequence</label>
+<textarea  id="Sequence" name="Sequence" style="width:100%; height:3; " >
+120 I8888 A8888 C8888
+</textarea>
+</div>
+<div class="annotations">
+Syntax: &lt;bpm&gt; &lt;Part Letter&gt; &lt;Beats&gt;&lt;Beats&gt;... &lt;Part Letter&gt;...<br/>
+# = Forward immediatly to next on button press <br/>
+&gt; = Jump back here after end<br/>
+Part Letter is defined in Song part configuration<br/>
+Beats are one digit numbers, that get accumulated: 8888=32 Beats <br/>
+248 =14 Beats
 </div>
 <div class="row">
- <select id="Preset1" name="Preset1" class="col-1" >
-  <option value="-1">- off -</option>
-  <option value="0">Alarm Gelb</option>
-  <option value="1">Alarm Rot/Orange/Rosa</option>
-  <option value="2">Fade Grün/Cyan/Lemon</option>
-  <option value="3">Fade Blau/Weiß</option>
-  <option value="4">Orbit Blau/Cyan</option>
-  <option value="5">Orbit Gelb/Lila/Rot/Grün</option>
-  <option value="6">Orbit Lemon/Cyan/Pink/Orange</option>
-  <option value="7" selected>Rainbow 60° Step</option>
-  <option value="8">Rainbow 1° Step</option>
-  <option value="9">1/4 Rainbow 1° Step</option>
-  <option value="10">1/4 Rainbow 10° Step</option>
-  <option value="11">Einfarbig 100° Farbstep</option>
-</select> 
- <select id="Speed1" name="Speed1" class="col-2">
-  <option value="0">2 Beats (Half Note)</option>
-  <option value="1" selected>1 Beat (Quater Note)</option>
-  <option value="2">8th Note</option>
-  <option value="3">16th Note</option>
-  <option value="4">32th Note</option>
-  <option value="5">64th Note</option>
-</select>
-<input type="number" name="duration1" value="4" class="col-3">
+<label for="Parts" >Song Parts</label>
+<textarea  id="Parts" name="Parts" style="width:100%; height:1; " >
+I14/8:20 A12/4:0 C60:4/0
+</textarea>
 </div>
-<div class="row">
- <select id="Preset2" name="Preset2" class="col-1" >
-  <option value="-1">- off -</option>
-  <option value="0">Alarm Gelb</option>
-  <option value="1">Alarm Rot/Orange/Rosa</option>
-  <option value="2">Fade Grün/Cyan/Lemon</option>
-  <option value="3">Fade Blau/Weiß</option>
-  <option value="4">Orbit Blau/Cyan</option>
-  <option value="5">Orbit Gelb/Lila/Rot/Grün</option>
-  <option value="6">Orbit Lemon/Cyan/Pink/Orange</option>
-  <option value="7" selected>Rainbow 60° Step</option>
-  <option value="8">Rainbow 1° Step</option>
-  <option value="9">1/4 Rainbow 1° Step</option>
-  <option value="10">1/4 Rainbow 10° Step</option>
-  <option value="11">Einfarbig 100° Farbstep</option>
-</select> 
- <select id="Speed2" name="Speed2" class="col-2">
-  <option value="0">2 Beats (Half Note)</option>
-  <option value="1" selected>1 Beat (Quater Note)</option>
-  <option value="2">8th Note</option>
-  <option value="3">16th Note</option>
-  <option value="4">32th Note</option>
-  <option value="5">64th Note</option>
-</select>
-<input type="number" name="duration2" value="4" class="col-3">
+<div class="annotations">
+Syntax:  &lt;Part Letter&gt;&lt;Pattern&gt;/&lt;Speed&gt;:&lt;color&gt;... <br/>
+Pattern: identifies the pattern of light change (see pattern catalog)<br/>
+Speed: Speed of the pattern 2=Haft Beat 4=Beat 8=8th, 16,32,64 <br/>
+Color: defines the color palette (see color catalog)
 </div>
-<div class="row">
- <select id="Preset3" name="Preset3" class="col-1" >
-  <option value="-1">- off -</option>
-  <option value="0">Alarm Gelb</option>
-  <option value="1">Alarm Rot/Orange/Rosa</option>
-  <option value="2">Fade Grün/Cyan/Lemon</option>
-  <option value="3">Fade Blau/Weiß</option>
-  <option value="4">Orbit Blau/Cyan</option>
-  <option value="5">Orbit Gelb/Lila/Rot/Grün</option>
-  <option value="6">Orbit Lemon/Cyan/Pink/Orange</option>
-  <option value="7" selected>Rainbow 60° Step</option>
-  <option value="8">Rainbow 1° Step</option>
-  <option value="9">1/4 Rainbow 1° Step</option>
-  <option value="10">1/4 Rainbow 10° Step</option>
-  <option value="11">Einfarbig 100° Farbstep</option>
-</select> 
- <select id="Speed3" name="Speed3" class="col-2">
-  <option value="0">2 Beats (Half Note)</option>
-  <option value="1" selected>1 Beat (Quater Note)</option>
-  <option value="2">8th Note</option>
-  <option value="3">16th Note</option>
-  <option value="4">32th Note</option>
-  <option value="5">64th Note</option>
-</select>
-<input type="number" name="duration3" value="4" class="col-3">
+<input type="submit" value="Start">
+</form>
+<hr/>
+<h1>Song Presets</h1>
+
+<a class="link_button"  href="/s1">Cypher 4 (BTS)</a>
+<a class="link_button" href="/s2">IDOL (BTS)</a>
+<a class="link_button" href="/s3">DNA (BTS)</a>
+<hr/>
+<h1>Pattern Catalog</h1>
+<div class="annotations">
+A group varies in speed of color change relative to beat<br/>
+0-3: Pulse<br/>
+4-7: Heartbeat Pulse<br/>
+8-9: Dimmed Pulse, Heartbeat<br/>
+10: Whipe  11: Whipe over black<br/>
+20-29: Orbit<br/>
+30-39: Color Orbit, color shift 1<br/>
+40-49: " , color shift 2<br/>
+50-59: " , color shift 3<br/>
+60-69: Full Rainbow<br/>
+70-79: Half  Rainbow<br/>
+80-89: Quater  Rainbow<br/>
+90-99: Flat <br/>
 </div>
-<div class="row">
- <select id="Preset4" name="Preset4" class="col-1" >
-  <option value="-1">- off -</option>
-  <option value="0">Alarm Gelb</option>
-  <option value="1">Alarm Rot/Orange/Rosa</option>
-  <option value="2">Fade Grün/Cyan/Lemon</option>
-  <option value="3">Fade Blau/Weiß</option>
-  <option value="4">Orbit Blau/Cyan</option>
-  <option value="5">Orbit Gelb/Lila/Rot/Grün</option>
-  <option value="6">Orbit Lemon/Cyan/Pink/Orange</option>
-  <option value="7" selected>Rainbow 60° Step</option>
-  <option value="8">Rainbow 1° Step</option>
-  <option value="9">1/4 Rainbow 1° Step</option>
-  <option value="10">1/4 Rainbow 10° Step</option>
-  <option value="11">Einfarbig 100° Farbstep</option>
-</select> 
- <select id="Speed4" name="Speed4" class="col-2">
-  <option value="0">2 Beats (Half Note)</option>
-  <option value="1" selected>1 Beat (Quater Note)</option>
-  <option value="2">8th Note</option>
-  <option value="3">16th Note</option>
-  <option value="4">32th Note</option>
-  <option value="5">64th Note</option>
-</select>
-<input type="number" name="duration4" value="4" class="col-3">
-</div>
-<input type="submit" value="Start"> </form>
-</div>
+
 </body></html>
