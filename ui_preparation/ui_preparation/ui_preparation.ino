@@ -44,6 +44,7 @@ void setup(void)
   #endif
 }
 
+
 void process_webui_command() {
   switch (webui_read_command())
     {
@@ -61,3 +62,15 @@ void loop(void)
 {
   webui_loop();
 }
+
+/*******************  Mockups **************************/
+
+void parse_slot_settings(String slot_setting_string)  {
+  
+
+}
+
+void parse_sequence(String sequence_string)  {
+  
+}
+
