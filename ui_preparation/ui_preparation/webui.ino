@@ -216,36 +216,40 @@ void send_main_page() {
   // ******************* Send Button Grid ***************************
   server.sendContent_P(WEB_PAGE_BUTTON_START);
   
-  for(int row_index=0;row_index<WEBUI_COLOR_BUTTON_ROW_COUNT;row_index++) {
+  for(int row_index=0;row_index<WEBUI_COLOR_BUTTON_ROW_COUNT+1;row_index++) {
     content_element="<tr>";
 
-    content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
-    content_element+=webui_pattern_button[row_index].pattern_id;
-    content_element+=F("&w=4\">");
-    strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_pattern_button[row_index].label)));
-    content_element+=string_buffer;
-    content_element+=F("</a></div></td>");
-
-    content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
-    content_element+=webui_pattern_button[row_index].pattern_id;
-    content_element+=F("&w=8\">8th\"");
-    content_element+=F("</a></div></td>");
-
-    for(int col=0;col<2;col++) {
-      content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?h=");
-      content_element+=webui_color_button[2*row_index+col].hue;
-      content_element+=F("&s=");
-      content_element+=webui_color_button[2*row_index+col].saturation;
-      content_element+="\">";
-      strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_color_button[2*row_index+col].label)));
+    for(int col=0;col<(row_index<WEBUI_COLOR_BUTTON_ROW_COUNT?1:3);col++){ // on last row fill it up by yourself
+      content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
+      content_element+=webui_pattern_button[row_index+col].pattern_id;
+      content_element+=F("&w=4\">");
+      strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_pattern_button[row_index+col].label)));
       content_element+=string_buffer;
       content_element+=F("</a></div></td>");
-      content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?i=1&h=");
-      content_element+=webui_color_button[2*row_index+col].hue;
-      content_element+=F("&s=");
-      content_element+=webui_color_button[2*row_index+col].saturation;
-      content_element+="\">+";
+  
+      content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
+      content_element+=webui_pattern_button[row_index+col].pattern_id;
+      content_element+=F("&w=8\">8th");
       content_element+=F("</a></div></td>");
+  }
+
+    if(row_index<WEBUI_COLOR_BUTTON_ROW_COUNT) {
+      for(int col=0;col<2;col++) {
+        content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?i=1&h=");
+        content_element+=webui_color_button[2*row_index+col].hue;
+        content_element+=F("&s=");
+        content_element+=webui_color_button[2*row_index+col].saturation;
+        content_element+="\">";
+        strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_color_button[2*row_index+col].label)));
+        content_element+=string_buffer;
+        content_element+=F("</a></div></td>");
+        content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?h=");
+        content_element+=webui_color_button[2*row_index+col].hue;
+        content_element+=F("&s=");
+        content_element+=webui_color_button[2*row_index+col].saturation;
+        content_element+="\">+";
+        content_element+=F("</a></div></td>");
+      }
     }
     content_element+="</tr>";
     server.sendContent(content_element);
@@ -341,6 +345,33 @@ void handleSong()
   send_main_page() ;
 }
 
+void handleSwitch()
+{
+  #ifdef TR_WEBUI
+    Serial.println(F("TR_WEBUI> handleSwitch started"));
+  #endif
+  String url_parameter_value;
+  if (server.hasArg("p")) {  // Pattern switch
+    url_parameter_value=server.arg("p");
+    output_start_pattern(url_parameter_value.toInt());
+    mode_of_operation=MODE_FIX_PRESET;
+  }
+  if (server.hasArg("w")) {  // Pattern switch
+    url_parameter_value=server.arg("w");
+    int preset_speed_id=preset_speed_to_id(server.arg("w"));
+    if(preset_speed_id>=0)output_set_pattern_speed(preset_speed_id);
+    mode_of_operation=MODE_FIX_PRESET;
+  }
+  if (server.hasArg("h")&&server.hasArg("s")) {
+    float hue = server.arg("h").toFloat();
+    float saturation = server.arg("s").toFloat();
+    if(server.hasArg("i")) output_reset_color_palette(hue,saturation);
+    else output_add_color_palette_entry(hue,saturation);
+    mode_of_operation=MODE_FIX_PRESET;
+  }
+  send_main_page() ;
+}
+
 
 void returnFail(String msg)
 {
@@ -350,34 +381,11 @@ void returnFail(String msg)
 }
 
 
-
 void returnOK()
 {
   server.sendHeader("Connection", "close");
   server.sendHeader("Access-Control-Allow-Origin", "*");
   server.send(200, "text/plain", "OK\r\n");
-}
-
-/*
- * Imperative to turn the LED on using a non-browser http client.
- * For example, using wget.
- * $ wget http://esp8266webform/ledon
- */
-void handleLEDon()
-{
-  //writeLED(true);
-  returnOK();
-}
-
-/*
- * Imperative to turn the LED off using a non-browser http client.
- * For example, using wget.
- * $ wget http://esp8266webform/ledoff
- */
-void handleLEDoff()
-{
-  //writeLED(false);
-  returnOK();
 }
 
 void handleNotFound()
@@ -420,9 +428,8 @@ void webui_setup(void)
 
   server.on("/", handleRoot);
   server.on("/song", handleSong);
+  server.on("/switch", handleSwitch);
   server.on("/default.css", sendStylesheet);
-  server.on("/ledon", handleLEDon);
-  server.on("/ledoff", handleLEDoff);
   server.onNotFound(handleNotFound);
 
   server.begin();

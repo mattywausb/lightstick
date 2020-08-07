@@ -65,7 +65,7 @@ struct catalog {
   ,{song_name_6,song_slots_6,song_sequence_6}
   ,{song_name_7,song_slots_7,song_sequence_7}
   ,{song_name_8,song_slots_8,song_sequence_8}
-  ,{song_name_9,song_slots_8,song_sequence_9}
+  ,{song_name_9,song_slots_9,song_sequence_9}
 };
 
 int song_catalog_count=10;

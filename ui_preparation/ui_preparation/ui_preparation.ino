@@ -10,23 +10,15 @@
 
 #include "mainSettings.h"
 #include "webui.h"
+#include "output.h"
 
-typedef struct {
-    byte preset_id;       // 0-255
-    byte preset_speed;       // 0-255
-    byte beats_to_run;       // 0-255
-} t_sequence_entry;
+enum MODE_OF_OPERATION {
+  MODE_SEQUENCE,
+  MODE_SEQUENCE_HOLD,
+  MODE_FIX_PRESET,
+};
 
-t_sequence_entry g_preset_sequence[MAX_NUMBER_OF_PRESETS_IN_SEQUENCE] = {
-                               {1, 4,16}
-                              ,{1, 8,16}
-                              ,{7, 4, 8}
-                              ,{3,16, 8}
-                              ,{6,16,32}
-                              ,{7, 4, 8}
-                              ,{3,16, 4}
-                              ,{8,32, 4}
-                              };
+MODE_OF_OPERATION mode_of_operation=MODE_SEQUENCE;
 
 void setup(void)
 {
@@ -64,3 +56,18 @@ void parse_sequence(String sequence_string)  {
   #endif
 }
 
+/* convert pattern_speed to pattern_speed_id */
+int preset_speed_to_id(String pattern_speed) {
+    #ifdef TR_STRING_PARSING
+ //        Serial.print(F(">TR_STRING_PARSING preset_speed_to_id:"));Serial.println(pattern_speed);
+  #endif
+      switch(pattern_speed.toInt()) {
+        case 2: return STEP_ON_2BEATS; 
+        case 4: return STEP_ON_BEAT;
+        case 8: return STEP_ON_8TH;
+        case 16:  return STEP_ON_16TH;
+        case 32:  return STEP_ON_32RD;
+        case 64:  return STEP_ON_64TH;
+      }
+      return -1;
+}
