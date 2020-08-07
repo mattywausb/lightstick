@@ -89,17 +89,18 @@ const char pattx_flat[] PROGMEM ="Flat";
 typedef struct pattern_button {
   const char *label;
   int   pattern_id;
+  int base_speed;
 } t_pattern_button;
 
 t_pattern_button webui_pattern_button[] {
-  {pattx_pulse,2},
-  {pattx_whipe,10},
-  {pattx_wave,11},
-  {pattx_orbit,24},
-  {pattx_disco,44},
-  {pattx_rainbow,68},
-  {pattx_quater,88},
-  {pattx_flat,92}
+  {pattx_pulse,2,2},
+  {pattx_whipe,10,4},
+  {pattx_wave,11,8},
+  {pattx_orbit,24,8},
+  {pattx_disco,44,4},
+  {pattx_rainbow,64,4},
+  {pattx_quater,83,4},
+  {pattx_flat,91,2}
 };
 
 const char coltx_red[] PROGMEM ="Red";

@@ -19,16 +19,16 @@ void Lamp::add_hue_angle(float angle)
   while(m_color_hsv.h<0.0) {m_color_hsv.h+=360.0;};
  }
 
-void Lamp::add_saturation(float saturation) 
+void Lamp::add_saturation(float increment) 
 {
-  m_color_hsv.s+=saturation; 
+  m_color_hsv.s+=increment; 
   if(m_color_hsv.s>=1.0) m_color_hsv.s=1.0; 
   if(m_color_hsv.s<0.0) m_color_hsv.s=0.0;
 }
 
-void Lamp::add_value(float value) 
+void Lamp::multiply_value(float fact) 
 {
-  m_color_hsv.v+=value; 
+  m_color_hsv.v*=fact; 
   if(m_color_hsv.v>=1.0) m_color_hsv.v=1.0; 
   if(m_color_hsv.v<0.0) m_color_hsv.v=0.0;
 }
