@@ -44,18 +44,10 @@ MDNSResponder mdns;
 
 ESP8266WebServer server(80);
 
-t_webui_command webui_command=NONE;
-int webui_data_bpm=0;
+String webui_song_sequence_textarea="120 I8#>A8888 B8888 R8888 8888";
 
-boolean webui_has_new_command() { return webui_command!=NONE; }
+String webui_song_parts_textarea="I8/2:0 A10/4:0 B11/4:0 R68/8:0";
 
-t_webui_command webui_read_command() { 
-  t_webui_command current_command=webui_command;
-  webui_command=NONE;
-  return current_command;
- }
-
-int webui_data_get_bpm() { return webui_data_bpm;}
 
 /* HTML Header */ 
 
@@ -76,9 +68,10 @@ void sendStylesheet() {
 "input[type=\"submit\"]{background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;margin:2px 2px ;padding:16px 16px ;font-size:16px ;cursor:pointer; width:100%}"
 "input[type=\"submit\"]:hover{background-color:#a6449f;color:#fff;}"
 "textarea{background-color:#317577;border-radius:4px ;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px ;padding:10px 10px ;}"
-".link_button{display:block;background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;margin:8px 2px ;padding:10px 10px ;font-size:16px ;cursor:pointer;text-decoration:none;width:100%}"
-".link_button:hover{background-color:#a6449f;color:#fff;}"
-".annotations{font-size:10px ;margin:2px 2px ;}"));
+".lb{display:block;background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;padding:10px 10px ;font-size:16px ;cursor:pointer;text-decoration:none}"
+".lb:hover{background-color:#a6449f;color:#fff;}"
+".lb_box{padding:2px 2px;}"
+".anntn{font-size:10px;margin:2px 2px;}"));
 }
 
 
@@ -117,18 +110,21 @@ void send_main_page() {
   send_html_header() ;
 
   // Heading of page 
-  body_content+=F("<h1>Show Control</h1> <div>");
+  body_content+=F("<div>");
   body_content+=F("<form action=\"/\" method=\"post\">"); 
   body_content+=F("<div class=\"row\">");
 
+  // Part / Sequence Form
   body_content+=F("<div> <form action=\"/\" method=\"post\">");
+
+  // Sequence
   body_content+=F("<div> <label for=\"Sequence\" >Song Sequence</label>");
   body_content+=F("<textarea  id=\"Sequence\" name=\"Sequence\" style=\"width:100%; height:3;\" >");
 
-  body_content+="### put current SEQUENCE String  here ###";
+  body_content+=webui_song_sequence_textarea;
   
   body_content+=F("</textarea> </div>");
-  body_content+=F("<div class=\"annotations\">");
+  body_content+=F("<div class=\"anntn\">");
     body_content+=F("Syntax: &lt;bpm&gt; &lt;Part Letter&gt; &lt;Beats&gt;&lt;Beats&gt;... &lt;Part Letter&gt;...<br/>");
   body_content+=F("# = Forward immediatly to next on button press <br/>");
   body_content+=F("&gt; = Jump back here after end<br/>");
@@ -136,21 +132,26 @@ void send_main_page() {
   body_content+=F("Beats are one digit numbers, that get accumulated: 8888=32 Beats <br/>");
   body_content+=F("248 =14 Beats");
   body_content+=F("</div>");
-  
+
+  // Parts
   body_content+=F("<div > <label for=\"Parts\" >Song Parts</label>");
   body_content+=F("<textarea  id=\"Parts\" name=\"Parts\" style=\"width:100%; height:1; \" >");
 
-  body_content+="### put current PART String  here ###";
+  body_content+=webui_song_parts_textarea;
 
   body_content+=F("</textarea> </div>");
-  body_content+=F("<div class=\"annotations\">");
+  body_content+=F("<div class=\"anntn\">");
   body_content+=F("Syntax:  &lt;Part Letter&gt;&lt;Pattern&gt;/&lt;Speed&gt;:&lt;color&gt;... <br/>");
   body_content+=F("Pattern: identifies the pattern of light change (see pattern catalog)<br/>");
   body_content+=F("Speed: Speed of the pattern 2=Haft Beat 4=Beat 8=8th, 16,32,64 <br/>");
   body_content+=F("Color: defines the color palette (see color catalog)");
   body_content+=F("</div>");
   body_content+=F("<input type=\"submit\" value=\"Start\">");
+
+  // End of Part/ Sequence Form
   body_content+=F("</form>");
+
+  // 
   body_content+=F("<hr/>");
   body_content+=F("<h1>Song Presets</h1>");
 
@@ -158,12 +159,12 @@ void send_main_page() {
   char string_buffer[MAX_DEFINITON_STRING_LENGTH];
 
   for(int song_index=0;song_index<song_catalog_count;song_index++) {
-        body_content+=F("<a class=\"link_button\"  href=\"song?song_index=");
-        body_content+=song_index;
+        body_content+=F("<div class=\"lb_box\"><a class=\"lb\"  href=\"song?song_index=");
+        body_content+=(song_index);  
         body_content+=F("\">");
         strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_name)));
         body_content+=string_buffer;
-        body_content+=F("</a>");
+        body_content+=F("</a></div>");
   } // Loop over song catalog
 
   /*Now get it all out to the user */
@@ -172,16 +173,15 @@ void send_main_page() {
 
 void parseFormData()
 {
-  String FormArgument;
-   if (server.hasArg("Parts")) {
-      FormArgument = server.arg("Parts");
-      // Parse Parts here
+  if (server.hasArg("Parts")) {
+      webui_song_parts_textarea = server.arg("Parts");
   }
 
   if (server.hasArg("Sequence")) {
-      FormArgument = server.arg("Sequence");
-      // Parse and start Sequence here
+      webui_song_sequence_textarea = server.arg("Sequence");
   }
+  parse_slot_settings( webui_song_parts_textarea);
+  parse_sequence (webui_song_sequence_textarea);
 }
 
 void handleRoot()
@@ -191,7 +191,6 @@ void handleRoot()
   #endif
   if (server.hasArg("Parts")) {
     parseFormData();
-    process_webui_command();
   }
   send_main_page() ;
 }
@@ -202,14 +201,22 @@ void handleSong()
     Serial.println(F("TR_WEBUI> handleSong started"));
   #endif
   
-  String urlParameterValue;
-  
+  String song_index_parameter;
+  char string_buffer[MAX_DEFINITON_STRING_LENGTH];
+   
   if (server.hasArg("song_index")) {
-    urlParameterValue=server.arg("song_index");
+     song_index_parameter=server.arg("song_index");
      #ifdef TR_WEBUI
-       Serial.print(F("TR_WEBUI> song_index:"));Serial.println(urlParameterValue);
+       Serial.print(F("TR_WEBUI> song_index:"));Serial.println(song_index_parameter);
     #endif   
-    /* ########## Load song here ############# */
+    int song_index=song_index_parameter.toInt();  // Bad input will result in song 0 (can happen from saved urls, not from urls of own form)
+    song_preset_start(song_index_parameter.toInt());
+
+    strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_slot_definition)));
+    webui_song_parts_textarea=string_buffer;
+
+    strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_sequence_definition)));
+    webui_song_sequence_textarea=string_buffer;
   }
   send_main_page() ;
 }

@@ -12,14 +12,6 @@ h1 {
     padding: 2px 2px;
 }
 
-h2 {
-	margin: 2px 2px;
-	font-size: 12px;
-    padding: 2px 2px;
-}
-
-/* Form Styles */
-
 label {
 	float: left;
     margin: 2px 2px;
@@ -27,7 +19,6 @@ label {
     padding: 2px 2px;
 }
 
-/* normal button */
 input[type="submit"] {
   background-color: #773172;
   border-radius: 4px;
@@ -36,6 +27,7 @@ input[type="submit"] {
   margin: 2px 2px;
   padding: 16px 16px;
   font-size: 16px;
+  cursor:pointer;
   width:100%
 }
 input[type="submit"]:hover {
@@ -43,26 +35,6 @@ input[type="submit"]:hover {
   color: #fff;
 }
 
-/* Number input, Select box */
-input[type="number"], select{
-  background-color: #317577;
-  border-radius: 4px;
-  border: none;
-  color:#f7d53d;
-  box-sizing: border-box;
-  margin: 2px 2px;
-  padding: 10px 10px;
-}  
-input[type="text"], select{
-  background-color: #317577;
-  border-radius: 4px;
-  border: none;
-  color:#f7d53d;
-  box-sizing: border-box;
-  margin: 2px 2px;
-  padding: 10px 10px;
-  
-}  
 textarea {
 	background-color: #317577;
   border-radius: 4px;
@@ -73,31 +45,25 @@ textarea {
   padding: 10px 10px;
 }
 
-.link_button {
-	display:block;
+.lb {
+display:block;
   background-color: #773172;
   border-radius: 4px;
   border: none;
   color:#f7d53d;
-  margin: 8px 2px;
   padding: 10px 10px;
   font-size: 16px;
   cursor: pointer;
-  text-align: left;
   text-decoration: none;
-  width:100%
 }
 
-
-.link_button:hover {
+.lb:hover {
   background-color: #a6449f;
   color: #fff;
 }
 
-.row:after {
-  content: "";
-  display: table;
-  clear: both;
+.lb_box{
+ padding: 2px 2px;
 }
 
 .annotations {

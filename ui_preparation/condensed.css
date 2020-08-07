@@ -1,0 +1,13 @@
+body{font-family:"OpenSans","Arial","mono";color:#f7d53d;background-color:#193c3d;font-size:16px ;text-align:left;}
+h1{margin:2px 2px ;font-size:18px ;padding:2px 2px ;}
+h2{margin:2px 2px ;font-size:12px ;padding:2px 2px ;}
+label{float:left;margin:2px 2px ;font-size:18px ;padding:2px 2px ;}
+input[type="submit"]{background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;margin:2px 2px ;padding:16px 16px ;font-size:16px ;width:100%}
+input[type="submit"]:hover{background-color:#a6449f;color:#fff;}
+input[type="number"],select{background-color:#317577;border-radius:4px ;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px ;padding:10px 10px ;}
+input[type="text"],select{background-color:#317577;border-radius:4px ;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px ;padding:10px 10px ;}
+textarea{background-color:#317577;border-radius:4px ;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px ;padding:10px 10px ;}
+.link_button{display:block;background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;margin:8px 2px ;padding:10px 10px ;font-size:16px ;cursor:pointer;text-align:left;text-decoration:none;width:100%}
+.link_button:hover{background-color:#a6449f;color:#fff;}
+.row:after{content:"";display:table;clear:both;}
+.annotations{font-size:10px ;margin:2px 2px ;}

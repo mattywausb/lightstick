@@ -45,19 +45,6 @@ void setup(void)
 }
 
 
-void process_webui_command() {
-  switch (webui_read_command())
-    {
-      case SET_SEQUENCE:
-              // toDo reset sequence index to 0
-      case SET_BPM: 
-              int new_bpm=webui_data_get_bpm();
-              output_set_demo_led(new_bpm%2);
-              output_set_bpm(new_bpm);
-              break;
-    }
-}
-
 void loop(void)
 {
   webui_loop();
@@ -66,11 +53,14 @@ void loop(void)
 /*******************  Mockups **************************/
 
 void parse_slot_settings(String slot_setting_string)  {
-  
-
+  #ifdef TRACE_ON
+    Serial.print(F("TRACE_ON> MOCK:parse_slot_settings:"));Serial.println(slot_setting_string);
+  #endif
 }
 
 void parse_sequence(String sequence_string)  {
-  
+    #ifdef TRACE_ON
+    Serial.print(F("TRACE_ON> MOCK parse_sequence:"));Serial.println(sequence_string);
+  #endif
 }
 
