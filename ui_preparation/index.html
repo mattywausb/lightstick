@@ -9,7 +9,71 @@
 
 <BODY class="body">
 
-<div> <form action="/" method="post">
+<div> 
+<table>
+<tr>
+	<td>Pattern</td>
+	<td></td>
+	<td>color</td>
+	<td></td>
+	<td></td>
+	<td></td>
+</tr><tr>
+
+<tr>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=0&speed=4">Pulse</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=0&speed=8">8th</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=0&sat=1&add=0">red</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=0&sat=1&add=1">+</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=0&sat=1&add=0">pink</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=0&sat=1&add=1">+</a></div></td>
+</tr><tr>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=10">Whipe</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=10&speed=8">8th</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">blue</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">+</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">cyan</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">+</a></div></td>
+</tr><tr>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=11">Fade</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=11&speed=8">8th</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">green</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">+</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">lemon</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">+</a></div></td>
+</tr><tr>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=24">Orbit</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=25&speed=8">8th</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">yellow</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">+</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">orange</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">+</a></div></td>
+</tr>
+<tr>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=24">Disco</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=25&speed=8">8th</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">purple</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">+</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">white</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">+</a></div></td>
+</tr>
+<tr>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=68">Rainbow</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=25&speed=8">8th</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">Quater</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">8th</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=0">Flat</a></div></td>
+	<td><div class="lb_box"><a class="lb"  href="/color?hue=240&sat=1&add=1">8th</a></div></td>
+</tr>
+</table>
+<hr/>
+<h1>Song Presets</h1>
+<div class="lb_box"><a class="lb"  href="/s1">Cypher 4 (BTS)</a></div>
+<div class="lb_box"><a class="lb" href="/s2">IDOL (BTS)</a></div>
+<div class="lb_box"><a class="lb" href="/s3">DNA (BTS)</a></div>
+<hr/>
+
+<form action="/" method="post">
 <div> <label for="Sequence" >Song Sequence</label>
 <textarea  id="Sequence" name="Sequence" style="width:100%; height:3; " >
 120 I8888 A8888 C8888
@@ -35,12 +99,6 @@ Color: defines the color palette (see color catalog)
 <input type="submit" value="Start">
 </form>
 <hr/>
-<h1>Song Presets</h1>
-
-<div class="lb_box"><a class="lb"  href="/s1">Cypher 4 (BTS)</a></div>
-<div class="lb_box"><a class="lb" href="/s2">IDOL (BTS)</a></div>
-<div class="lb_box"><a class="lb" href="/s3">DNA (BTS)</a></div>
-<hr/>
 <h1>Pattern Catalog</h1>
 <div class="annotations">
 A group varies in speed of color change relative to beat<br/>
@@ -57,5 +115,4 @@ A group varies in speed of color change relative to beat<br/>
 80-89: Quater  Rainbow<br/>
 90-99: Flat <br/>
 </div>
-
 </body></html>

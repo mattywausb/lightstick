@@ -87,12 +87,7 @@ static void send_html_header() {
 const char WEB_PAGE_FOOTER[] PROGMEM = "</body></html>\r\n";
 
 
-static void send_html_body(String& body_content) {
-  if (body_content.length()) {
-    server.sendContent(body_content);
-  } else {
-    server.sendContent(F("<h1>Ooops. There was no/nada/nix content assembled for the html page body</h1>"));
-  }
+static void send_html_footer() {
   server.sendContent_P(WEB_PAGE_FOOTER);
   #ifdef TR_WEBUI
     Serial.println(F("TR_WEBUI> Page sent "));
@@ -100,63 +95,68 @@ static void send_html_body(String& body_content) {
       
 }
 
-                                              
+const char WEB_PAGE_INTRO[] PROGMEM ="<div>""<form action=\"/\" method=\"post\">"; 
+
+const char WEB_PAGE_SEQ_PART_START[] PROGMEM =
+      "<div> <label for=\"Sequence\" >Song Sequence</label>"
+      "<textarea  id=\"Sequence\" name=\"Sequence\" style=\"width:100%; height:3;\" >";
+  
+
+const char WEB_PAGE_SEQ_PART_END[] PROGMEM =
+      "</textarea> </div>"
+      "<div class=\"anntn\">"
+      "Syntax: &lt;bpm&gt; &lt;Part Letter&gt; &lt;Beats&gt;&lt;Beats&gt;... &lt;Part Letter&gt;...<br/>"
+      "# = Forward immediatly to next on button press <br/>"
+      "&gt; = Jump back here after end<br/>"
+      "Part Letter is defined in Song part configuration<br/>"
+      "Beats are one digit numbers, that get accumulated: 8888=32 Beats <br/>"
+      "248 =14 Beats"
+      "</div>";
+
+const char WEB_PAGE_SONG_PART_START[] PROGMEM =
+      "<div > <label for=\"Parts\" >Song Parts</label>"
+      "<textarea  id=\"Parts\" name=\"Parts\" style=\"width:100%; height:1; \" >";
+
+const char WEB_PAGE_SONG_PART_END[] PROGMEM =
+      "</textarea> </div>"
+      "<div class=\"anntn\">"
+      "Syntax:  &lt;Part Letter&gt;&lt;Pattern&gt;/&lt;Speed&gt;:&lt;color&gt;... <br/>"
+      "Pattern: identifies the pattern of light change (see pattern catalog)<br/>"
+      "Speed: Speed of the pattern 2=Haft Beat 4=Beat 8=8th, 16,32,64 <br/>"
+      "Color: defines the color palette (see color catalog)"
+      "</div>";
+
+const char WEB_PAGE_FORM_END[] PROGMEM =
+      "<input type=\"submit\" value=\"Start\">"
+      "</form>"
+      "<hr/>"
+      "<h1>Song Presets</h1>";
 
 void send_main_page() {
-  DECLARE_PREALLOCATED_STRING(body_content,XLARGE_STR);
+
 
   String value_as_string;
   
   send_html_header() ;
-
-  // Heading of page 
-  body_content+=F("<div>");
-  body_content+=F("<form action=\"/\" method=\"post\">"); 
-  body_content+=F("<div class=\"row\">");
-
-  // Part / Sequence Form
-  body_content+=F("<div> <form action=\"/\" method=\"post\">");
-
-  // Sequence
-  body_content+=F("<div> <label for=\"Sequence\" >Song Sequence</label>");
-  body_content+=F("<textarea  id=\"Sequence\" name=\"Sequence\" style=\"width:100%; height:3;\" >");
-
-  body_content+=webui_song_sequence_textarea;
+  server.sendContent_P(WEB_PAGE_INTRO);
   
-  body_content+=F("</textarea> </div>");
-  body_content+=F("<div class=\"anntn\">");
-    body_content+=F("Syntax: &lt;bpm&gt; &lt;Part Letter&gt; &lt;Beats&gt;&lt;Beats&gt;... &lt;Part Letter&gt;...<br/>");
-  body_content+=F("# = Forward immediatly to next on button press <br/>");
-  body_content+=F("&gt; = Jump back here after end<br/>");
-  body_content+=F("Part Letter is defined in Song part configuration<br/>");
-  body_content+=F("Beats are one digit numbers, that get accumulated: 8888=32 Beats <br/>");
-  body_content+=F("248 =14 Beats");
-  body_content+=F("</div>");
+  // Sequence
+  server.sendContent_P(WEB_PAGE_SEQ_PART_START);
+  server.sendContent(webui_song_sequence_textarea);
+  server.sendContent_P(WEB_PAGE_SEQ_PART_END);
+
 
   // Parts
-  body_content+=F("<div > <label for=\"Parts\" >Song Parts</label>");
-  body_content+=F("<textarea  id=\"Parts\" name=\"Parts\" style=\"width:100%; height:1; \" >");
-
-  body_content+=webui_song_parts_textarea;
-
-  body_content+=F("</textarea> </div>");
-  body_content+=F("<div class=\"anntn\">");
-  body_content+=F("Syntax:  &lt;Part Letter&gt;&lt;Pattern&gt;/&lt;Speed&gt;:&lt;color&gt;... <br/>");
-  body_content+=F("Pattern: identifies the pattern of light change (see pattern catalog)<br/>");
-  body_content+=F("Speed: Speed of the pattern 2=Haft Beat 4=Beat 8=8th, 16,32,64 <br/>");
-  body_content+=F("Color: defines the color palette (see color catalog)");
-  body_content+=F("</div>");
-  body_content+=F("<input type=\"submit\" value=\"Start\">");
-
+  server.sendContent_P(WEB_PAGE_SONG_PART_START);
+  server.sendContent(webui_song_parts_textarea);
+  server.sendContent_P(WEB_PAGE_SONG_PART_END);
+  
   // End of Part/ Sequence Form
-  body_content+=F("</form>");
-
-  // 
-  body_content+=F("<hr/>");
-  body_content+=F("<h1>Song Presets</h1>");
-
+  server.sendContent_P(WEB_PAGE_FORM_END);
   
   char string_buffer[MAX_DEFINITON_STRING_LENGTH];
+  
+  DECLARE_PREALLOCATED_STRING(body_content,XLARGE_STR);
 
   for(int song_index=0;song_index<song_catalog_count;song_index++) {
         body_content+=F("<div class=\"lb_box\"><a class=\"lb\"  href=\"song?song_index=");
@@ -168,7 +168,8 @@ void send_main_page() {
   } // Loop over song catalog
 
   /*Now get it all out to the user */
-  send_html_body(body_content);
+  server.sendContent(body_content);
+  send_html_footer();
 }
 
 void parseFormData()
