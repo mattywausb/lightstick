@@ -11,13 +11,8 @@ h1 {
 	font-size: 18px;
     padding: 2px 2px;
 }
+tr,td {margin:0px 0px;padding:0px 0px;}
 
-label {
-	float: left;
-    margin: 2px 2px;
-	font-size: 18px;
-    padding: 2px 2px;
-}
 
 input[type="submit"] {
   background-color: #773172;

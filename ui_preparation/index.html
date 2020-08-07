@@ -10,16 +10,15 @@
 <BODY class="body">
 
 <div> 
-<table>
+<table width=100%>
 <tr>
-	<td>Pattern</td>
+	<td><h1>Pattern</h1></td>
 	<td></td>
-	<td>color</td>
+	<td><h1>Color<h1></td>
 	<td></td>
 	<td></td>
 	<td></td>
-</tr><tr>
-
+</tr>
 <tr>
 	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=0&speed=4">Pulse</a></div></td>
 	<td><div class="lb_box"><a class="lb"  href="/pattern?pattern=0&speed=8">8th</a></div></td>
@@ -74,7 +73,7 @@
 <hr/>
 
 <form action="/" method="post">
-<div> <label for="Sequence" >Song Sequence</label>
+<div> <label for="Sequence" ><h1>Song Sequence</h1></label>
 <textarea  id="Sequence" name="Sequence" style="width:100%; height:3; " >
 120 I8888 A8888 C8888
 </textarea> </div>
@@ -86,7 +85,7 @@ Part Letter is defined in Song part configuration<br/>
 Beats are one digit numbers, that get accumulated: 8888=32 Beats <br/>
 248 =14 Beats
 </div>
-<div > <label for="Parts" >Song Parts</label>
+<div > <label for="Parts" ><h1>Song Parts</h1></label>
 <textarea  id="Parts" name="Parts" style="width:100%; height:1; " >
 I14/8:20 A12/4:0 C60:4/0
 </textarea> </div>
@@ -94,14 +93,14 @@ I14/8:20 A12/4:0 C60:4/0
 Syntax:  &lt;Part Letter&gt;&lt;Pattern&gt;/&lt;Speed&gt;:&lt;color&gt;... <br/>
 Pattern: identifies the pattern of light change (see pattern catalog)<br/>
 Speed: Speed of the pattern 2=Haft Beat 4=Beat 8=8th, 16,32,64 <br/>
-Color: defines the color palette (see color catalog)
+Color: defines the color palette (see color palette catalog)
 </div>
 <input type="submit" value="Start">
 </form>
 <hr/>
 <h1>Pattern Catalog</h1>
 <div class="annotations">
-A group varies in speed of color change relative to beat<br/>
+Groups of same pattern varies in speed of color change relative to beat<br/>
 0-3: Pulse<br/>
 4-7: Heartbeat Pulse<br/>
 8-9: Dimmed Pulse, Heartbeat<br/>
@@ -113,6 +112,17 @@ A group varies in speed of color change relative to beat<br/>
 60-69: Full Rainbow<br/>
 70-79: Half  Rainbow<br/>
 80-89: Quater  Rainbow<br/>
-90-99: Flat <br/>
+90-99: Flat (Varies in distance to next color)<br/>
+</div>
+<h1>Color Palette Catalog</h1>
+<div class="annotations">
+
+0..: Broad coloring<br/>
+20..: Pink red orange yellow coloring<br/>
+50..: Cyan Blue Purple coloring<br/>
+50..: Green Lemon coloring<br/>
+100..: Pulse optimized<br/>
+110..: Disco shift 2 optimized <br/>
+120..: doubled entries (whipe optimized)
 </div>
 </body></html>

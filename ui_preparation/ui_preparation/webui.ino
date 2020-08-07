@@ -49,6 +49,8 @@ String webui_song_sequence_textarea="120 I8#>A8888 B8888 R8888 8888";
 String webui_song_parts_textarea="I8/2:0 A10/4:0 B11/4:0 R68/8:0";
 
 
+
+
 /* HTML Header */ 
 
 const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html>"
@@ -74,6 +76,62 @@ void sendStylesheet() {
 ".anntn{font-size:10px;margin:2px 2px;}"));
 }
 
+/* Switchgrid constants */
+const char pattx_pulse[] PROGMEM ="Pulse";
+const char pattx_whipe[] PROGMEM ="Whipe";
+const char pattx_wave[] PROGMEM ="Wave";
+const char pattx_orbit[] PROGMEM ="Orbit";
+const char pattx_disco[] PROGMEM ="Disco";
+const char pattx_rainbow[] PROGMEM ="Rainbow";
+const char pattx_quater[] PROGMEM ="Quater";
+const char pattx_flat[] PROGMEM ="Flat";
+
+typedef struct pattern_button {
+  const char *label;
+  int   pattern_id;
+} t_pattern_button;
+
+t_pattern_button webui_pattern_button[] {
+  {pattx_pulse,2},
+  {pattx_whipe,10},
+  {pattx_wave,11},
+  {pattx_orbit,24},
+  {pattx_disco,44},
+  {pattx_rainbow,68},
+  {pattx_quater,88},
+  {pattx_flat,92}
+};
+
+const char coltx_red[] PROGMEM ="Red";
+const char coltx_pink[] PROGMEM ="Pink";
+const char coltx_blue[] PROGMEM ="Blue";
+const char coltx_cyan[] PROGMEM ="Cyan";
+const char coltx_green[] PROGMEM ="Green";
+const char coltx_lemon[] PROGMEM ="Lemon";
+const char coltx_yellow[] PROGMEM ="Yellow";
+const char coltx_orange[] PROGMEM ="Orange";
+const char coltx_purple[] PROGMEM ="Purple";
+const char coltx_white[] PROGMEM ="White";
+
+
+typedef struct color_button {
+  const char *label;
+  int hue;
+  byte saturation;
+} t_color_button;
+
+t_color_button webui_color_button [] {
+  {coltx_red,0,1}     ,{coltx_pink,340,1},
+  {coltx_blue, 240,1} ,{coltx_cyan,180,1},
+  {coltx_green, 120,1} ,{coltx_lemon,95,1},
+  {coltx_yellow, 60,1} ,{coltx_orange,15,1},
+  {coltx_purple, 250,1} ,{coltx_white,180,0}
+};
+
+#define WEBUI_COLOR_BUTTON_ROW_COUNT 5
+
+
+
 
 static void send_html_header() {
  
@@ -95,7 +153,17 @@ static void send_html_footer() {
       
 }
 
-const char WEB_PAGE_INTRO[] PROGMEM ="<div>""<form action=\"/\" method=\"post\">"; 
+const char WEB_PAGE_BUTTON_START[] PROGMEM =
+      "<div>" 
+      "<table width=100%>"
+      "<tr>"
+      " <td><h1>Pattern</h1></td><td></td><td><h1>Color<h1></td><td></td><td></td><td></td>"
+      "</tr>"; 
+
+const char WEB_PAGE_BUTTON_END[] PROGMEM = "</table></div>";
+
+
+const char WEB_PAGE_FORM_SECTION_START[] PROGMEM ="<hr/><div><form action=\"/\" method=\"post\">"; 
 
 const char WEB_PAGE_SEQ_PART_START[] PROGMEM =
       "<div> <label for=\"Sequence\" >Song Sequence</label>"
@@ -128,7 +196,9 @@ const char WEB_PAGE_SONG_PART_END[] PROGMEM =
 
 const char WEB_PAGE_FORM_END[] PROGMEM =
       "<input type=\"submit\" value=\"Start\">"
-      "</form>"
+      "</form>";
+
+const char WEB_PRESET_SECTION_START[] PROGMEM =
       "<hr/>"
       "<h1>Song Presets</h1>";
 
@@ -138,9 +208,73 @@ void send_main_page() {
   String value_as_string;
   
   send_html_header() ;
-  server.sendContent_P(WEB_PAGE_INTRO);
+
+  char string_buffer[MAX_DEFINITON_STRING_LENGTH];
   
+  DECLARE_PREALLOCATED_STRING(content_element,XLARGE_STR);
+  
+  // ******************* Send Button Grid ***************************
+  server.sendContent_P(WEB_PAGE_BUTTON_START);
+  
+  for(int row_index=0;row_index<WEBUI_COLOR_BUTTON_ROW_COUNT;row_index++) {
+    content_element="<tr>";
+
+    content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
+    content_element+=webui_pattern_button[row_index].pattern_id;
+    content_element+=F("&w=4\">");
+    strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_pattern_button[row_index].label)));
+    content_element+=string_buffer;
+    content_element+=F("</a></div></td>");
+
+    content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
+    content_element+=webui_pattern_button[row_index].pattern_id;
+    content_element+=F("&w=8\">8th\"");
+    content_element+=F("</a></div></td>");
+
+    for(int col=0;col<2;col++) {
+      content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?h=");
+      content_element+=webui_color_button[2*row_index+col].hue;
+      content_element+=F("&s=");
+      content_element+=webui_color_button[2*row_index+col].saturation;
+      content_element+="\">";
+      strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_color_button[2*row_index+col].label)));
+      content_element+=string_buffer;
+      content_element+=F("</a></div></td>");
+      content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?i=1&h=");
+      content_element+=webui_color_button[2*row_index+col].hue;
+      content_element+=F("&s=");
+      content_element+=webui_color_button[2*row_index+col].saturation;
+      content_element+="\">+";
+      content_element+=F("</a></div></td>");
+    }
+    content_element+="</tr>";
+    server.sendContent(content_element);
+  }
+
+   server.sendContent_P(WEB_PAGE_BUTTON_END);
+
+ 
+  // ******************* Send Sequence Section Form ****************
+  server.sendContent_P(WEB_PRESET_SECTION_START);
+  
+ 
+  
+  content_element="";
+  for(int song_index=0;song_index<song_catalog_count;song_index++) {
+        content_element+=F("<div class=\"lb_box\"><a class=\"lb\"  href=\"song?song_index=");
+        content_element+=(song_index);  
+        content_element+=F("\">");
+        strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_name)));
+        content_element+=string_buffer;
+        content_element+=F("</a></div>");
+  } // Loop over song catalog
+
+  /*Now get it all out to the user */
+  server.sendContent(content_element);
+
+  // ******************* Send Sequence Section Form ****************
   // Sequence
+  server.sendContent_P(WEB_PAGE_FORM_SECTION_START);
   server.sendContent_P(WEB_PAGE_SEQ_PART_START);
   server.sendContent(webui_song_sequence_textarea);
   server.sendContent_P(WEB_PAGE_SEQ_PART_END);
@@ -153,22 +287,7 @@ void send_main_page() {
   
   // End of Part/ Sequence Form
   server.sendContent_P(WEB_PAGE_FORM_END);
-  
-  char string_buffer[MAX_DEFINITON_STRING_LENGTH];
-  
-  DECLARE_PREALLOCATED_STRING(body_content,XLARGE_STR);
 
-  for(int song_index=0;song_index<song_catalog_count;song_index++) {
-        body_content+=F("<div class=\"lb_box\"><a class=\"lb\"  href=\"song?song_index=");
-        body_content+=(song_index);  
-        body_content+=F("\">");
-        strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_name)));
-        body_content+=string_buffer;
-        body_content+=F("</a></div>");
-  } // Loop over song catalog
-
-  /*Now get it all out to the user */
-  server.sendContent(body_content);
   send_html_footer();
 }
 
