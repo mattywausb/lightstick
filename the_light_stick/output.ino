@@ -7,7 +7,7 @@
 //#define TR_OUT_PIXEL_RESULT
 //#define TR_OUT_TIMING
 //#define TR_OUT_PATTERN_BEAT
-//#define TR_OUT_API_CALL
+#define TR_OUT_API_CALL
 #define TR_COLOR_PALETTE_SETTING
 //#define TR_COLOR_PRESET_PALETTE_SETTING
 #define TR_PATTERN_SETTING
@@ -157,6 +157,30 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[6].h=HUE_RED;patconf_color_palette[6].s=1.0;
          patconf_color_palette[7].h=HUE_BLUE;patconf_color_palette[7].s=1.0; 
          patconf_color_palette_lenght=8;
+         break;
+    case 3:                 // b g y
+         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0; 
+         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=1.0;
+         patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
+         patconf_color_palette_lenght=3;
+         break;
+    case 4:                 // Yellow pulse with blue and green change
+         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_YELLOW;patconf_color_palette[3].s=1.0; 
+         patconf_color_palette[4].h=HUE_GREEN;patconf_color_palette[4].s=1.0; 
+         patconf_color_palette[5].h=HUE_YELLOW;patconf_color_palette[5].s=1.0; 
+         patconf_color_palette[6].h=HUE_GREEN;patconf_color_palette[6].s=1.0;
+         patconf_color_palette[7].h=HUE_YELLOW;patconf_color_palette[7].s=1.0; 
+         patconf_color_palette_lenght=8;
+         break;
+    case 5:                 //  y g b c 
+         patconf_color_palette[0].h=HUE_CYAN;   patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_YELLOW; patconf_color_palette[1].s=1.0;
+         patconf_color_palette[2].h=HUE_GREEN;  patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_BLUE;   patconf_color_palette[3].s=1.0; 
+         patconf_color_palette_lenght=4;
          break;
    /// ---------- Cold section       
    case 20:                // blue green  

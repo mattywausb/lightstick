@@ -19,6 +19,8 @@
 #define TR_SEQUENCE_PROGRESS
 //#define TR_STRING_PARSING
 //#define TR_WATCH_MODE_CHANGE
+
+
 #endif
 
 typedef struct {
