@@ -32,6 +32,7 @@
 #define DECLARE_PREALLOCATED_STRING(varname, alloc_size) String varname((const char*)nullptr); varname.reserve(alloc_size)
 
 
+
 //  SSID and password are defined in header file that will not be in the git repo
 const char* ssid = STASSID;
 const char* password = STAPSK;
@@ -66,7 +67,7 @@ void sendStylesheet() {
 "input[type=\"submit\"]{background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;margin:2px 2px ;padding:16px 16px ;font-size:16px ;cursor:pointer; width:100%}"
 "input[type=\"submit\"]:hover{background-color:#a6449f;color:#fff;}"
 "textarea{background-color:#317577;border-radius:4px ;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px ;padding:10px 10px ;}"
-".lb{display:block;background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;padding:10px 10px ;font-size:16px ;cursor:pointer;text-decoration:none}"
+".lb{display:block;background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;padding:10px 10px ;font-size:14px ;cursor:pointer;text-decoration:none}"
 ".lb:hover{background-color:#a6449f;color:#fff;}"
 ".lb_box{padding:2px 2px;}"
 ".anntn{font-size:10px;margin:2px 2px;}"));
@@ -85,17 +86,18 @@ const char pattx_flat[] PROGMEM ="Flat";
 typedef struct pattern_button {
   const char *label;
   int   pattern_id;
+  int base_speed;
 } t_pattern_button;
 
 t_pattern_button webui_pattern_button[] {
-  {pattx_pulse,2},
-  {pattx_whipe,10},
-  {pattx_wave,11},
-  {pattx_orbit,24},
-  {pattx_disco,44},
-  {pattx_rainbow,68},
-  {pattx_quater,88},
-  {pattx_flat,92}
+  {pattx_pulse,2,2},
+  {pattx_whipe,10,4},
+  {pattx_wave,11,8},
+  {pattx_orbit,24,8},
+  {pattx_disco,44,4},
+  {pattx_rainbow,64,4},
+  {pattx_quater,83,4},
+  {pattx_flat,91,2}
 };
 
 const char coltx_red[] PROGMEM ="Red";
@@ -121,7 +123,7 @@ t_color_button webui_color_button [] {
   {coltx_blue, 240,1} ,{coltx_cyan,180,1},
   {coltx_green, 120,1} ,{coltx_lemon,95,1},
   {coltx_yellow, 60,1} ,{coltx_orange,15,1},
-  {coltx_purple, 250,1} ,{coltx_white,180,0}
+  {coltx_purple, 250,1} ,{coltx_white,15,0}
 };
 
 #define WEBUI_COLOR_BUTTON_ROW_COUNT 5
@@ -218,14 +220,18 @@ void send_main_page() {
     for(int col=0;col<(row_index<WEBUI_COLOR_BUTTON_ROW_COUNT?1:3);col++){ // on last row fill it up by yourself
       content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
       content_element+=webui_pattern_button[row_index+col].pattern_id;
-      content_element+=F("&w=4\">");
+      content_element+=F("&w=");
+      content_element+=webui_pattern_button[row_index+col].base_speed;
+      content_element+=("\">");
       strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_pattern_button[row_index+col].label)));
       content_element+=string_buffer;
       content_element+=F("</a></div></td>");
   
       content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
       content_element+=webui_pattern_button[row_index+col].pattern_id;
-      content_element+=F("&w=8\">8th");
+      content_element+=F("&w=");
+      content_element+=webui_pattern_button[row_index+col].base_speed*2;
+      content_element+=("\">&gt;&gt;");
       content_element+=F("</a></div></td>");
   }
 

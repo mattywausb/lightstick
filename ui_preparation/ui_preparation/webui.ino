@@ -70,7 +70,7 @@ void sendStylesheet() {
 "input[type=\"submit\"]{background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;margin:2px 2px ;padding:16px 16px ;font-size:16px ;cursor:pointer; width:100%}"
 "input[type=\"submit\"]:hover{background-color:#a6449f;color:#fff;}"
 "textarea{background-color:#317577;border-radius:4px ;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px ;padding:10px 10px ;}"
-".lb{display:block;background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;padding:10px 10px ;font-size:16px ;cursor:pointer;text-decoration:none}"
+".lb{display:block;background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;padding:10px 10px ;font-size:14px ;cursor:pointer;text-decoration:none}"
 ".lb:hover{background-color:#a6449f;color:#fff;}"
 ".lb_box{padding:2px 2px;}"
 ".anntn{font-size:10px;margin:2px 2px;}"));
@@ -223,14 +223,18 @@ void send_main_page() {
     for(int col=0;col<(row_index<WEBUI_COLOR_BUTTON_ROW_COUNT?1:3);col++){ // on last row fill it up by yourself
       content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
       content_element+=webui_pattern_button[row_index+col].pattern_id;
-      content_element+=F("&w=4\">");
+      content_element+=F("&w=");
+      content_element+=webui_pattern_button[row_index+col].base_speed;
+      content_element+=("\">");
       strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_pattern_button[row_index+col].label)));
       content_element+=string_buffer;
       content_element+=F("</a></div></td>");
   
       content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
       content_element+=webui_pattern_button[row_index+col].pattern_id;
-      content_element+=F("&w=8\">8th");
+      content_element+=F("&w=");
+      content_element+=webui_pattern_button[row_index+col].base_speed*2;
+      content_element+=("\">&gt;&gt;");
       content_element+=F("</a></div></td>");
   }
 
