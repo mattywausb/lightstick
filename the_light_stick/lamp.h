@@ -8,8 +8,9 @@
 
 #define HUE_ORANGE 15.0
 #define HUE_LORANGE 25.0
+#define HUE_DORANGE 7.0
 
-#define HUE_YELLOW 60.0
+#define HUE_YELLOW 45.0
 #define SAT_LYELLOW 0.8
 
 #define HUE_LEMON 95.0

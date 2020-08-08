@@ -45,8 +45,8 @@ const char song_slots_8[] PROGMEM ="TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD"
 const char song_sequence_8[] PROGMEM ="TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD TBD ";
 
 const char song_name_9[] PROGMEM ="-- full demo --";
-const char song_slots_9[] PROGMEM ="A0/4:0 B4/4:0 C10/4:0 D11/8:0 D24/4:0 E34/4:0 F68/8:0";
-const char song_sequence_9[] PROGMEM ="A8888 B8888 C8888 D8888 E8888 F8888";
+const char song_slots_9[] PROGMEM ="A1/4:0 B5/4:0 C10/4:0 D11/8:0 D24/4:0 E34/4:0 F68/8:0";
+const char song_sequence_9[] PROGMEM ="120 A8888 B8888 C8888 D8888 E8888 F8888";
 
 
 #define MAX_DEFINITON_STRING_LENGTH 150

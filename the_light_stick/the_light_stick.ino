@@ -91,15 +91,14 @@ void setup() {
     Serial.begin(115200);
     Serial.println(compile_signature); 
   #endif
+  output_setup();
+  output_set_bpm(80);
+  output_reset_color_palette(HUE_ORANGE,1);
+  output_start_pattern(9);  // Heartbeat with low light
   webui_setup();
   input_setup();
-  output_setup();
-  output_set_bpm(126);
+  output_reset_color_palette(HUE_LEMON,1);
   mode_of_operation=MODE_FIX_PRESET;
-  output_set_pattern_speed(STEP_ON_BEAT);
-  output_load_color_palette(22);
-  output_sync_beat();
-  output_start_pattern(10);
 }
 
 

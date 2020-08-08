@@ -22,6 +22,7 @@
 #include "wifi_credentials.h"
 #include "webui.h"
 #include "mainSettings.h"
+#include "lamp.h"
 
 #ifdef TRACE_ON
 #define TR_WEBUI
@@ -119,10 +120,10 @@ typedef struct color_button {
 } t_color_button;
 
 t_color_button webui_color_button [] {
-  {coltx_red,0,1}     ,{coltx_pink,340,1},
+  {coltx_red,HUE_RED,1}     ,{coltx_pink,340,1},
   {coltx_blue, 240,1} ,{coltx_cyan,180,1},
   {coltx_green, 120,1} ,{coltx_lemon,95,1},
-  {coltx_yellow, 60,1} ,{coltx_orange,15,1},
+  {coltx_yellow, HUE_YELLOW,1} ,{coltx_orange,15,1},
   {coltx_purple, 250,1} ,{coltx_white,15,0}
 };
 
@@ -279,17 +280,18 @@ void send_main_page() {
   server.sendContent(content_element);
 
   // ******************* Send Sequence Section Form ****************
-  // Sequence
-  server.sendContent_P(WEB_PAGE_FORM_SECTION_START);
-  server.sendContent_P(WEB_PAGE_SEQ_PART_START);
-  server.sendContent(webui_song_sequence_textarea);
-  server.sendContent_P(WEB_PAGE_SEQ_PART_END);
 
+  server.sendContent_P(WEB_PAGE_FORM_SECTION_START);
 
   // Parts
   server.sendContent_P(WEB_PAGE_SONG_PART_START);
   server.sendContent(webui_song_parts_textarea);
   server.sendContent_P(WEB_PAGE_SONG_PART_END);
+
+  // Sequence
+  server.sendContent_P(WEB_PAGE_SEQ_PART_START);
+  server.sendContent(webui_song_sequence_textarea);
+  server.sendContent_P(WEB_PAGE_SEQ_PART_END);
   
   // End of Part/ Sequence Form
   server.sendContent_P(WEB_PAGE_FORM_END);
