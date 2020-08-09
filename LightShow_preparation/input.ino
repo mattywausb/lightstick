@@ -7,8 +7,8 @@
 
 #ifdef TRACE_ON
 #define TRACE_INPUT 
-//#define TRACE_INPUT_HIGH
-//#define TRACE_INPUT_TIMING 
+#define TRACE_INPUT_HIGH
+#define TRACE_INPUT_TIMING 
 #endif
 
 
@@ -144,6 +144,12 @@ unsigned long input_getLastPressStartTime()
 {
   return  input_last_press_start_time;
 }
+
+unsigned long input_getLastPressEndTime()
+{
+  return  input_last_press_end_time;
+}
+
 
 /* ---- Serial Data Input ---- */
 
