@@ -1,5 +1,12 @@
-// This is code creates small light show, using neo pixel
+/* Compiles against  Arduino UNO */
 
+/* Main controller Module
+ *  
+ *  Orchestrates all Elements 
+ *  transforming input signals from Buttons, Web IU and Serial Input into Actions and Mode changes
+ *  manage output processing
+ *  
+ */
 
 #include <Adafruit_NeoPixel.h>
 #include "lamp.h"
@@ -7,10 +14,13 @@
 #include "mainSettings.h"
 
 
+
 #ifdef TRACE_ON
 #define TR_SEQUENCE_PROGRESS
 //#define TR_STRING_PARSING
 //#define TR_WATCH_MODE_CHANGE
+
+
 #endif
 
 typedef struct {
@@ -78,19 +88,19 @@ MODE_OF_OPERATION prev_mode_of_operation=MODE_SEQUENCE;
 
 
 void setup() {
-  Serial.begin(9600);
   #ifdef TRACE_ON 
     char compile_signature[] = "--- START (Build: " __DATE__ " " __TIME__ ") ---";   
+    Serial.begin(115200);
     Serial.println(compile_signature); 
   #endif
-  input_setup();
   output_setup();
-  output_set_bpm(126);
+  output_set_bpm(80);
+  output_reset_color_palette(HUE_ORANGE,1);
+  output_start_pattern(9);  // Heartbeat with low light
+  webui_setup();
+  input_setup();
+  output_reset_color_palette(HUE_LEMON,1);
   mode_of_operation=MODE_FIX_PRESET;
-  output_set_pattern_speed(STEP_ON_BEAT);
-  output_load_color_palette(22);
-  output_sync_beat();
-  output_start_pattern(10);
 }
 
 
@@ -346,6 +356,9 @@ void sequence_next_slot()
 
 
 void loop() {
+  // Check for input from webui
+  webui_loop();
+  
   // Manage Button Press
   input_switches_scan_tick();
   if (input_stepGotPressed()) {

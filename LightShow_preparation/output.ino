@@ -7,7 +7,7 @@
 //#define TR_OUT_PIXEL_RESULT
 //#define TR_OUT_TIMING
 //#define TR_OUT_PATTERN_BEAT
-//#define TR_OUT_API_CALL
+#define TR_OUT_API_CALL
 #define TR_COLOR_PALETTE_SETTING
 //#define TR_COLOR_PRESET_PALETTE_SETTING
 #define TR_PATTERN_SETTING
@@ -37,7 +37,7 @@ typedef struct {
     float s;       // a fraction between 0 and 1
 } t_color_hs;
 
-#define COLOR_PALETTE_MAX_ENTRIES  8 
+#define COLOR_PALETTE_MAX_ENTRIES  12 
 t_color_hs patconf_color_palette[COLOR_PALETTE_MAX_ENTRIES];
 uint8_t patconf_color_palette_lenght=0;
 uint8_t patvar_color_palette_index=0;
@@ -158,6 +158,30 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[7].h=HUE_BLUE;patconf_color_palette[7].s=1.0; 
          patconf_color_palette_lenght=8;
          break;
+    case 3:                 // b g y
+         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0; 
+         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=1.0;
+         patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
+         patconf_color_palette_lenght=3;
+         break;
+    case 4:                 // Yellow pulse with blue and green change
+         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_YELLOW;patconf_color_palette[3].s=1.0; 
+         patconf_color_palette[4].h=HUE_GREEN;patconf_color_palette[4].s=1.0; 
+         patconf_color_palette[5].h=HUE_YELLOW;patconf_color_palette[5].s=1.0; 
+         patconf_color_palette[6].h=HUE_GREEN;patconf_color_palette[6].s=1.0;
+         patconf_color_palette[7].h=HUE_YELLOW;patconf_color_palette[7].s=1.0; 
+         patconf_color_palette_lenght=8;
+         break;
+    case 5:                 //  y g b c 
+         patconf_color_palette[0].h=HUE_CYAN;   patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_YELLOW; patconf_color_palette[1].s=1.0;
+         patconf_color_palette[2].h=HUE_GREEN;  patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_BLUE;   patconf_color_palette[3].s=1.0; 
+         patconf_color_palette_lenght=4;
+         break;
    /// ---------- Cold section       
    case 20:                // blue green  
          patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
@@ -219,6 +243,41 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[7].h=HUE_ORANGE;patconf_color_palette[7].s=0.0;
          patconf_color_palette_lenght=8;
          break;
+   case 44:                                                   // fire
+         patconf_color_palette[0].h=20;patconf_color_palette[0].s=1.0; 
+         patconf_color_palette[1].h=10;patconf_color_palette[1].s=1.0; 
+         patconf_color_palette[2].h=25;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=5;patconf_color_palette[3].s=1.0; 
+         patconf_color_palette[4].h=15;patconf_color_palette[4].s=1.0; 
+         patconf_color_palette[5].h=7;patconf_color_palette[5].s=1.0; 
+         patconf_color_palette_lenght=6;
+         break; 
+   case 45:                           // r wr
+         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=0.0;
+         patconf_color_palette_lenght=2;
+         break; 
+   case 46:                           //  r r r wr r r
+         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+         patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=1.0;
+         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
+         patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0;
+         patconf_color_palette[4].h=HUE_RED;patconf_color_palette[4].s=1.0;
+         patconf_color_palette[5].h=HUE_RED;patconf_color_palette[5].s=1.0;
+         patconf_color_palette_lenght=6;
+         break; 
+ // -- Single Color + White Overlay version
+   case 80:
+         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+         patconf_color_palette_lenght=1;
+         break; 
+   case 81:
+         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=0.0;
+         patconf_color_palette_lenght=1;
+         break; 
+         
+         
+                   
  // -- Pulse specials  Section
    case 100:                                        // blue green  
          patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
@@ -254,8 +313,24 @@ void output_load_color_palette(int palette_id)
          patconf_color_palette[7].h=HUE_PINK;patconf_color_palette[7].s=1.0; 
          patconf_color_palette_lenght=8;
          break;
-
-    // -- Color OrbWhipe specials Section         
+ // -- Color Orb specials Section 
+  case 130:
+                                                   // fire with White center 3 steps
+         patconf_color_palette[0].h=20;         patconf_color_palette[0].s=1.0; 
+         patconf_color_palette[1].h=HUE_YELLOW; patconf_color_palette[1].s=0.0; // WHITE
+         patconf_color_palette[2].h=15;         patconf_color_palette[2].s=1.0; 
+         patconf_color_palette[3].h=10;         patconf_color_palette[3].s=1.0;
+         patconf_color_palette[4].h=HUE_YELLOW; patconf_color_palette[4].s=0.0; // WHITE
+         patconf_color_palette[5].h= 5;         patconf_color_palette[5].s=1.0; 
+         patconf_color_palette[6].h=25;         patconf_color_palette[6].s=1.0; 
+         patconf_color_palette[7].h=HUE_YELLOW; patconf_color_palette[7].s=0.0; // WHITE 
+         patconf_color_palette[8].h=19;         patconf_color_palette[8].s=1.0; 
+         patconf_color_palette[9].h= 6;         patconf_color_palette[9].s=1.0; 
+         patconf_color_palette[10].h=HUE_YELLOW;patconf_color_palette[10].s=0.0; // WHITE
+         patconf_color_palette[11].h= 8;        patconf_color_palette[11].s=1.0; 
+         patconf_color_palette_lenght=12;
+         break; 
+          
           
    #ifdef TR_WARNING
    default:

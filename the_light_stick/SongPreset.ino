@@ -73,7 +73,7 @@ struct catalog {
   ,{song_name_DEMO__,song_slots_DEMO__,song_sequence_DEMO__}
 };
 
-int song_catalog_count=10;
+int song_catalog_count=11;
 
 void song_preset_start(int preset_id) {
   char string_buffer[MAX_DEFINITON_STRING_LENGTH];
