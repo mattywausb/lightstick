@@ -376,13 +376,13 @@ void loop() {
   // Manage Serial input
   /*
    * Commands:
-   * #<id>               load song preset
+   * x<id>               load song preset
    * o <slot settings>   load the slot settings from string syntax
    * s <sequence string> load the sequence from string syntax
    * +                   restart sequence
    * 
    * b <bpm>             set bpm
-   * w {2,4,8,16,32,64}  set step waittime
+   * w {2,4,8,16,32,64}  set step speed (waittime)
    * 
    * p <pattern id>      start predefined pattern per id (0 Pulse, 10 Whipe, 
    * <id>/{2,4,8,16,32,64}  start predefined pattern per id with waittime

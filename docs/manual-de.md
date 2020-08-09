@@ -6,7 +6,7 @@ Mit dem "Personal K-Pop Lightstick" hat man seine eigene Lichtshow verfügbar. E
 * Abruf von vorbereiteten Abläufen für bestimmte Lieder
 * Individuelle, taktgenaue Programmierung eines Ablaufs
 
-##Einschalten
+## Einschalten
 
 Der Stick wird eingeschaltet, indem man den Deckel am unteren Stabende öffnet und den USB Stecker mit einer passenden Stromversorgung verbindet. Sofern diese kompakt genug ist, kann man sie direkt im Stick deponieren und den Deckel wieder verschließen.
 
