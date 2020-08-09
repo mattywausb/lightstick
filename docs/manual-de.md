@@ -32,26 +32,26 @@ Die Farbe der LED wird in der Regel durch die eingestellte Farbpalette festgeleg
 Mit Auswahl einer Farbe auf der Weboberfläche wird die Farbpalette auf jeweils diese Farbe gesetzt. Wird das '+' Zeichen rechts neben der Farbe gewählt, so wird diese Farbe an die Palette drangehängt. 
 Je nach Muster macht es auch Sinn, die gleiche Farbe mehrfach hintereinander in die Palette  einzubauen.
 
-###Die Pattern:
-Pulse - Kurzes Aufblitzen auf dem Beat
-Wipe - leds nacheinander auf Folgefarbe schalten 
-Wave - leds nacheinander erst ein und danach wieder ausschalten 
-Orbit - einfarbig rotierende Lichter mit Taktpuls
-Disco - mehrfarbig rotierende Lichter mit Taktpuls
+### Die Pattern:
+    Pulse - Kurzes Aufblitzen auf dem Beat
+    Wipe - leds nacheinander auf Folgefarbe schalten 
+    Wave - leds nacheinander erst ein und danach wieder ausschalten 
+    Orbit - einfarbig rotierende Lichter mit Taktpuls
+    Disco - mehrfarbig rotierende Lichter mit Taktpuls
 
 Folgenden Pattern ignorieren die Farbpalette 
 
-Rainbow - Volles Farbspektrum 
-Quater - Ausschnitt aus dem Spektrum der sich dann verschiebt
-Flat - es wird nur eine Farbe des Spektrums gezeigt  und weitergeschaltet
+    Rainbow - Volles Farbspektrum 
+    Quater - Ausschnitt aus dem Spektrum der sich dann verschiebt
+    Flat - es wird nur eine Farbe des Spektrums gezeigt  und weitergeschaltet
 
-##Synchronisationstaster
+## Synchronisationstaster
 Mit dem Taster werden folgende Funktionen ausgelöst.
-*1xTippen - Beatposition festlegen / korrigieren 
-*4x regelmäßig Tippen - Tempo messen und einstellen (unregelmäßiges Tippen führt zu keiner Änderungen) 
-*Erstes Tippen nach Songstart - Beatposition festlegen und "Warteschleife beenden"
-*Lange (>2s) halten  -  Liedfortschritt aufhalten
-*Loslassen nach halten -   Beatposition festlegen und auf nächsten Liedabschnitt wechseln 
+* 1xTippen - Beatposition festlegen / korrigieren 
+* 4x regelmäßig Tippen - Tempo messen und einstellen (unregelmäßiges Tippen führt zu keiner Änderungen) 
+* Erstes Tippen nach Songstart - Beatposition festlegen und "Warteschleife beenden"
+* Lange (>2s) halten  -  Liedfortschritt aufhalten
+* Loslassen nach halten -   Beatposition festlegen und auf nächsten Liedabschnitt wechseln 
 
 
 
