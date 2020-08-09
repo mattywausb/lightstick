@@ -6,9 +6,9 @@
 // Activate general trace output
 
 #ifdef TRACE_ON
-#define TRACE_INPUT 
-#define TRACE_INPUT_HIGH
-#define TRACE_INPUT_TIMING 
+#define TR_INP 
+//#define TR_INP_HIGH
+//#define TR_INP_TIMING 
 #endif
 
 
@@ -84,8 +84,8 @@ boolean input_serialCommand_isNew=false;
 int input_getSecondsSinceLastEvent() {
   unsigned long timestamp_difference = (millis() - input_last_change_time) / 1000;
   if (timestamp_difference > 255) return 255;
-#ifdef TRACE_INPUT_TIMING
-  Serial.print(F("TRACE_INPUT_TIMING:input last interaction:"));
+#ifdef TR_INP_TIMING
+  Serial.print(F("TR_INP_TIMING>input last interaction:"));
   Serial.println(timestamp_difference);
 #endif
   return timestamp_difference;
@@ -127,8 +127,8 @@ byte input_stepGotReleased()
 
 long input_getCurrentPressDuration()
 {
-  #ifdef TRACE_INPUT_TIMING
-    Serial.print(F("TRACE_INPUT_TIMING:input CurrentPressDuration:"));
+  #ifdef TR_INP_TIMING
+    Serial.print(F("TR_INP_TIMING>input CurrentPressDuration:"));
     Serial.println(millis()-input_last_press_start_time);
   #endif
     
@@ -215,16 +215,16 @@ void input_switches_scan_tick()
     {
       change_happened=true;
       input_last_press_end_time =input_last_press_start_time=frame_time;
-      #ifdef TRACE_INPUT_HIGH
-        Serial.print(("TRACE_INPUT_HIGH:press of "));Serial.println(i);
+      #ifdef TR_INP_HIGH
+        Serial.print(("TR_INP_HIGH>press of "));Serial.println(i);
       #endif     
     }
     if((button_tick_state & (INPUT_0_BITS<<(i*2))) == INPUT_0_SWITCHED_OFF_PATTERN<<(i*2)) 
     {
       input_last_press_end_time=frame_time;
       change_happened=true;
-      #ifdef TRACE_INPUT_HIGH
-        Serial.print(("TRACE_INPUT_HIGH:release of "));Serial.println(i);
+      #ifdef TR_INP_HIGH
+        Serial.print(("TR_INP_HIGH>release of "));Serial.println(i);
       #endif     
     }
   }
@@ -250,8 +250,8 @@ void input_pollSerial() {
       input_serialCommand_isNew=true;
       input_currentSerialCommand=input_serialBuffer;
       input_serialBuffer="";
-      #ifdef TRACE_INPUT
-          Serial.print(F(">TRACE_INPUT: Fetched serial command:"));
+      #ifdef TR_INP
+          Serial.print(F("TR_INP>Fetched serial command:"));
           Serial.println(input_currentSerialCommand);
       #endif
     }
