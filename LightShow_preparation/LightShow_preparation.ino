@@ -19,7 +19,7 @@
 #define TR_SEQUENCE_PROGRESS
 //#define TR_STRING_PARSING
 //#define TR_WATCH_MODE_CHANGE
-
+#define TR_BUTTON_INPUT
 
 #endif
 
@@ -72,7 +72,7 @@ int g_tap_track_interval[3];
 int g_tap_track_count=0;
 int g_tap_track_index=0;
 int g_tap_track_sum=0;
-long g_tap_track_prev_time=0L;
+unsigned long g_tap_track_prev_time=0L;
 
 
 enum MODE_OF_OPERATION {
@@ -122,14 +122,17 @@ int preset_speed_to_id(String pattern_speed) {
 
 void manage_tap_input() {
   int prev_tap_track_interval=g_tap_track_interval[g_tap_track_index];
-  long current_millis=millis();
 
   if(++g_tap_track_index>=3) g_tap_track_index=0;  // Foreward track array index
 
   // Determine tap interval
-  g_tap_track_interval[g_tap_track_index]=current_millis-g_tap_track_prev_time;
-  g_tap_track_prev_time=current_millis;
+  g_tap_track_interval[g_tap_track_index]=input_getLastPressStartTime()-g_tap_track_prev_time;
+  g_tap_track_prev_time=input_getLastPressStartTime();
   g_tap_track_sum+=g_tap_track_interval[g_tap_track_index];
+
+    #ifdef TR_BUTTON_INPUT
+            Serial.print(F(">TR_BUTTON_INPUT tap interval: ")); Serial.println(g_tap_track_interval[g_tap_track_index]);
+    #endif
   
   if(abs(g_tap_track_interval[g_tap_track_index]-prev_tap_track_interval)>300) {  // no valid lenght compared to previous
     g_tap_track_count=1; // Reset Counter and sum to latest measure
@@ -365,7 +368,7 @@ void loop() {
       #ifdef TR_BUTTON_INPUT
         Serial.println(F(">TR_BUTTON_INPUT step got pressed"));
       #endif
-      output_sync_beat();
+      output_sync_beat(input_getLastPressStartTime());
       if(mode_of_operation==MODE_SEQUENCE_HOLD) sequence_next_slot();
       manage_tap_input();
   }

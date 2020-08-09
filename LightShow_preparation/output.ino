@@ -352,7 +352,7 @@ void output_set_bpm(int beats_per_minute) {
   #endif 
   output_beats_per_minute = beats_per_minute;
   output_set_waittimes(60000/output_beats_per_minute);
-  output_sync_beat();
+  output_sync_beat(millis());
 };
 
 int output_get_bpm() { return output_beats_per_minute;}
@@ -385,8 +385,10 @@ int output_get_preset_beat_count() {
   return output_preset_beat_count;
 }
 
-void output_sync_beat() {
-  output_beat_sync_time=millis();
+void output_sync_beat(long sync_event_time) {
+  output_beat_sync_time=sync_event_time;
+
+  
   patvar_previous_step_time=output_get_current_beat_start_time();
 }
 
