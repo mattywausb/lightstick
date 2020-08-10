@@ -2,19 +2,20 @@
 
 #include "mainSettings.h"
 
+
 // Activate general trace output
 
 #ifdef TRACE_ON
-#define TRACE_INPUT 
-//#define TRACE_INPUT_HIGH
-//#define TRACE_INPUT_TIMING 
+#define TR_INP 
+//#define TR_INP_HIGH
+//#define TR_INP_TIMING 
 #endif
 
 
 
 /* Button constants */ 
-const byte switch_pin_list[] = {5,    // Mode Select  D1 on ESP8266 / Node MCU
-                                4    // Step          D2 on ESP8266 / Node MCU
+const byte switch_pin_list[] = {4,    // Mode Select  D2 on ESP8266 / Node MCU
+                                5    // Step          D1 on ESP8266 / Node MCU
                                };
                                 
 #define INPUT_PORT_COUNT sizeof(switch_pin_list)
@@ -62,8 +63,8 @@ unsigned int button_tick_state = 0;      // current and historized state in the 
 #define INPUT_PREVIOUS_BITS 0x000a
 
 
-unsigned long last_press_start_time=0;
-unsigned long last_press_end_time=0;
+unsigned long input_last_press_start_time=0;  //Last System time, a button got pressed
+unsigned long input_last_press_end_time=0;  // Last System time, a button got releasd
 bool input_enabled=true;
 
 /* General state variables */
@@ -83,8 +84,8 @@ boolean input_serialCommand_isNew=false;
 int input_getSecondsSinceLastEvent() {
   unsigned long timestamp_difference = (millis() - input_last_change_time) / 1000;
   if (timestamp_difference > 255) return 255;
-#ifdef TRACE_INPUT_TIMING
-  Serial.print(F("TRACE_INPUT_TIMING:input last interaction:"));
+#ifdef TR_INP_TIMING
+  Serial.print(F("TR_INP_TIMING>input last interaction:"));
   Serial.println(timestamp_difference);
 #endif
   return timestamp_difference;
@@ -126,18 +127,29 @@ byte input_stepGotReleased()
 
 long input_getCurrentPressDuration()
 {
-  #ifdef TRACE_INPUT_TIMING
-    Serial.print(F("TRACE_INPUT_TIMING:input CurrentPressDuration:"));
-    Serial.println(millis()-last_press_start_time);
+  #ifdef TR_INP_TIMING
+    Serial.print(F("TR_INP_TIMING>input CurrentPressDuration:"));
+    Serial.println(millis()-input_last_press_start_time);
   #endif
     
-  return millis()-last_press_start_time;
+  return millis()-input_last_press_start_time;
 }
 
 long input_getLastPressDuration()
 {
-  return  last_press_end_time-last_press_start_time;
+  return  input_last_press_end_time-input_last_press_start_time;
 }
+
+unsigned long input_getLastPressStartTime()
+{
+  return  input_last_press_start_time;
+}
+
+unsigned long input_getLastPressEndTime()
+{
+  return  input_last_press_end_time;
+}
+
 
 /* ---- Serial Data Input ---- */
 
@@ -170,19 +182,19 @@ void input_IgnoreUntilRelease()
    translate the state of buttons into the ticks of the master loop
    Must be called by the master loop for every cycle to provide valid event states of
    all input devices.
-   Also transfers state changes, tracked with the timer interrupt into a tick state
 */
 
 void input_switches_scan_tick()
 {
   bool change_happened=false;
+  long frame_time=millis();
   
-  /* regular button scan and encoder crosscheck */
-  if (millis() - buttons_last_read_time > INPUT_BUTTON_COOLDOWN)
+  /* regular button scan  */
+  if (frame_time - buttons_last_read_time > INPUT_BUTTON_COOLDOWN)
   {
     byte isPressed=0;
     int analog_value=0;
-    buttons_last_read_time = millis();
+    buttons_last_read_time = frame_time;
     
     for (int i = 0; i <INPUT_PORT_COUNT; i++) { // for all input ports configured
       isPressed=!digitalRead(switch_pin_list[i]);
@@ -202,31 +214,31 @@ void input_switches_scan_tick()
     if((button_tick_state & (INPUT_0_BITS<<(i*2))) == INPUT_0_SWITCHED_ON_PATTERN<<(i*2)) 
     {
       change_happened=true;
-      last_press_end_time =last_press_start_time=millis();
-      #ifdef TRACE_INPUT_HIGH
-        Serial.print(("TRACE_INPUT_HIGH:press of "));Serial.println(i);
+      input_last_press_end_time =input_last_press_start_time=frame_time;
+      #ifdef TR_INP_HIGH
+        Serial.print(("TR_INP_HIGH>press of "));Serial.println(i);
       #endif     
     }
     if((button_tick_state & (INPUT_0_BITS<<(i*2))) == INPUT_0_SWITCHED_OFF_PATTERN<<(i*2)) 
     {
-      last_press_end_time=millis();
+      input_last_press_end_time=frame_time;
       change_happened=true;
-      #ifdef TRACE_INPUT_HIGH
-        Serial.print(("TRACE_INPUT_HIGH:release of "));Serial.println(i);
+      #ifdef TR_INP_HIGH
+        Serial.print(("TR_INP_HIGH>release of "));Serial.println(i);
       #endif     
     }
   }
 
   if((button_tick_state & INPUT_ALL_BUTTON_STATE_MASK) ==0x00)  input_enabled=true; // enable input when all is released and settled
 
-  if(change_happened)input_last_change_time = millis(); // Reset the globel age of interaction
+  if(change_happened)input_last_change_time =frame_time; // Reset the globel age of interaction
 
 
 } // void input_switches_tick()
 
 /* ************** Manage Serial input ***************** */
 
-void serialEvent() {
+void input_pollSerial() {
   while (Serial.available()) {
     // get the new byte:
     char inChar = (char)Serial.read();
@@ -238,8 +250,8 @@ void serialEvent() {
       input_serialCommand_isNew=true;
       input_currentSerialCommand=input_serialBuffer;
       input_serialBuffer="";
-      #ifdef TRACE_INPUT
-          Serial.print(F(">TRACE_INPUT: New Serial Command:"));
+      #ifdef TR_INP
+          Serial.print(F("TR_INP>Fetched serial command:"));
           Serial.println(input_currentSerialCommand);
       #endif
     }
@@ -257,8 +269,5 @@ void input_setup() {
   }
 
   setupComplete = true;
-  #ifdef TRACE_ON
-  Serial.println(F(">input_setup complete "));
-  #endif
 }
 

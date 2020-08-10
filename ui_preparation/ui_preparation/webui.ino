@@ -22,6 +22,7 @@
 #include "wifi_credentials.h"
 #include "webui.h"
 #include "mainSettings.h"
+#include "lamp.h"
 
 #ifdef TRACE_ON
 #define TR_WEBUI
@@ -31,10 +32,7 @@
 /* Macro to declare Strings with reserved buffer */
 #define DECLARE_PREALLOCATED_STRING(varname, alloc_size) String varname((const char*)nullptr); varname.reserve(alloc_size)
 
-constexpr unsigned SMALL_STR = 64-1;
-constexpr unsigned MED_STR = 256-1;
-constexpr unsigned LARGE_STR = 512-1;
-constexpr unsigned XLARGE_STR = 1024-1;
+
 
 //  SSID and password are defined in header file that will not be in the git repo
 const char* ssid = STASSID;
@@ -122,11 +120,11 @@ typedef struct color_button {
 } t_color_button;
 
 t_color_button webui_color_button [] {
-  {coltx_red,0,1}     ,{coltx_pink,340,1},
+  {coltx_red,HUE_RED,1}     ,{coltx_pink,340,1},
   {coltx_blue, 240,1} ,{coltx_cyan,180,1},
   {coltx_green, 120,1} ,{coltx_lemon,95,1},
-  {coltx_yellow, 60,1} ,{coltx_orange,15,1},
-  {coltx_purple, 250,1} ,{coltx_white,180,0}
+  {coltx_yellow, HUE_YELLOW,1} ,{coltx_orange,15,1},
+  {coltx_purple, 250,1} ,{coltx_white,15,0}
 };
 
 #define WEBUI_COLOR_BUTTON_ROW_COUNT 5
@@ -282,17 +280,18 @@ void send_main_page() {
   server.sendContent(content_element);
 
   // ******************* Send Sequence Section Form ****************
-  // Sequence
-  server.sendContent_P(WEB_PAGE_FORM_SECTION_START);
-  server.sendContent_P(WEB_PAGE_SEQ_PART_START);
-  server.sendContent(webui_song_sequence_textarea);
-  server.sendContent_P(WEB_PAGE_SEQ_PART_END);
 
+  server.sendContent_P(WEB_PAGE_FORM_SECTION_START);
 
   // Parts
   server.sendContent_P(WEB_PAGE_SONG_PART_START);
   server.sendContent(webui_song_parts_textarea);
   server.sendContent_P(WEB_PAGE_SONG_PART_END);
+
+  // Sequence
+  server.sendContent_P(WEB_PAGE_SEQ_PART_START);
+  server.sendContent(webui_song_sequence_textarea);
+  server.sendContent_P(WEB_PAGE_SEQ_PART_END);
   
   // End of Part/ Sequence Form
   server.sendContent_P(WEB_PAGE_FORM_END);

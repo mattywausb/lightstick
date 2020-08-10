@@ -66,6 +66,12 @@
 </tr>
 </table>
 <hr/>
+<form action="/bpm" method="post">
+<h1><label for="BPM" class="col-1"> Beats per minute</label>
+<input type="number" id="BPM" name="BPM" value="120"></h1>
+<input type="submit" value="set">
+</form>
+<hr/>
 <h1>Song Presets</h1>
 <div class="lb_box"><a class="lb"  href="/s1">Cypher 4 (BTS)</a></div>
 <div class="lb_box"><a class="lb" href="/s2">IDOL (BTS)</a></div>
@@ -125,4 +131,18 @@ Groups of same pattern varies in speed of color change relative to beat<br/>
 110..: Disco shift 2 optimized <br/>
 120..: doubled entries (whipe optimized)
 </div>
+<hr/>
+<h1>Wifi Settings</h1>
+<div>To connect the Stick to a local Wifi, enter credentials here</div>
+<form action="/wifi-settings" method="post">
+<label for="SSID" class="col-1"> SSID</label>
+<input type="text" id="SSID" name="SSID" value=""><br/>
+<label for="Password" class="col-1">Password</label>
+<input type="text" value="" autocomplete="off" autocapitalize="off" autocorrect="off">
+<div >
+To try out the credentials, the stick will stop its own WIFI network and this website will not be available any more. After successfull wifi connction the stick will light up green and start blinking its IP adress. In case of a connection problem, it will start its own ap, light up in blue again and you can access this site again.
+</div>
+<input type="submit" value="connect to wifi">
+</form>
+
 </body></html>
