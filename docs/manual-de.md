@@ -92,12 +92,14 @@ Die Song Sequence repräsentiert die Abfolge des Songs. Sie wird mit der BPM Ang
 	<bpm> <Part Letter> <Beats><Beats>... <Part Letter>...
 	Beispiel: "120 A88# A88 B88 A8888 B88 R8888 8888 >A8888 B88 R8888 8888"
 ```
-	
 
 * Part Letter: Muss einer der Buchstaben aus der "Song Parts" Definition sein
 * Beates: Die Beats werden als einstellige Zahlen angegeben und als solche dann für den Abschnitt aufaddiert bis ein neuer Buchstabe angegeben wird. (Beispiele: 8888=32 Beats 248 =14 Beats)
 * Sonderzeichen #: Der Abschnitt in dem dieses Zeichen Steht ist die Warteschleife. Mit dem Tastendruck springt das Programm dann zum nächsten Abschnitt. Die Anzahl an Beats in dem Abschnitt sind dabei irrelevant, sollten aber so angegeben werden, dass man ablesen kann, welcher Beat für den einsatz gewählt werden soll (88 = 16 Beats, Also Beat 17 für den Wechsel)
 * Sonderzeichen >: Nach dem Songende wird an diese Stelle zurückgesprungen. So kann eine Endlosschleife einer Folge konstruiert werden. Ohne diese Angabe springt das Programm wieder an den Anfang zurück und in die ggf. dort definierte Warteschleife 
+
+### Fehlerbehandlung
+Die Angaben für Song Parts und Song Sequence werden intern bzgl. plausibilität geprüft. Formatfehler führen dazu, dass Teile ignoriert oder auch falsch zugeordnet werden. *Es gibt bisher keine Rückmeldung* ob alle Angaben korrekt waren. Syntaktisch falsche oder inkonsistente Angaben(z.B. Buchstabe doppelt als Song Part genutzt oder nicht als Songpart definiert, unbekannte Farbpalette, unbekannter Pattern Speed) führen zu verschiedenen Phänomenen: Falsche Farbpalette, Falsche Pattern, Falsche Anzahl an Beats bis zum Wechsel
 
 ### Farbpaletten
 	// Code r=red o=orange y=yellow g=green c=cyan sb=sky blue b=blue pu=purple pi=pink
@@ -126,6 +128,7 @@ Die Song Sequence repräsentiert die Abfolge des Songs. Sie wird mit der BPM Ang
 	102: // o wo r wo wo
 	120: // pu pu pi pi wpu wpu pi pi
 	
+Weiß wird durch eine entsättigte Farbe dargestellt. Bei Pattern, die die Sättigung verändern (z.Zt. "Pulse", der von Weiß in den gesättigten Ton überführt) hat dies eine Relevanz, da dann die LED zwischen Weiß und der entsprechenden Farbe wechselt.
 	
 ### Pattern Presets
 
