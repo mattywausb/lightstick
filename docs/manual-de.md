@@ -70,13 +70,13 @@ Beat 17 war die beste Wahl, da man so über die zwei 8er Gruppe gute Orientierun
 Die Warteschleife und ihre Position im Song ist eine Festlegung des jeweiligen Song Programms. Für die leichtere Bedienung wurde Beat 17 festgelegt. Eigene Programme können auch andere Zählpositionen festlegen.
 
 ## Eigene Songprogamme eingeben und abspielen
-Auf der Weboberfläche gibt es zwei Eingabefelder um das Songprogramm selbst festzulegen. Diese werden bei der Auswahl eines vorbereiteten Songs mit den Programmangaben für diesen Song belegt. Ein Songprogramm besteht aus zwei Teilen:
+Auf der Weboberfläche gibt es zwei Eingabefelder um das Songprogramm selbst festzulegen. Diese werden bei der Auswahl eines vorbereiteten Songs mit den Programmangaben für diesen Song belegt. Die beiden Textschnipsel kann man aber auch selbst dort editiern oder von einer externen Quelle hineinkopieren. Ein Songprogramm besteht aus zwei Teilen:
 * Song Parts: Definieren verschiedene Sätze von Farbpaletten und Mustern die der Song nutzt
 * Song Sequence: Legt das Tempo fest und regelt , welcher Song Part für wieviele Beats abgespielt werden soll
 
 ### Song Parts
 Die Angabe eines Song Parts erfolgt in folgender Syntax:
-    <Part Letter><Pattern preset>/<Speed>:<color>
+	'&lt;Part Letter>&lt;Pattern preset>/&lt;Speed>:&lt;color>
 	
 	Beispiel:"A10/4:0  B42/8:2  R30/8:0"
 * Part Letter: Ein Buchstabe unter dem dieser Part in der Song Sequence angesprochen wird
@@ -86,8 +86,8 @@ Die Angabe eines Song Parts erfolgt in folgender Syntax:
 
 ### Song Sequence:
 Die Song Sequence repräsentiert die Abfolge des Songs. Sie wird mit der BPM Angabe eröffnet und mit einer Angabe für jeden Songabschnitt fortgesetzt. Verschiedene Sonderzeichen markieren spezielle übergeordnete Positionen
-    <bpm> <Part Letter> <Beats><Beats>... <Part Letter>...
-    Beispiel: "120 A88# A88 B88 A8888 B88 R8888 8888 >A8888 B88 R8888 8888"
+	'&lt;bpm> &lt;Part Letter> &lt;Beats>&lt;Beats>... &lt;Part Letter>...
+	Beispiel: "120 A88# A88 B88 A8888 B88 R8888 8888 >A8888 B88 R8888 8888"
 
 * Part Letter: Muss einer der Buchstaben aus der "Song Parts" Definition sein
 * Beates: Die Beats werden als einstellige Zahlen angegeben und als solche dann für den Abschnitt aufaddiert bis ein neuer Buchstabe angegeben wird. (Beispiele: 8888=32 Beats 248 =14 Beats)
