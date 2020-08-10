@@ -76,9 +76,11 @@ Auf der Weboberfläche gibt es zwei Eingabefelder um das Songprogramm selbst fes
 
 ### Song Parts
 Die Angabe eines Song Parts erfolgt in folgender Syntax:
-	'&lt;Part Letter>&lt;Pattern preset>/&lt;Speed>:&lt;color>
+```
+	'<Part Letter><Pattern preset>/<Speed>:<color>
 	
 	Beispiel:"A10/4:0  B42/8:2  R30/8:0"
+```
 * Part Letter: Ein Buchstabe unter dem dieser Part in der Song Sequence angesprochen wird
 * Pattern Preset: Die Nummer eines Patternpresets (Legt Pattern und Farbstepping fest)
 * Speed: Tempo des Steppings innerhalb des Beats (2=2 Beats(Halbe Note), 4= 1 Beat(4tel Note), 8=1/2 Beat(8tel Note), 16, 32,64
@@ -86,8 +88,11 @@ Die Angabe eines Song Parts erfolgt in folgender Syntax:
 
 ### Song Sequence:
 Die Song Sequence repräsentiert die Abfolge des Songs. Sie wird mit der BPM Angabe eröffnet und mit einer Angabe für jeden Songabschnitt fortgesetzt. Verschiedene Sonderzeichen markieren spezielle übergeordnete Positionen
-	'&lt;bpm> &lt;Part Letter> &lt;Beats>&lt;Beats>... &lt;Part Letter>...
+```
+	<bpm> <Part Letter> <Beats><Beats>... <Part Letter>...
 	Beispiel: "120 A88# A88 B88 A8888 B88 R8888 8888 >A8888 B88 R8888 8888"
+```
+	
 
 * Part Letter: Muss einer der Buchstaben aus der "Song Parts" Definition sein
 * Beates: Die Beats werden als einstellige Zahlen angegeben und als solche dann für den Abschnitt aufaddiert bis ein neuer Buchstabe angegeben wird. (Beispiele: 8888=32 Beats 248 =14 Beats)
