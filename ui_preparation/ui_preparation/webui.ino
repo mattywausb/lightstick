@@ -27,6 +27,7 @@
 #ifdef TRACE_ON
 #define TR_WEBUI
 #define TR_WEBUI_PAGE_GENERATION
+#define TR_WEBUI_CONNECT
 #endif
 
 /* Macro to declare Strings with reserved buffer */
@@ -37,6 +38,8 @@
 //  SSID and password are defined in header file that will not be in the git repo
 const char* ssid = STASSID;
 const char* password = STAPSK;
+
+t_webui_connect_mode webui_connect_mode =NONE; 
 
 MDNSResponder mdns;
 
@@ -410,35 +413,73 @@ void handleNotFound()
 }
 
 
+// Setup return code will connection result
+// 1 = Couldconncet to WiFi
+// 2 = Started own AP
+// 0 = no WiFi available
 
-void webui_setup(void)
+t_webui_connect_mode webui_setup(void)
 {
-
   WiFi.begin(ssid, password);
+  
+  //WiFi.begin(ssid, "badpassword");
   // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
+  #ifdef TR_WEBUI_CONNECT
+     Serial.print("TR_WEBUI_CONNECT> Try to connect to SSID ");
+     Serial.println(ssid);
+  #endif 
+  for(int retry=0; WiFi.status() != WL_CONNECTED && retry<10; retry++) {
+     #ifdef TR_WEBUI_CONNECT
+        Serial.print('.');
+     #endif
+     delay(500);
   }
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  if (mdns.begin("lightstick", WiFi.localIP())) {
-    Serial.println("MDNS responder started");
+  if (WiFi.status() == WL_CONNECTED) {
+     webui_connect_mode =WIFI;
+     #ifdef TR_WEBUI_CONNECT
+      Serial.print("\nTR_WEBUI_CONNECT> Connected to ");
+      Serial.println(ssid);
+      Serial.print("IP address: ");
+      Serial.println(WiFi.localIP());
+     #endif
+  } else { 
+    WiFi.disconnect();  
+    String ap_ssid="Lightstick";//+ESP.getChipId();
+    IPAddress local_IP(192,168,4,22);
+    IPAddress gateway(192,168,4,9);
+    IPAddress subnet(255,255,255,0);
+     if(!WiFi.softAPConfig(local_IP, gateway, subnet)) {
+        #ifdef TR_WARNING
+          Serial.println("\n#!# TR_WARNING> Could not configure SoftAP ");
+       #endif;
+     }
+     if(WiFi.softAP(ap_ssid)) {
+        IPAddress myIP = WiFi.softAPIP();
+        webui_connect_mode =SOFT_AP;
+        #ifdef TR_WEBUI_CONNECT
+          Serial.print("\nTR_WEBUI_CONNECT>Providing own Wifi with IP ");
+          Serial.println(myIP);
+        #endif
+        if (mdns.begin("lightstick", WiFi.softAPIP())) {
+          Serial.println("MDNS responder started");
+        }
+     } else {
+       webui_connect_mode =NONE;
+       #ifdef TR_WARNING
+          Serial.println("\n#!# TR_WARNING> Could not start Wifi ");
+       #endif
+     }
+  }  
+  
+  if(webui_connect_mode!=NONE){
+      server.on("/", handleRoot);
+      server.on("/song", handleSong);
+      server.on("/switch", handleSwitch);
+      server.on("/default.css", sendStylesheet);
+      server.onNotFound(handleNotFound);
+      server.begin();
   }
 
-  server.on("/", handleRoot);
-  server.on("/song", handleSong);
-  server.on("/switch", handleSwitch);
-  server.on("/default.css", sendStylesheet);
-  server.onNotFound(handleNotFound);
-
-  server.begin();
-  Serial.print("Connect to http://lightstick.local or http://");
-  Serial.println(WiFi.localIP());
   #ifdef TRACE_ON
     Serial.println(F(">webui_setup complete "));
   #endif
