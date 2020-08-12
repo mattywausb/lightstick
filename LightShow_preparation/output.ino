@@ -37,7 +37,7 @@ typedef struct {
     float s;       // a fraction between 0 and 1
 } t_color_hs;
 
-#define COLOR_PALETTE_MAX_ENTRIES  12 
+#define COLOR_PALETTE_MAX_ENTRIES  16
 t_color_hs patconf_color_palette[COLOR_PALETTE_MAX_ENTRIES];
 uint8_t patconf_color_palette_lenght=0;
 uint8_t patvar_color_palette_index=0;
@@ -54,6 +54,16 @@ enum STEPPER_TYPE {
 STEPPER_TYPE output_current_stepper_type=ST_COLOR_WIPE;
 
 
+float output_indexed_color[]={HUE_RED,    //0
+                             HUE_ORANGE,  //1
+                             HUE_YELLOW,  //2
+                             HUE_LEMON,   //3
+                             HUE_GREEN,   //4
+                             HUE_CYAN,    //5
+                             HUE_SKYBLUE, //6
+                             HUE_BLUE,    //7
+                             HUE_PURPLE,  //8
+                             HUE_PINK} ;   //9
 
 int output_waittime[6];
 int output_beats_per_minute = 120;
@@ -135,212 +145,228 @@ void output_load_color_palette(int palette_id)
   #ifdef TR_OUT_API_CALL
       Serial.print(F("TR_OUT_API_CALL> output_load_color_palette:"));Serial.println(palette_id);
   #endif 
-  switch(palette_id) {
-    // broad  section
-    case 0:                 // Prime Colors and Yellow
-         patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=1.0;
-         patconf_color_palette_lenght=4;
-         break;
-    case 1:                 // Police USA (red,white (over blue) ,blue,white over red)
-         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; //WHITE
-         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0; //WHITE
-         patconf_color_palette_lenght=4;
-         break;
-    case 2:                 // Red blue variant (w,sb,r,b,o,sb,r,b) "not today"
-         patconf_color_palette[0].h=HUE_SKYBLUE;patconf_color_palette[0].s=0.0; //WHITE
-         patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_BLUE;patconf_color_palette[3].s=1.0; 
-         patconf_color_palette[4].h=HUE_ORANGE;patconf_color_palette[4].s=1.0; 
-         patconf_color_palette[5].h=HUE_SKYBLUE;patconf_color_palette[5].s=1.0; 
-         patconf_color_palette[6].h=HUE_RED;patconf_color_palette[6].s=1.0;
-         patconf_color_palette[7].h=HUE_BLUE;patconf_color_palette[7].s=1.0; 
-         patconf_color_palette_lenght=8;
-         break;
-    case 3:                 // b g y
-         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0; 
-         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=1.0;
-         patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
-         patconf_color_palette_lenght=3;
-         break;
-    case 4:                 // Yellow pulse with blue and green change
-         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_YELLOW;patconf_color_palette[3].s=1.0; 
-         patconf_color_palette[4].h=HUE_GREEN;patconf_color_palette[4].s=1.0; 
-         patconf_color_palette[5].h=HUE_YELLOW;patconf_color_palette[5].s=1.0; 
-         patconf_color_palette[6].h=HUE_GREEN;patconf_color_palette[6].s=1.0;
-         patconf_color_palette[7].h=HUE_YELLOW;patconf_color_palette[7].s=1.0; 
-         patconf_color_palette_lenght=8;
-         break;
-    case 5:                 //  y g b c 
-         patconf_color_palette[0].h=HUE_CYAN;   patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_YELLOW; patconf_color_palette[1].s=1.0;
-         patconf_color_palette[2].h=HUE_GREEN;  patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_BLUE;   patconf_color_palette[3].s=1.0; 
-         patconf_color_palette_lenght=4;
-         break;
-   /// ---------- Cold section       
-   case 20:                // blue green  
-         patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette_lenght=2;
-         break;
-   case 21:                 // blue white cyan geen 
-         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; //WHITE
-         patconf_color_palette[2].h=HUE_CYAN;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_PURPLE;patconf_color_palette[3].s=1.0;
-         patconf_color_palette_lenght=4;
-         break;
-   case 22:                 // blue white(on blue) cyan geen 
-         patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0;
-         patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=0.0; //WHITE
-         patconf_color_palette[3].h=HUE_PURPLE;patconf_color_palette[3].s=1.0;
-         patconf_color_palette[4].h=HUE_BLUE;patconf_color_palette[4].s=1.0;
-         patconf_color_palette[5].h=HUE_CYAN;patconf_color_palette[5].s=SAT_LCYAN;
-         patconf_color_palette_lenght=6;
-         break;
-   case 23:                 // blue sky lblue cyan
-         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_LBLUE;patconf_color_palette[2].s=SAT_LBLUE;
-         patconf_color_palette[3].h=HUE_CYAN;patconf_color_palette[3].s=1.0;
-         patconf_color_palette_lenght=4;
-         break;
-   /// -- Warm Section
-   case 40:                   // yellow, skyblue, orange, pink
-         patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
-         patconf_color_palette_lenght=4;
-         break;
-   case 41:                   // red, orange, rose
-         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=SAT_ROSE;
-         patconf_color_palette_lenght=3;
-         break;
-   case 42:                   // pu pi wpu pi
-         patconf_color_palette[0].h=HUE_PURPLE;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_PINK;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_PURPLE;patconf_color_palette[2].s=0.0;
-         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
-         patconf_color_palette_lenght=4;
-         break;
-   case 43:                   // o wo o wo r wo r wo 
-         patconf_color_palette[0].h=HUE_ORANGE;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=0.0; 
-         patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0;
-         patconf_color_palette[4].h=HUE_RED;patconf_color_palette[4].s=1.0;
-         patconf_color_palette[5].h=HUE_ORANGE;patconf_color_palette[5].s=0.0;
-         patconf_color_palette[6].h=HUE_RED;patconf_color_palette[6].s=1.0;
-         patconf_color_palette[7].h=HUE_ORANGE;patconf_color_palette[7].s=0.0;
-         patconf_color_palette_lenght=8;
-         break;
-   case 44:                                                   // fire
-         patconf_color_palette[0].h=20;patconf_color_palette[0].s=1.0; 
-         patconf_color_palette[1].h=10;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=25;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=5;patconf_color_palette[3].s=1.0; 
-         patconf_color_palette[4].h=15;patconf_color_palette[4].s=1.0; 
-         patconf_color_palette[5].h=7;patconf_color_palette[5].s=1.0; 
-         patconf_color_palette_lenght=6;
-         break; 
-   case 45:                           // r wr
-         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=0.0;
-         patconf_color_palette_lenght=2;
-         break; 
-   case 46:                           //  r r r wr r r
-         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=1.0;
-         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0;
-         patconf_color_palette[4].h=HUE_RED;patconf_color_palette[4].s=1.0;
-         patconf_color_palette[5].h=HUE_RED;patconf_color_palette[5].s=1.0;
-         patconf_color_palette_lenght=6;
-         break; 
- // -- Single Color + White Overlay version
-   case 80:
-         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-         patconf_color_palette_lenght=1;
-         break; 
-   case 81:
-         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=0.0;
-         patconf_color_palette_lenght=1;
-         break; 
-         
-         
-                   
- // -- Pulse specials  Section
-   case 100:                                        // blue green  
-         patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; 
-         patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=0.0; 
-         patconf_color_palette_lenght=4;
-         break;
-  case 101:                                        // r w+r oe w+o
-         patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=0.0; 
-         patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0; 
-         patconf_color_palette_lenght=4;
-         break;
-  case 102:                                        // o wo r wo wo
-         patconf_color_palette[0].h=HUE_ORANGE;patconf_color_palette[0].s=1.0;
-         patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=0.0; 
-         patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0; 
-         patconf_color_palette[4].h=HUE_ORANGE;patconf_color_palette[4].s=0.0; 
-         patconf_color_palette_lenght=5;
-         break;
-  // -- Whipe specials Section
-  case 120:                                        // pu pu pi pi wpu wpu pi pi
-         patconf_color_palette[0].h=HUE_PURPLE;patconf_color_palette[0].s=1.0; //WHITE
-         patconf_color_palette[1].h=HUE_PURPLE;patconf_color_palette[1].s=1.0; 
-         patconf_color_palette[2].h=HUE_PINK;patconf_color_palette[2].s=1.0;
-         patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0; 
-         patconf_color_palette[4].h=HUE_PURPLE;patconf_color_palette[4].s=0.0; 
-         patconf_color_palette[5].h=HUE_PURPLE;patconf_color_palette[5].s=0.0; 
-         patconf_color_palette[6].h=HUE_PINK;patconf_color_palette[6].s=1.0;
-         patconf_color_palette[7].h=HUE_PINK;patconf_color_palette[7].s=1.0; 
-         patconf_color_palette_lenght=8;
-         break;
- // -- Color Orb specials Section 
-  case 130:
-                                                   // fire with White center 3 steps
-         patconf_color_palette[0].h=20;         patconf_color_palette[0].s=1.0; 
-         patconf_color_palette[1].h=HUE_YELLOW; patconf_color_palette[1].s=0.0; // WHITE
-         patconf_color_palette[2].h=15;         patconf_color_palette[2].s=1.0; 
-         patconf_color_palette[3].h=10;         patconf_color_palette[3].s=1.0;
-         patconf_color_palette[4].h=HUE_YELLOW; patconf_color_palette[4].s=0.0; // WHITE
-         patconf_color_palette[5].h= 5;         patconf_color_palette[5].s=1.0; 
-         patconf_color_palette[6].h=25;         patconf_color_palette[6].s=1.0; 
-         patconf_color_palette[7].h=HUE_YELLOW; patconf_color_palette[7].s=0.0; // WHITE 
-         patconf_color_palette[8].h=19;         patconf_color_palette[8].s=1.0; 
-         patconf_color_palette[9].h= 6;         patconf_color_palette[9].s=1.0; 
-         patconf_color_palette[10].h=HUE_YELLOW;patconf_color_palette[10].s=0.0; // WHITE
-         patconf_color_palette[11].h= 8;        patconf_color_palette[11].s=1.0; 
-         patconf_color_palette_lenght=12;
-         break; 
-          
-          
-   #ifdef TR_WARNING
-   default:
-        Serial.print(F("#!# TR_WARNING> unkown color pallette:"));Serial.println(palette_id);
-   #endif         
-  }
+  if(palette_id<10000) {
+    switch(palette_id) {
+      // broad  section
+      case 0:                 // Prime Colors and Yellow
+           patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=1.0;
+           patconf_color_palette_lenght=4;
+           break;
+      case 1:                 // Police USA (red,white (over blue) ,blue,white over red)
+           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; //WHITE
+           patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0; //WHITE
+           patconf_color_palette_lenght=4;
+           break;
+      case 2:                 // Red blue variant (w,sb,r,b,o,sb,r,b) "not today"
+           patconf_color_palette[0].h=HUE_SKYBLUE;patconf_color_palette[0].s=0.0; //WHITE
+           patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_BLUE;patconf_color_palette[3].s=1.0; 
+           patconf_color_palette[4].h=HUE_ORANGE;patconf_color_palette[4].s=1.0; 
+           patconf_color_palette[5].h=HUE_SKYBLUE;patconf_color_palette[5].s=1.0; 
+           patconf_color_palette[6].h=HUE_RED;patconf_color_palette[6].s=1.0;
+           patconf_color_palette[7].h=HUE_BLUE;patconf_color_palette[7].s=1.0; 
+           patconf_color_palette_lenght=8;
+           break;
+      case 3:                 // b g y
+           patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0; 
+           patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=1.0;
+           patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
+           patconf_color_palette_lenght=3;
+           break;
+      case 4:                 // Yellow pulse with blue and green change
+           patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_YELLOW;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_YELLOW;patconf_color_palette[3].s=1.0; 
+           patconf_color_palette[4].h=HUE_GREEN;patconf_color_palette[4].s=1.0; 
+           patconf_color_palette[5].h=HUE_YELLOW;patconf_color_palette[5].s=1.0; 
+           patconf_color_palette[6].h=HUE_GREEN;patconf_color_palette[6].s=1.0;
+           patconf_color_palette[7].h=HUE_YELLOW;patconf_color_palette[7].s=1.0; 
+           patconf_color_palette_lenght=8;
+           break;
+      case 5:                 //  y g b c 
+           patconf_color_palette[0].h=HUE_CYAN;   patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_YELLOW; patconf_color_palette[1].s=1.0;
+           patconf_color_palette[2].h=HUE_GREEN;  patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_BLUE;   patconf_color_palette[3].s=1.0; 
+           patconf_color_palette_lenght=4;
+           break;
+     /// ---------- Cold section       
+     case 20:                // blue green  
+           patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette_lenght=2;
+           break;
+     case 21:                 // blue white cyan geen 
+           patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; //WHITE
+           patconf_color_palette[2].h=HUE_CYAN;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_PURPLE;patconf_color_palette[3].s=1.0;
+           patconf_color_palette_lenght=4;
+           break;
+     case 22:                 // blue white(on blue) cyan geen 
+           patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0;
+           patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=0.0; //WHITE
+           patconf_color_palette[3].h=HUE_PURPLE;patconf_color_palette[3].s=1.0;
+           patconf_color_palette[4].h=HUE_BLUE;patconf_color_palette[4].s=1.0;
+           patconf_color_palette[5].h=HUE_CYAN;patconf_color_palette[5].s=SAT_LCYAN;
+           patconf_color_palette_lenght=6;
+           break;
+     case 23:                 // blue sky lblue cyan
+           patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette[2].h=HUE_LBLUE;patconf_color_palette[2].s=SAT_LBLUE;
+           patconf_color_palette[3].h=HUE_CYAN;patconf_color_palette[3].s=1.0;
+           patconf_color_palette_lenght=4;
+           break;
+     /// -- Warm Section
+     case 40:                   // yellow, skyblue, orange, pink
+           patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
+           patconf_color_palette_lenght=4;
+           break;
+     case 41:                   // red, orange, rose
+           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=SAT_ROSE;
+           patconf_color_palette_lenght=3;
+           break;
+     case 42:                   // pu pi wpu pi
+           patconf_color_palette[0].h=HUE_PURPLE;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_PINK;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette[2].h=HUE_PURPLE;patconf_color_palette[2].s=0.0;
+           patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
+           patconf_color_palette_lenght=4;
+           break;
+     case 43:                   // o wo o wo r wo r wo 
+           patconf_color_palette[0].h=HUE_ORANGE;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=0.0; 
+           patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0;
+           patconf_color_palette[4].h=HUE_RED;patconf_color_palette[4].s=1.0;
+           patconf_color_palette[5].h=HUE_ORANGE;patconf_color_palette[5].s=0.0;
+           patconf_color_palette[6].h=HUE_RED;patconf_color_palette[6].s=1.0;
+           patconf_color_palette[7].h=HUE_ORANGE;patconf_color_palette[7].s=0.0;
+           patconf_color_palette_lenght=8;
+           break;
+     case 44:                                                   // fire
+           patconf_color_palette[0].h=20;patconf_color_palette[0].s=1.0; 
+           patconf_color_palette[1].h=10;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette[2].h=25;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=5;patconf_color_palette[3].s=1.0; 
+           patconf_color_palette[4].h=15;patconf_color_palette[4].s=1.0; 
+           patconf_color_palette[5].h=7;patconf_color_palette[5].s=1.0; 
+           patconf_color_palette_lenght=6;
+           break; 
+     case 45:                           // r wr
+           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=0.0;
+           patconf_color_palette_lenght=2;
+           break; 
+     case 46:                           //  r r r wr r r
+           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=1.0;
+           patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0;
+           patconf_color_palette[4].h=HUE_RED;patconf_color_palette[4].s=1.0;
+           patconf_color_palette[5].h=HUE_RED;patconf_color_palette[5].s=1.0;
+           patconf_color_palette_lenght=6;
+           break; 
+   // -- Single Color + White Overlay version
+     case 80:
+           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+           patconf_color_palette_lenght=1;
+           break; 
+     case 81:
+           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=0.0;
+           patconf_color_palette_lenght=1;
+           break; 
+           
+           
+                     
+   // -- Pulse specials  Section
+     case 100:                                        // blue green  
+           patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; 
+           patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=0.0; 
+           patconf_color_palette_lenght=4;
+           break;
+    case 101:                                        // r w+r oe w+o
+           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=0.0; 
+           patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0; 
+           patconf_color_palette_lenght=4;
+           break;
+    case 102:                                        // o wo r wo wo
+           patconf_color_palette[0].h=HUE_ORANGE;patconf_color_palette[0].s=1.0;
+           patconf_color_palette[1].h=HUE_ORANGE;patconf_color_palette[1].s=0.0; 
+           patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0; 
+           patconf_color_palette[4].h=HUE_ORANGE;patconf_color_palette[4].s=0.0; 
+           patconf_color_palette_lenght=5;
+           break;
+    // -- Whipe specials Section
+    case 120:                                        // pu pu pi pi wpu wpu pi pi
+           patconf_color_palette[0].h=HUE_PURPLE;patconf_color_palette[0].s=1.0; //WHITE
+           patconf_color_palette[1].h=HUE_PURPLE;patconf_color_palette[1].s=1.0; 
+           patconf_color_palette[2].h=HUE_PINK;patconf_color_palette[2].s=1.0;
+           patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0; 
+           patconf_color_palette[4].h=HUE_PURPLE;patconf_color_palette[4].s=0.0; 
+           patconf_color_palette[5].h=HUE_PURPLE;patconf_color_palette[5].s=0.0; 
+           patconf_color_palette[6].h=HUE_PINK;patconf_color_palette[6].s=1.0;
+           patconf_color_palette[7].h=HUE_PINK;patconf_color_palette[7].s=1.0; 
+           patconf_color_palette_lenght=8;
+           break;
+   // -- Color Orb specials Section 
+    case 130:
+                                                     // fire with White center 3 steps
+           patconf_color_palette[0].h=20;         patconf_color_palette[0].s=1.0; 
+           patconf_color_palette[1].h=HUE_YELLOW; patconf_color_palette[1].s=0.0; // WHITE
+           patconf_color_palette[2].h=15;         patconf_color_palette[2].s=1.0; 
+           patconf_color_palette[3].h=10;         patconf_color_palette[3].s=1.0;
+           patconf_color_palette[4].h=HUE_YELLOW; patconf_color_palette[4].s=0.0; // WHITE
+           patconf_color_palette[5].h= 5;         patconf_color_palette[5].s=1.0; 
+           patconf_color_palette[6].h=25;         patconf_color_palette[6].s=1.0; 
+           patconf_color_palette[7].h=HUE_YELLOW; patconf_color_palette[7].s=0.0; // WHITE 
+           patconf_color_palette[8].h=19;         patconf_color_palette[8].s=1.0; 
+           patconf_color_palette[9].h= 6;         patconf_color_palette[9].s=1.0; 
+           patconf_color_palette[10].h=HUE_YELLOW;patconf_color_palette[10].s=0.0; // WHITE
+           patconf_color_palette[11].h= 8;        patconf_color_palette[11].s=1.0; 
+           patconf_color_palette_lenght=12;
+           break; 
+            
+            
+     #ifdef TR_WARNING
+     default:
+          Serial.print(F("#!# TR_WARNING> unkown color pallette:"));Serial.println(palette_id);
+     #endif         
+    } // Switch
+  } // <10000
+  
+  if(palette_id>=10000 && palette_id<20000) {
+    int remainder=palette_id-10000;
+    byte ci3=remainder%10;
+    byte ci2=(remainder/10)%10;
+    byte ci1=(remainder/100)%10;
+    byte ci0=(remainder/1000)%10;
+    patconf_color_palette[0].h=output_indexed_color[ci0];         patconf_color_palette[0].s=1.0;
+    patconf_color_palette[1].h=output_indexed_color[ci1];         patconf_color_palette[1].s=1.0;
+    patconf_color_palette[2].h=output_indexed_color[ci2];         patconf_color_palette[2].s=1.0;
+    patconf_color_palette[3].h=output_indexed_color[ci3];         patconf_color_palette[3].s=1.0;
+    patconf_color_palette_lenght=4;
+  } // 10000-19999
+  
   #ifdef TR_COLOR_PRESET_PALETTE_SETTING
   #ifdef TR_COLOR_PALETTE_SETTING
     dump_color_palette_to_serial();

@@ -13,7 +13,7 @@
 #define HUE_YELLOW 45.0
 #define SAT_LYELLOW 0.8
 
-#define HUE_LEMON 95.0
+#define HUE_LEMON 90.0
 
 #define HUE_GREEN 120.0
 #define SAT_LGREEN 0.8
