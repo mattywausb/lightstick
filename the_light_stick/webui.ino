@@ -26,7 +26,7 @@
 
 #ifdef TRACE_ON
 #define TR_WEBUI
-#define TR_WEBUI_PAGE_GENERATION
+//#define TR_WEBUI_PAGE_GENERATION
 #define TR_WEBUI_CONNECT
 #endif
 
