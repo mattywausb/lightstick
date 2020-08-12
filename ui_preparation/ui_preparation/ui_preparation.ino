@@ -26,9 +26,15 @@ void setup(void)
   char compile_signature[] = "\n\n\n--- START (Build: " __DATE__ " " __TIME__ ") ---";   
   Serial.println(compile_signature);
 
-  webui_setup();
   output_setup();
   input_setup();
+  
+  input_switches_scan_tick();
+  #ifdef TRACE_ON
+    if( input_stepIsPressed()) Serial.println(F("TRACE_ON> Button is pressed during start"));
+    else Serial.println(F("TRACE_ON> normal start"));
+  #endif  
+  webui_setup(input_stepIsPressed());
   
   output_set_bpm(120);
   #ifdef TRACE_ON
@@ -39,6 +45,7 @@ void setup(void)
 
 void loop(void)
 {
+  input_switches_scan_tick();
   webui_loop();
 }
 
