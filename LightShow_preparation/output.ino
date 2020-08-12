@@ -13,7 +13,7 @@
 #define TR_PATTERN_SETTING
 //#define TR_COLOR_ORBIT_COLOR
 #define TR_OUT_BEAT_TRACKING
-
+//#define TR_OUT_SPARKLE_DETAILS
 #endif
 
 #define PIXEL_PIN    12    // Digital IO pin connected to the NeoPixels. D6 on ESP8266 / Node MCU
@@ -47,7 +47,8 @@ enum STEPPER_TYPE {
   ST_DOUBLE_ORBIT,
   ST_COLOR_ORBIT,
   ST_PULSE,
-  ST_RAINBOW
+  ST_RAINBOW,
+  ST_SPARKLE
 };
 
 STEPPER_TYPE output_current_stepper_type=ST_COLOR_WIPE;
@@ -95,6 +96,7 @@ void output_setup() {
   digitalWrite(LED_BUILTIN, LOW);
   output_set_bpm(40);
   output_set_pattern_speed(STEP_ON_BEAT);
+  randomSeed(1);
 }
 
 
@@ -465,6 +467,15 @@ void output_start_pattern(int pattern_id) {
                start_rainbow(0.5,0.0,30*(pattern_id-94)+25); 
          }
          break;
+    case 10:           // SPARKLE 100-106 palette increment 1 
+         start_sparkle(0.8,1<<(pattern_id-100),1);  // brightness, Steps until color increment, color palette increment   
+         break;
+    case 11:           // SPARKLE 110-116 palette increment 2 
+         start_sparkle(0.8,1<<(pattern_id-110),2);  // brightness, Steps until color increment, color palette increment   
+         break;
+    case 12:           // SPARKLE 120-126 palette increment 3 
+         start_sparkle(0.8,1<<(pattern_id-120),3);  // brightness, Steps until color increment, color palette increment   
+         break;  
   }
   output_process_pattern();
 }
@@ -488,8 +499,90 @@ void output_process_pattern() {
     case ST_COLOR_ORBIT: process_colorOrbit(); break;
     case ST_PULSE: process_pulse(); break;
     case ST_RAINBOW: process_rainbow();break;
+    case ST_SPARKLE: process_sparkle();break;
   }
   output_beat_sync_happened=false;      // Agents had their chance to react, now we set it back
+}
+
+
+/*
+ *   SPARKLE 
+ *   Igniting random leds with random color from 3 of palette
+ *   lamp_value: general brightness
+ *   steps_per_color: number of steps to change color index (index alway increments by 2, so you must double a color in palette for uni color effect)
+ *   follow_up_time_shift: number of 1/4 waittime between center and ring pulse
+ */
+void start_sparkle(float lamp_value, int steps_per_color, int color_palette_increment){
+  #ifdef TR_PATTERN_SETTING
+      Serial.print(F("TR_PATTERN_SETTING> start_sparkle:"));
+      Serial.print(steps_per_color);Serial.print(',');
+      Serial.println(color_palette_increment);
+  #endif
+  // init all globales for the pattern
+  output_current_stepper_type=ST_SPARKLE;
+  patvar_previous_step_time = output_get_current_beat_start_time();
+  patvar_previous_fade_time = 0L;
+  
+  patconf_pattern_lamp_value = lamp_value;
+  patconf_steps_until_color_change=steps_per_color;
+  patconf_color_palette_increment=color_palette_increment;
+  patconf_fade_factor=0.7;
+
+  for (int lamp_index = 0; lamp_index < LAMP_COUNT; ++lamp_index){
+           lamp[lamp_index].set_value(0);
+  }
+  lamp[random(0,PIXEL_COUNT)].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
+
+  output_push_lamps_to_pixels();
+}
+
+void process_sparkle() {
+
+  long current_time = millis();
+  boolean pixel_update_necessary=false;
+
+  if (current_time - patvar_previous_fade_time >= PATCONF_FADE_FRAMETIME) {  // calculate fading effect
+    patvar_previous_fade_time=current_time;
+    pixel_update_necessary=true;
+     for (int lamp_index = 0; lamp_index < LAMP_COUNT; ++lamp_index){
+       if(lamp[lamp_index].get_saturation()<1.0) {
+         lamp[lamp_index].add_saturation(0.1);
+        } 
+        lamp[lamp_index].multiply_value(patconf_fade_factor);
+      } // loop over lamp ring
+  }  // end of fading calculation
+
+   
+   if ((current_time - patvar_previous_step_time >= output_waittime[patconf_speed_id])||   
+        output_beat_sync_happened){                                                        // next step
+          
+      if(output_beat_sync_happened) {    //clean init of step 
+          patvar_previous_step_time=output_beat_sync_time;  // new Start
+          patvar_current_step_index=0;                      // Start with even step
+          patvar_step_in_color_index=patconf_steps_until_color_change; // Trigger color change
+      }else {
+          patvar_previous_step_time = current_time;
+          ++patvar_current_step_index;   // Step index will not be reset (would take 32000 steps to overflow)
+      }
+      
+      if (++patvar_step_in_color_index>=patconf_steps_until_color_change) {  // Forward color pallette if necessary
+            patvar_step_in_color_index=0;
+            patvar_color_palette_index+=patconf_color_palette_increment;
+            while(patvar_color_palette_index>=patconf_color_palette_lenght) patvar_color_palette_index-=patconf_color_palette_lenght;
+      } 
+
+      byte random_component=random((patconf_color_palette_lenght>3?3:patconf_color_palette_lenght));
+      #ifdef TR_OUT_SPARKLE_DETAILS
+        Serial.print(F("TR_OUT_SPARKLE_DETAILS> random_component:"));
+        Serial.println(random_component);
+      #endif
+      byte random_color_index=patvar_color_palette_index+random_component;
+      while(random_color_index>=patconf_color_palette_lenght) random_color_index-=patconf_color_palette_lenght;
+      lamp[random(0,PIXEL_COUNT)].set_hsv(patconf_color_palette[random_color_index].h,patconf_color_palette[random_color_index].s,patconf_pattern_lamp_value);
+   }
+
+   // Finally display the result
+   if(pixel_update_necessary) output_push_lamps_to_pixels();       
 }
 
 
