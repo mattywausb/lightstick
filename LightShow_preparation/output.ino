@@ -149,11 +149,7 @@ void output_load_color_palette(int palette_id)
     switch(palette_id) {
       // broad  section
       case 0:                 // Prime Colors and Yellow
-           patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
-           patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
-           patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=1.0;
-           patconf_color_palette_lenght=4;
+           palette_id=12704;
            break;
       case 1:                 // Police USA (red,white (over blue) ,blue,white over red)
            patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
@@ -191,11 +187,7 @@ void output_load_color_palette(int palette_id)
            patconf_color_palette_lenght=8;
            break;
       case 5:                 //  y g b c 
-           patconf_color_palette[0].h=HUE_CYAN;   patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_YELLOW; patconf_color_palette[1].s=1.0;
-           patconf_color_palette[2].h=HUE_GREEN;  patconf_color_palette[2].s=1.0;
-           patconf_color_palette[3].h=HUE_BLUE;   patconf_color_palette[3].s=1.0; 
-           patconf_color_palette_lenght=4;
+           palette_id=15247;
            break;
      /// ---------- Cold section       
      case 20:                // blue green  
@@ -228,11 +220,7 @@ void output_load_color_palette(int palette_id)
            break;
      /// -- Warm Section
      case 40:                   // yellow, skyblue, orange, pink
-           patconf_color_palette[0].h=HUE_YELLOW;patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_SKYBLUE;patconf_color_palette[1].s=1.0; 
-           patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
-           patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
-           patconf_color_palette_lenght=4;
+           palette_id=12619;
            break;
      case 41:                   // red, orange, rose
            patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
@@ -552,7 +540,7 @@ void start_sparkle(float lamp_value, int steps_per_color, int color_palette_incr
   patconf_pattern_lamp_value = lamp_value;
   patconf_steps_until_color_change=steps_per_color;
   patconf_color_palette_increment=color_palette_increment;
-  patconf_fade_factor=0.7;
+  patconf_fade_factor=0.90;
 
   for (int lamp_index = 0; lamp_index < LAMP_COUNT; ++lamp_index){
            lamp[lamp_index].set_value(0);
