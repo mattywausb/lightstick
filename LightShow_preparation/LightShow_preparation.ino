@@ -12,6 +12,7 @@
 #include "lamp.h"
 #include "output.h"
 #include "mainSettings.h"
+#include "webui.h"
 
 
 
@@ -97,9 +98,20 @@ void setup() {
   output_set_bpm(80);
   output_reset_color_palette(HUE_ORANGE,1);
   output_start_pattern(9);  // Heartbeat with low light
-  webui_setup();
   input_setup();
-  output_reset_color_palette(HUE_LEMON,1);
+  
+  input_switches_scan_tick();
+  #ifdef TRACE_ON
+    if( input_stepIsPressed()) Serial.println(F("TRACE_ON> Button is pressed during start"));
+    else Serial.println(F("TRACE_ON> normal start"));
+  #endif  
+  switch (webui_setup(input_stepIsPressed())) {
+    case WIFI: output_reset_color_palette(HUE_LEMON,1); break;
+    case SOFT_AP: output_reset_color_palette(HUE_BLUE,1); break;
+    case NONE:
+    default:
+            output_reset_color_palette(HUE_RED,1); 
+  }
   mode_of_operation=MODE_FIX_PRESET;
 }
 
@@ -568,6 +580,4 @@ void loop() {
   
   output_process_pattern();
 }
-
-
 

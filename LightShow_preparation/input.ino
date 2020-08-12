@@ -7,7 +7,7 @@
 
 #ifdef TRACE_ON
 #define TR_INP 
-//#define TR_INP_HIGH
+// #define TR_INP_HIGH
 //#define TR_INP_TIMING 
 #endif
 
@@ -50,7 +50,7 @@ unsigned int button_tick_state = 0;      // current and historized state in the 
 
 
 #define INPUT_BUTTON_B_BITS                  0x000c
-#define INPUT_BUTTON_B_IS_PRESSED_PATTERN    0x000c
+#define INPUT_BUTTON_B_IS_PRESSED_BIT        0x0004
 #define INPUT_BUTTON_B_GOT_PRESSED_PATTERN   0x0004
 #define INPUT_BUTTON_B_GOT_RELEASED_PATTERN  0x0008
 
@@ -117,7 +117,7 @@ bool input_stepGotPressed()
 
 bool input_stepIsPressed()
 {
-  return input_enabled && ((button_tick_state & INPUT_BUTTON_B_BITS) == INPUT_BUTTON_B_IS_PRESSED_PATTERN); 
+  return input_enabled && (button_tick_state & INPUT_BUTTON_B_IS_PRESSED_BIT ); 
 }
 
 byte input_stepGotReleased()
@@ -267,7 +267,7 @@ void input_setup() {
   for (byte switchIndex = 0; switchIndex < INPUT_PORT_COUNT ; switchIndex++) {
     pinMode(switch_pin_list[switchIndex], INPUT_PULLUP);
   }
-
+  delay(INPUT_BUTTON_COOLDOWN*2);  // ensure, systemtime is behind Button Cooldown
   setupComplete = true;
 }
 
