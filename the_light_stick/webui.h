@@ -1,12 +1,12 @@
 #ifndef __WEBUI_H__
 #define __WEBUI_H__
 
-enum WEBUI_COMMAND {
+enum WEBUI_CONNECT_MODE {
   NONE,
-  SET_BPM,
-  SET_SEQUENCE
+  WIFI,
+  SOFT_AP
 };
 
-typedef enum WEBUI_COMMAND t_webui_command ;
+typedef enum WEBUI_CONNECT_MODE t_webui_connect_mode ;
 
 #endif
