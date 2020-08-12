@@ -12,9 +12,12 @@ Der Stick wird eingeschaltet, indem man den Deckel am unteren Stabende öffnet u
 
 Sowie der Lightstick Strom hat sucht er die Verbindung zum WLAN. In dieser Zeit leuchtet er schwach in Orange. 
 
-Hat er den Kontakt zum WLAN aufgenommen, blinkt er schwach grün und ist bereit.
+Hat er den Kontakt zum WLAN aufgenommen (Momentan hard codierte Zugangsdaten), blinkt er schwach Grün und ist bereit. Die Webseite ist auf der IP Adresse des Stick zu erreichen (Momentan in unserem Netz unter http://192.168.178.82)
 
-Wie Webseite ist auf der IP Adresse des Stick zu erreichen (Momentan in unserem Netz unter http://192.168.178.82)
+Konnte sich der Stick nicht im WLAN einwählen, baut der Stick seine eigene WLAN Zelle auf. (SSID:"Lightstick-xxxxxxxx" Passwort:"letsparty" (xxxxxx=Seriennummer des eingebauten Controllers)).
+In diesem Fall blinkt er Blau. Um ihn zu bedienen muss man sich mit dem WLAN Verbinden und findet die Webseite dann unter http://192.168.4.22.
+
+Sollte der Stick auch keinen eigenen AP aufbauen können, blink er rot und ist dann leider nicht bedienbar.
 
 ## Auswahl eines Pattern (Musters)
 Ein Pattern definiert, welche der eingebauten LED wann und wie lange leuchten. Dies erfolgt bezogen auf den laufenden Takt, d.h. das Pattern passt sein Lauftempo der Beatzahl(BPM) an, die über den Taster ermittelt wird oder von einem vorigen Song noch eingestellt ist. 
@@ -77,73 +80,75 @@ Auf der Weboberfläche gibt es zwei Eingabefelder um das Songprogramm selbst fes
 ### Song Parts
 Die Angabe eines Song Parts erfolgt in folgender Syntax:
 ```
-	'<Part Letter><Pattern preset>/<Speed>:<color>
-	
-	Beispiel:"A10/4:0  B42/8:2  R30/8:0"
+<Part Letter><Pattern preset>/<Speed>:<Color Ppalette>
+
+Beispiel:"A10/4:0  B42/8:2  R30/8:0"
 ```
-* Part Letter: Ein Buchstabe unter dem dieser Part in der Song Sequence angesprochen wird
+* Part Letter: Ein Buchstabe unter dem dieser Part in der Song Sequence angesprochen wird. Gute Praxis sind A B C für Strophenabschnitte R S T für Refrainabschnitte, I J L M für Intro Abschnitte
 * Pattern Preset: Die Nummer eines Patternpresets (Legt Pattern und Farbstepping fest)
-* Speed: Tempo des Steppings innerhalb des Beats (2=2 Beats(Halbe Note), 4= 1 Beat(4tel Note), 8=1/2 Beat(8tel Note), 16, 32,64
-* Color: Die Nummer einer der fest programmierten Farbpaletten
+* Speed: Tempo des Steppings innerhalb des Beats (2=2 Beats(halbe Note), 4= 1 Beat(4tel Note), 8=1/2 Beat(8tel Note), 16, 32,64
+* Color Palette: Die Nummer einer der fest programmierten Farbpaletten
 
 ### Song Sequence:
-Die Song Sequence repräsentiert die Abfolge des Songs. Sie wird mit der BPM Angabe eröffnet und mit einer Angabe für jeden Songabschnitt fortgesetzt. Verschiedene Sonderzeichen markieren spezielle übergeordnete Positionen
+Die Song Sequence repräsentiert die Abfolge des Songs. Sie beginnt mit der  BPM Angabe der dann die Songabschnitt folgen. Verschiedene Sonderzeichen markieren spezielle übergeordnete Positionen
 ```
-	<bpm> <Part Letter> <Beats><Beats>... <Part Letter>...
-	Beispiel: "120 A88# A88 B88 A8888 B88 R8888 8888 >A8888 B88 R8888 8888"
+<bpm> <Part Letter> <Beats><Beats>... <Part Letter>...
+
+Beispiel: "120 A88# A88 B88 A8888 B88 R8888 8888 >A8888 B88 R8888 8888"
 ```
 
 * Part Letter: Muss einer der Buchstaben aus der "Song Parts" Definition sein
-* Beates: Die Beats werden als einstellige Zahlen angegeben und als solche dann für den Abschnitt aufaddiert bis ein neuer Buchstabe angegeben wird. (Beispiele: 8888=32 Beats 248 =14 Beats)
-* Sonderzeichen #: Der Abschnitt in dem dieses Zeichen Steht ist die Warteschleife. Mit dem Tastendruck springt das Programm dann zum nächsten Abschnitt. Die Anzahl an Beats in dem Abschnitt sind dabei irrelevant, sollten aber so angegeben werden, dass man ablesen kann, welcher Beat für den einsatz gewählt werden soll (88 = 16 Beats, Also Beat 17 für den Wechsel)
+* Beats: Die Beats werden als einstellige Zahlen angegeben und als solche dann für den aktuellen Abschnitt aufaddiert bis ein neuer Buchstabe den nächsten Abschnitt deklariert. (Beispiele: 8888=32 Beats 248 =14 Beats)
+* Sonderzeichen #: Der Abschnitt in dem dieses Zeichen steht ist die Warteschleife. Mit dem Tastendruck springt das Programm dann zum nächsten Abschnitt. Die Anzahl an Beats in dem Abschnitt sind dabei irrelevant, sollten aber so angegeben werden, dass man ablesen kann, welcher Beat für den einsatz gewählt werden soll (88 = 16 Beats, Also Beat 17 für den Wechsel)
 * Sonderzeichen >: Nach dem Songende wird an diese Stelle zurückgesprungen. So kann eine Endlosschleife einer Folge konstruiert werden. Ohne diese Angabe springt das Programm wieder an den Anfang zurück und in die ggf. dort definierte Warteschleife 
 
 ### Fehlerbehandlung
 Die Angaben für Song Parts und Song Sequence werden intern bzgl. plausibilität geprüft. Formatfehler führen dazu, dass Teile ignoriert oder auch falsch zugeordnet werden. *Es gibt bisher keine Rückmeldung* ob alle Angaben korrekt waren. Syntaktisch falsche oder inkonsistente Angaben(z.B. Buchstabe doppelt als Song Part genutzt oder nicht als Songpart definiert, unbekannte Farbpalette, unbekannter Pattern Speed) führen zu verschiedenen Phänomenen: Falsche Farbpalette, Falsche Pattern, Falsche Anzahl an Beats bis zum Wechsel
 
 ### Farbpaletten
-	// Code r=red o=orange y=yellow g=green c=cyan sb=sky blue b=blue pu=purple pi=pink
-	// prefix "l" = light   prefix"w" = White (unsaturated)
-	0: // Prime Colors and Yellow
-	1: // Police USA (red,white (over blue) ,blue,white over red)
-	2: // Red blue variant (w,sb,r,b,o,sb,r,b) "not today"
-	3: // b g y
-	4: // Yellow pulse with blue and green change
-	5: // y g b c
-	20: // blue green
-	21: // blue white cyan geen
-	22: // blue white(on blue) cyan geen
-	23: // blue sky lblue cyan
-	40: // yellow, skyblue, orange, pink
-	41: // red, orange, rose
-	42: // pu pi wpu pi
-	43: // o wo o wo r wo r wo
-	44: // fire
-	45: // r wr
-	46: // r r r wr r r
-	80: // r
-	81: // wr
-	100: // blue green
-	101: // r wr o w+o
-	102: // o wo r wo wo
-	120: // pu pu pi pi wpu wpu pi pi
-	
-Weiß wird durch eine entsättigte Farbe dargestellt. Bei Pattern, die die Sättigung verändern (z.Zt. "Pulse", der von Weiß in den gesättigten Ton überführt) hat dies eine Relevanz, da dann die LED zwischen Weiß und der entsprechenden Farbe wechselt.
+```
+// Code r=red o=orange y=yellow g=green c=cyan sb=sky blue b=blue pu=purple pi=pink
+// prefix "l" = light   prefix"w" = White (unsaturated)
+0: // Prime Colors and Yellow
+1: // Police USA (red,white (over blue) ,blue,white over red)
+2: // Red blue variant (w,sb,r,b,o,sb,r,b) "not today"
+3: // b g y
+4: // Yellow pulse with blue and green change
+5: // y g b c
+20: // blue green
+21: // blue white cyan geen
+22: // blue white(on blue) cyan geen
+23: // blue sky lblue cyan
+40: // yellow, skyblue, orange, pink
+41: // red, orange, rose
+42: // pu pi wpu pi
+43: // o wo o wo r wo r wo
+44: // fire
+45: // r wr
+46: // r r r wr r r
+80: // r
+81: // wr
+100: // blue green
+101: // r wr o w+o
+102: // o wo r wo wo
+120: // pu pu pi pi wpu wpu pi pi
+```
+Weiß wird durch eine *entsättigte Farbe* dargestellt. Bei Pattern, die die Sättigung verändern (z.Zt. "Pulse", der von Weiß in den gesättigten Ton überführt) hat dies eine Relevanz, da dann die LED zwischen Weiß und der entsprechenden Farbe wechselt.
 	
 ### Pattern Presets
-
-	0-3: Pulse
-	4-7: Heartbeat Pulse
-	8-9: Dimmed Pulse, Heartbeat
-	10: Whipe
-	11: Wave
-	20-27: Orbit
-	30-37: Disco, color shift 1
-	40-47: "    , color shift 2
-	50-57: "    , color shift 3
-	60-67: Full Rainbow
-	70-77: Half  Rainbow
-	80-87: Quater  Rainbow
-	90-97: Flat (Varies in distance to next color)
-
+```
+0-3: Pulse
+4-7: Heartbeat Pulse
+8-9: Dimmed Pulse, Heartbeat
+10: Whipe
+11: Wave
+20-27: Orbit
+30-37: Disco, color shift 1
+40-47: "    , color shift 2
+50-57: "    , color shift 3
+60-67: Full Rainbow
+70-77: Half  Rainbow
+80-87: Quater  Rainbow
+90-97: Flat (Varies in distance to next color)
+```
 Die Pattern innerhalb einer Gruppe (z.B. 0-3), varieren über die Anzahl Steps bis zum Weiterschalten einer Farbe. Dabei wird in der Regel in 2er Potenzen skaliert. So schaltet 20 bei jedem Step eine Farbe weiter, 21 jeden 2. Step, 22 jeden 4., 23 jeden 8.  Ein Song Part 20/4 schaltet also jeden Beat die Farbe voran. Ebenso 21/8 und 22/16, wobei das Muster sich aber jeweils schneller  in 1/4, 1/8 und 1/16 Noten bewegt. Mit 22/4 Schaltet die Farbe jeden 4. Beat voran, also auf jeden Takt.
