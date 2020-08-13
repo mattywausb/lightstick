@@ -462,7 +462,7 @@ void output_load_color_palette(int palette_id)
                     break;
             case 2:
                     patconf_color_palette_lenght=3;
-                    patconf_color_palette[0].h=output_general_color[digit3];patconf_color_palette[0].s=0.0; 
+                    patconf_color_palette[0].h=output_general_color[digit3];
                     patconf_color_palette[1].h=output_general_color[digit4];
                     patconf_color_palette[2].h=output_general_color[digit4];
                     break;
@@ -487,7 +487,7 @@ void output_load_color_palette(int palette_id)
                     patconf_color_palette[4].s=0.0; 
                     break;            
             case 7:
-                    patconf_color_palette_lenght=6;
+                    patconf_color_palette_lenght=16;
                     output_generate_4step_palette(digit3,digit3,digit4,digit4);
                     output_patch_palette_white(0,4);
                     break;            
