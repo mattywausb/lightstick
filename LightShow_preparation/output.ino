@@ -172,10 +172,10 @@ void output_generate_3step_palette( byte step1_index, byte step2_index,byte step
 
 // patch color palette with color on interval  pattern
 // first color index can be 10 to trigger white with follow up color
-void output_patch_palette_color( byte color_index,  byte start,byte stepping )
+void output_patch_palette_hue( float hue,  byte start,byte stepping )
 {
   for(int i=start;i<COLOR_PALETTE_MAX_ENTRIES;i+= stepping){
-       patconf_color_palette[i].h=output_general_color[color_index];
+       patconf_color_palette[i].h=hue;
   }
 }
 
@@ -188,7 +188,7 @@ void output_patch_palette_white( byte start,byte stepping )
 }
 
 
-void output_load_color_palette(int palette_id)
+void output_load_color_palette(long palette_id)
 {
   #ifdef TR_OUT_API_CALL
       Serial.print(F("TR_OUT_API_CALL> output_load_color_palette:"));Serial.println(palette_id);
@@ -271,11 +271,7 @@ void output_load_color_palette(int palette_id)
            patconf_color_palette_lenght=3;
            break;
      case 42:                   // pu pi wpu pi
-           patconf_color_palette[0].h=HUE_PURPLE;patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_PINK;patconf_color_palette[1].s=1.0; 
-           patconf_color_palette[2].h=HUE_PURPLE;patconf_color_palette[2].s=0.0;
-           patconf_color_palette[3].h=HUE_PINK;patconf_color_palette[3].s=1.0;
-           patconf_color_palette_lenght=4;
+           palette_id=28899;
            break;
      case 43:                   // o wo o wo r wo r wo 
            patconf_color_palette[0].h=HUE_ORANGE;patconf_color_palette[0].s=1.0;
@@ -367,11 +363,12 @@ void output_load_color_palette(int palette_id)
     } // Switch
   } // <10000
   
-  if(palette_id>=10000) {
+  if(palette_id>=10000 && palette_id<100000) {
     byte digit5=palette_id%10;
     byte digit4=(palette_id/10)%10;
     byte digit3=(palette_id/100)%10;
     byte digit2=(palette_id/1000)%10;
+    
     if(palette_id<20000) { // 10000-19999
     output_saturate_color_palette(4);  
     patconf_color_palette[0].h=output_general_color[digit2];     
@@ -386,35 +383,35 @@ void output_load_color_palette(int palette_id)
               Serial.println(F("TR_COLOR_PRESET_PALETTE_SETTING> 1 color special"));
         #endif
 
-        switch(digit2){
-          case 0:
+        switch(palette_id/1000){
+          case 20:                                                   // x wx
                   patconf_color_palette_lenght=2;
                   patconf_color_palette[0].h=output_general_color[digit3];
                   patconf_color_palette[1].h=output_general_color[digit3];patconf_color_palette[1].s=0.0; 
                   break;
-          case 1:
-                  patconf_color_palette_lenght=2;
+          case 21:                                                  
+                  patconf_color_palette_lenght=2;                   // wx x
                   patconf_color_palette[0].h=output_general_color[digit3];patconf_color_palette[0].s=0.0; 
                   patconf_color_palette[1].h=output_general_color[digit3];
                   break;
-          case 2:
-                  patconf_color_palette_lenght=3;
+          case 22:
+                  patconf_color_palette_lenght=3;                   // wx x x
                   patconf_color_palette[0].h=output_general_color[digit3];patconf_color_palette[0].s=0.0; 
                   patconf_color_palette[1].h=output_general_color[digit3];
                   patconf_color_palette[2].h=output_general_color[digit3];
                   break;
-          case 3:
+          case 23:                                                   // wx x x x  
                   patconf_color_palette_lenght=4;
                   output_generate_4step_palette(digit3,digit3,digit3,digit3);
                   patconf_color_palette[0].s=0.0; 
                   break;
-          case 4:
-                  patconf_color_palette_lenght=6;
+          case 24:
+                  patconf_color_palette_lenght=6;                   // x x x wx x x 
                   output_generate_3step_palette(digit3,digit3,digit3,digit3);
                   patconf_color_palette[3].s=0.0; 
                   break;
           default:
-                  patconf_color_palette_lenght=1;
+                  patconf_color_palette_lenght=1;                   // wx
                   patconf_color_palette[0].h=output_general_color[digit3];patconf_color_palette[0].s=0.0; 
          } //switch
       } else {
@@ -422,53 +419,60 @@ void output_load_color_palette(int palette_id)
           #ifdef TR_COLOR_PRESET_PALETTE_SETTING
               Serial.println(F("TR_COLOR_PRESET_PALETTE_SETTING> 2 color special"));
           #endif
-          switch(digit2){
-            case 0:
+          switch(palette_id/1000){
+            case 20:                                                 // x wx y wy
                     patconf_color_palette_lenght=4;
                     patconf_color_palette[0].h=output_general_color[digit3];
                     patconf_color_palette[1].h=output_general_color[digit3];patconf_color_palette[1].s=0.0; 
                     patconf_color_palette[2].h=output_general_color[digit4];
                     patconf_color_palette[3].h=output_general_color[digit4];patconf_color_palette[3].s=0.0; 
                     break;
-            case 1:
+            case 21:                                                 // wx x wy y
                     patconf_color_palette_lenght=4;
                     patconf_color_palette[0].h=output_general_color[digit3];patconf_color_palette[0].s=0.0; 
                     patconf_color_palette[1].h=output_general_color[digit3];
                     patconf_color_palette[2].h=output_general_color[digit4];patconf_color_palette[2].s=0.0; 
                     patconf_color_palette[3].h=output_general_color[digit4];
                     break;
-            case 2:
+            case 22:                                                 // x y y
                     patconf_color_palette_lenght=3;
                     patconf_color_palette[0].h=output_general_color[digit3];
                     patconf_color_palette[1].h=output_general_color[digit4];
                     patconf_color_palette[2].h=output_general_color[digit4];
                     break;
-            case 3:
+            case 23:                                                 // wx x x x wy y y y 
                     patconf_color_palette_lenght=8;
                     output_generate_4step_palette(digit3,digit4,digit3,digit4);
                     output_patch_palette_white(0,4);
                     break;
-            case 4:
+            case 24:                                                 // y y y x y y 
                     patconf_color_palette_lenght=6;
                     output_generate_3step_palette(digit4,digit4,digit4,digit4);
                     patconf_color_palette[3].h=output_general_color[digit3];
                     break;
-            case 5:
+            case 25:                                                 // x x x y y y 
                     patconf_color_palette_lenght=6;
                     output_generate_3step_palette(digit3,digit4,digit3,digit4);
                     break;
-            case 6:
+            case 26:                                                 // x wx x y wy y 
                     patconf_color_palette_lenght=6;
                     output_generate_3step_palette(digit3,digit4,digit3,digit4);
                     patconf_color_palette[1].s=0.0; 
                     patconf_color_palette[4].s=0.0; 
                     break;            
-            case 7:
+            case 27:                                                 // wx x x x wx x x x wy y y y wy y y y 
                     patconf_color_palette_lenght=16;
                     output_generate_4step_palette(digit3,digit3,digit4,digit4);
                     output_patch_palette_white(0,4);
-                    break;            
-           default: 
+                    break;   
+            case 28:                                                 // x y wx y
+                    patconf_color_palette_lenght=4;
+                    patconf_color_palette[0].h=output_general_color[digit3];
+                    patconf_color_palette[1].h=output_general_color[digit4];
+                    patconf_color_palette[2].h=output_general_color[digit3]; patconf_color_palette[2].s=0.0; 
+                    patconf_color_palette[3].h=output_general_color[digit4];
+                    break;                              
+           default:                                                 // wx wy
                   patconf_color_palette_lenght=2;
                   patconf_color_palette[0].h=output_general_color[digit3];
                   patconf_color_palette[1].h=output_general_color[digit4];
@@ -479,12 +483,62 @@ void output_load_color_palette(int palette_id)
          #ifdef TR_COLOR_PRESET_PALETTE_SETTING
               Serial.println(F("TR_COLOR_PRESET_PALETTE_SETTING> 3 color special"));
           #endif
-          switch(digit2){
-           default: 
+          switch(palette_id/1000){
+           case 20:                                                  // x y z
                   patconf_color_palette_lenght=3;
                   patconf_color_palette[0].h=output_general_color[digit3];
                   patconf_color_palette[1].h=output_general_color[digit4];
                   patconf_color_palette[2].h=output_general_color[digit5];
+                  break;
+           case 21:                                                  //wx y x z
+                  patconf_color_palette_lenght=4;
+                  patconf_color_palette[0].h=output_general_color[digit3];  patconf_color_palette[0].s=0.0; 
+                  patconf_color_palette[1].h=output_general_color[digit4];
+                  patconf_color_palette[2].h=output_general_color[digit3];
+                  patconf_color_palette[3].h=output_general_color[digit5];
+                  break;
+           case 22:                                                  // x y x y x z x z
+                  patconf_color_palette_lenght=8;
+                  output_generate_4step_palette(digit4,digit5,digit3,digit3);
+                  output_patch_palette_hue(output_general_color[digit3],0,2);
+                  break;
+           case 23:                                                  // wx x wx x wy y wy y wz z wz z
+                  patconf_color_palette_lenght=12;
+                  output_generate_4step_palette(digit3,digit4,digit5,digit3);
+                  output_patch_palette_white(0,2);
+                  break;
+           case 24:                                                  // x y y y x z z z 
+                  patconf_color_palette_lenght=8;
+                  output_generate_4step_palette(digit4,digit5,digit5,digit3);
+                  output_patch_palette_hue(output_general_color[digit3],0,4);
+                  break;
+           case 25:                                                  // x y y y x y y y x z z z x z z z 
+                  patconf_color_palette_lenght=16;
+                  output_generate_4step_palette(digit4,digit4,digit5,digit4);
+                  output_patch_palette_hue(output_general_color[digit3],0,4);
+                  break;
+           case 26:                                                  // wx x x x wy y y y wz z z z 
+                  patconf_color_palette_lenght=12;
+                  output_generate_4step_palette(digit3,digit4,digit5,digit4);
+                  output_patch_palette_white(0,4);
+                  break;                  
+           case 27:                                                  // y x y z x z
+                  patconf_color_palette_lenght=6;
+                  output_generate_4step_palette(digit4,digit5,digit5,digit4);
+                  patconf_color_palette[1].h=output_general_color[digit3];
+                  patconf_color_palette[4].h=output_general_color[digit3];
+                  break;       
+           case 28:                                                  // x wx x y wy y z wz z
+                  patconf_color_palette_lenght=9;
+                  output_generate_4step_palette(digit3,digit4,digit5,digit4);
+                  output_patch_palette_white(1,3);
+                  break;       
+           case 29:                                                  // x x x y y y z z z
+                  patconf_color_palette_lenght=9;
+                  output_generate_4step_palette(digit3,digit4,digit5,digit4);
+                  break;       
+
+
           } //switch
         } // not 2 Color Pattern
       } // not 1  Color Pattern

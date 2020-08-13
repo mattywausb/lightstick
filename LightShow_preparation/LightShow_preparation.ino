@@ -457,7 +457,7 @@ void loop() {
     }
 
     if(command.startsWith("l")) { //load color pallette
-      int value=command.substring(1).toInt();
+      long value=command.substring(1).toInt();
       output_load_color_palette(value);
       mode_of_operation=MODE_FIX_PRESET;
     }
