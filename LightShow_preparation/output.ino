@@ -200,11 +200,7 @@ void output_load_color_palette(int palette_id)
            palette_id=12704;
            break;
       case 1:                 // Police USA (red,white (over blue) ,blue,white over red)
-           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; //WHITE
-           patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=1.0;
-           patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0; //WHITE
-           patconf_color_palette_lenght=4;
+           palette_id=20700;
            break;
       case 2:                 // Red blue variant (w,sb,r,b,o,sb,r,b) "not today"
            patconf_color_palette[0].h=HUE_SKYBLUE;patconf_color_palette[0].s=0.0; //WHITE
@@ -239,9 +235,7 @@ void output_load_color_palette(int palette_id)
            break;
      /// ---------- Cold section       
      case 20:                // blue green  
-           patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0; 
-           patconf_color_palette_lenght=2;
+           palette_id=14747;
            break;
      case 21:                 // blue white cyan geen 
            patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
@@ -250,7 +244,7 @@ void output_load_color_palette(int palette_id)
            patconf_color_palette[3].h=HUE_PURPLE;patconf_color_palette[3].s=1.0;
            patconf_color_palette_lenght=4;
            break;
-     case 22:                 // blue white(on blue) cyan geen 
+     case 22:                 // blue white(on blue) cyan green 
            patconf_color_palette[0].h=HUE_GREEN;patconf_color_palette[0].s=1.0;
            patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=1.0;
            patconf_color_palette[2].h=HUE_BLUE;patconf_color_palette[2].s=0.0; //WHITE
@@ -304,25 +298,16 @@ void output_load_color_palette(int palette_id)
            patconf_color_palette_lenght=6;
            break; 
      case 45:                           // r wr
-           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=0.0;
-           patconf_color_palette_lenght=2;
+           palette_id=20000;
            break; 
      case 46:                           //  r r r wr r r
-           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=1.0;
-           patconf_color_palette[2].h=HUE_RED;patconf_color_palette[2].s=1.0;
-           patconf_color_palette[3].h=HUE_RED;patconf_color_palette[3].s=0.0;
-           patconf_color_palette[4].h=HUE_RED;patconf_color_palette[4].s=1.0;
-           patconf_color_palette[5].h=HUE_RED;patconf_color_palette[5].s=1.0;
-           patconf_color_palette_lenght=6;
+           palette_id=24000;
            break; 
    // -- Single Color + White Overlay version
-     case 80:
-           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-           patconf_color_palette_lenght=1;
+     case 80:         // pure red
+           palette_id=20000;
            break; 
-     case 81:
+     case 81:         // pure red over white  
            patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=0.0;
            patconf_color_palette_lenght=1;
            break; 
@@ -330,19 +315,11 @@ void output_load_color_palette(int palette_id)
            
                      
    // -- Pulse specials  Section
-     case 100:                                        // blue green  
-           patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_BLUE;patconf_color_palette[1].s=0.0; 
-           patconf_color_palette[2].h=HUE_GREEN;patconf_color_palette[2].s=1.0;
-           patconf_color_palette[3].h=HUE_GREEN;patconf_color_palette[3].s=0.0; 
-           patconf_color_palette_lenght=4;
+     case 100:                                        // blue green 
+           palette_id=20744; 
            break;
     case 101:                                        // r w+r oe w+o
-           patconf_color_palette[0].h=HUE_RED;patconf_color_palette[0].s=1.0;
-           patconf_color_palette[1].h=HUE_RED;patconf_color_palette[1].s=0.0; 
-           patconf_color_palette[2].h=HUE_ORANGE;patconf_color_palette[2].s=1.0;
-           patconf_color_palette[3].h=HUE_ORANGE;patconf_color_palette[3].s=0.0; 
-           patconf_color_palette_lenght=4;
+           palette_id=20011; 
            break;
     case 102:                                        // o wo r wo wo
            patconf_color_palette[0].h=HUE_ORANGE;patconf_color_palette[0].s=1.0;
