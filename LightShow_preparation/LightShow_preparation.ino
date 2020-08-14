@@ -240,7 +240,7 @@ void parse_slot_settings(String slot_setting_string)  {
               preset_speed_id=-1;
               if(++slot_index>=MAX_NUMBER_OF_PROGRAM_SLOTS) {
                #ifdef TR_WARNING
-                    Serial.print(F("#!# TR_WARNING> max slots reached"));Serial.println(slot_index);
+                    Serial.print(F("#!# TR_WARNING> max slots reached, last accepted token:"));Serial.println(current_token);
                #endif                    
                 break;
               }
