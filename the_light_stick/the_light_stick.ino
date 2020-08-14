@@ -28,7 +28,7 @@ typedef struct {
     char slot_tag; // 
     byte pattern_id;       // 0-255
     byte preset_speed_id;       // 0-255
-    byte color_palette_id;
+    long color_palette_id;
 } t_program_slot;
 
 t_program_slot g_program_slot[MAX_NUMBER_OF_PROGRAM_SLOTS]={ /* IDOL 126 BPM*/
@@ -201,7 +201,7 @@ void parse_slot_settings(String slot_setting_string)  {
   int slot_index=0;
   int pattern_id=-1;
   int preset_speed_id=-1;
-  int color_palette_id;
+  long color_palette_id;
   int slash_index;
   int colon_index;
   int token_end_index;
@@ -240,7 +240,7 @@ void parse_slot_settings(String slot_setting_string)  {
               preset_speed_id=-1;
               if(++slot_index>=MAX_NUMBER_OF_PROGRAM_SLOTS) {
                #ifdef TR_WARNING
-                    Serial.print(F("#!# TR_WARNING> max slots reached"));Serial.println(slot_index);
+                    Serial.print(F("#!# TR_WARNING> max slots reached, last accepted token:"));Serial.println(current_token);
                #endif                    
                 break;
               }
@@ -457,7 +457,7 @@ void loop() {
     }
 
     if(command.startsWith("l")) { //load color pallette
-      int value=command.substring(1).toInt();
+      long value=command.substring(1).toInt();
       output_load_color_palette(value);
       mode_of_operation=MODE_FIX_PRESET;
     }
@@ -580,6 +580,4 @@ void loop() {
   
   output_process_pattern();
 }
-
-
 
