@@ -26,7 +26,7 @@
 
 #ifdef TRACE_ON
 #define TR_WEBUI
-#define TR_WEBUI_PAGE_GENERATION
+//#define TR_WEBUI_PAGE_GENERATION
 #define TR_WEBUI_CONNECT
 #endif
 
@@ -78,14 +78,15 @@ void sendStylesheet() {
 }
 
 /* Switchgrid constants */
-const char pattx_pulse[] PROGMEM ="Pulse";
-const char pattx_whipe[] PROGMEM ="Whipe";
-const char pattx_wave[] PROGMEM ="Wave";
-const char pattx_orbit[] PROGMEM ="Orbit";
 const char pattx_disco[] PROGMEM ="Disco";
-const char pattx_rainbow[] PROGMEM ="Rainbow";
-const char pattx_quater[] PROGMEM ="Quater";
 const char pattx_flat[] PROGMEM ="Flat";
+const char pattx_orbit[] PROGMEM ="Orbit";
+const char pattx_pulse[] PROGMEM ="Pulse";
+const char pattx_quater[] PROGMEM ="Quater";
+const char pattx_rainbow[] PROGMEM ="Rainbow";
+const char pattx_sparkle[] PROGMEM ="Sparkle";
+const char pattx_wave[] PROGMEM ="Wave";
+const char pattx_whipe[] PROGMEM ="Whipe";
 
 typedef struct pattern_button {
   const char *label;
@@ -94,43 +95,42 @@ typedef struct pattern_button {
 } t_pattern_button;
 
 t_pattern_button webui_pattern_button[] {
-  {pattx_pulse,2,2},
-  {pattx_whipe,10,4},
-  {pattx_wave,11,8},
-  {pattx_orbit,24,8},
-  {pattx_disco,44,4},
-  {pattx_rainbow,64,4},
-  {pattx_quater,83,4},
-  {pattx_flat,91,2}
+  {pattx_pulse,2,2},    {pattx_whipe,10,4},   {pattx_wave,11,8},
+  {pattx_orbit,24,8},   {pattx_disco,44,4},   {pattx_sparkle,104,16},
+  {pattx_rainbow,64,4}, {pattx_quater,83,4},  {pattx_flat,91,2}
 };
 
-const char coltx_red[] PROGMEM ="Red";
-const char coltx_pink[] PROGMEM ="Pink";
+#define WEBUI_PATTERN_BUTTON_COUNT 9
+
+
 const char coltx_blue[] PROGMEM ="Blue";
 const char coltx_cyan[] PROGMEM ="Cyan";
 const char coltx_green[] PROGMEM ="Green";
 const char coltx_lemon[] PROGMEM ="Lemon";
-const char coltx_yellow[] PROGMEM ="Yellow";
 const char coltx_orange[] PROGMEM ="Orange";
+const char coltx_pink[] PROGMEM ="Pink";
 const char coltx_purple[] PROGMEM ="Purple";
+const char coltx_red[] PROGMEM ="Red";
+const char coltx_rose[] PROGMEM ="Rose";
+const char coltx_sky[] PROGMEM ="Sky";
 const char coltx_white[] PROGMEM ="White";
+const char coltx_yellow[] PROGMEM ="Yellow";
 
 
 typedef struct color_button {
   const char *label;
   int hue;
-  byte saturation;
+  float saturation;
 } t_color_button;
 
 t_color_button webui_color_button [] {
-  {coltx_red,HUE_RED,1}     ,{coltx_pink,340,1},
-  {coltx_blue, 240,1} ,{coltx_cyan,180,1},
-  {coltx_green, 120,1} ,{coltx_lemon,95,1},
-  {coltx_yellow, HUE_YELLOW,1} ,{coltx_orange,15,1},
-  {coltx_purple, 250,1} ,{coltx_white,15,0}
+  {coltx_pink,HUE_PINK,1.0},      {coltx_red,HUE_RED,1.0},    {coltx_orange,HUE_ORANGE,1.0},
+  {coltx_yellow, HUE_YELLOW,1.0}, {coltx_lemon,HUE_LEMON,1.0},{coltx_green,HUE_GREEN,1.0} ,
+  {coltx_cyan,HUE_CYAN,1.0},      {coltx_sky,HUE_SKYBLUE,1.0},   {coltx_blue,HUE_BLUE,1.0} ,
+  {coltx_purple, HUE_PURPLE,1.0} ,{coltx_rose, HUE_RED,SAT_ROSE} ,{coltx_white,HUE_ORANGE,0.0}
 };
 
-#define WEBUI_COLOR_BUTTON_ROW_COUNT 5
+#define WEBUI_COLOR_BUTTON_COUNT 12
 
 
 
@@ -155,14 +155,21 @@ static void send_html_footer() {
       
 }
 
-const char WEB_PAGE_BUTTON_START[] PROGMEM =
+const char WEB_PAGE_BUTTON_TABLE_START[] PROGMEM =
       "<div>" 
-      "<table width=100%>"
+      "<table width=100%>";
+      
+const char WEB_PAGE_PATTERN_PART_HEADING[] PROGMEM =
       "<tr>"
-      " <td><h1>Pattern</h1></td><td></td><td><h1>Color<h1></td><td></td><td></td><td></td>"
+      "<td><h1>Pattern</h1></td>"
       "</tr>"; 
 
-const char WEB_PAGE_BUTTON_END[] PROGMEM = "</table></div>";
+const char WEB_PAGE_COLOR_PART_HEADING[] PROGMEM =
+      "<tr>"
+      "<td><h1>Color<h1></td>"
+      "</tr>"; 
+
+const char WEB_PAGE_BUTTON_TABLE_END[] PROGMEM = "</table></div>";
 
 
 const char WEB_PAGE_FORM_SECTION_START[] PROGMEM ="<hr/><div><form action=\"/\" method=\"post\">"; 
@@ -206,7 +213,10 @@ const char WEB_PRESET_SECTION_START[] PROGMEM =
 
 void send_main_page() {
 
-
+  #ifdef TR_WEBUI
+   Serial.println(F("TR_WEBUI> send_main_page started"));
+  #endif
+  
   String value_as_string;
   
   send_html_header() ;
@@ -215,61 +225,71 @@ void send_main_page() {
   
   DECLARE_PREALLOCATED_STRING(content_element,XLARGE_STR);
   
-  // ******************* Send Button Grid ***************************
-  server.sendContent_P(WEB_PAGE_BUTTON_START);
-  
-  for(int row_index=0;row_index<WEBUI_COLOR_BUTTON_ROW_COUNT+1;row_index++) {
-    content_element="<tr>";
+  // *******************  Button Grid ***************************
+  server.sendContent_P(WEB_PAGE_BUTTON_TABLE_START);
 
-    for(int col=0;col<(row_index<WEBUI_COLOR_BUTTON_ROW_COUNT?1:3);col++){ // on last row fill it up by yourself
-      content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
-      content_element+=webui_pattern_button[row_index+col].pattern_id;
-      content_element+=F("&w=");
-      content_element+=webui_pattern_button[row_index+col].base_speed;
-      content_element+=("\">");
-      strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_pattern_button[row_index+col].label)));
-      content_element+=string_buffer;
-      content_element+=F("</a></div></td>");
-  
-      content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
-      content_element+=webui_pattern_button[row_index+col].pattern_id;
-      content_element+=F("&w=");
-      content_element+=webui_pattern_button[row_index+col].base_speed*2;
-      content_element+=("\">&gt;&gt;");
-      content_element+=F("</a></div></td>");
-  }
+  // -------------- Pattern Buttons ------------------------
+  #ifdef TR_WEBUI_PAGE_GENERATION
+   Serial.println(F("TR_WEBUI_PAGE_GENERATION> render pattern buttons"));
+  #endif
+    server.sendContent_P(WEB_PAGE_PATTERN_PART_HEADING);
+    for(int element_index=0;element_index<WEBUI_PATTERN_BUTTON_COUNT;element_index++) {
+        if(element_index%3==0) content_element+="<tr>"; 
 
-    if(row_index<WEBUI_COLOR_BUTTON_ROW_COUNT) {
-      for(int col=0;col<2;col++) {
+        content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
+        content_element+=webui_pattern_button[element_index].pattern_id;
+        content_element+=F("&w=");
+        content_element+=webui_pattern_button[element_index].base_speed;
+        content_element+=("\">");
+        strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_pattern_button[element_index].label)));
+        content_element+=string_buffer;
+        content_element+=F("</a></div></td>");
+    
+        content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
+        content_element+=webui_pattern_button[element_index].pattern_id;
+        content_element+=F("&w=");
+        content_element+=webui_pattern_button[element_index].base_speed*2;
+        content_element+=("\">&gt;&gt;");
+        content_element+=F("</a></div></td>");
+        if(element_index%3==2) content_element+="</tr>";  // Works only for button count  that is dividable by 3
+   } // end loop over all Pattern Buttons
+   server.sendContent(content_element);
+   content_element="";
+   
+  // -------------- color Buttons ------------------------
+  #ifdef TR_WEBUI_PAGE_GENERATION
+   Serial.println(F("TR_WEBUI_PAGE_GENERATION> render color buttons"));
+  #endif
+    server.sendContent_P(WEB_PAGE_COLOR_PART_HEADING);
+    
+    for(int element_index=0;element_index<WEBUI_COLOR_BUTTON_COUNT;element_index++) {
+        if(element_index%3==0) content_element+="<tr>"; // 3 Column format
         content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?i=1&h=");
-        content_element+=webui_color_button[2*row_index+col].hue;
+        content_element+=webui_color_button[element_index].hue;
         content_element+=F("&s=");
-        content_element+=webui_color_button[2*row_index+col].saturation;
+        content_element+=webui_color_button[element_index].saturation;
         content_element+="\">";
-        strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_color_button[2*row_index+col].label)));
+        strcpy_P(string_buffer, (char*)pgm_read_dword(&(webui_color_button[element_index].label)));
         content_element+=string_buffer;
         content_element+=F("</a></div></td>");
         content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?h=");
-        content_element+=webui_color_button[2*row_index+col].hue;
+        content_element+=webui_color_button[element_index].hue;
         content_element+=F("&s=");
-        content_element+=webui_color_button[2*row_index+col].saturation;
+        content_element+=webui_color_button[element_index].saturation;
         content_element+="\">+";
         content_element+=F("</a></div></td>");
+        if(element_index%3==2) content_element+="</tr>";  // Works only for button count that is dividable by 3
       }
-    }
-    content_element+="</tr>";
-    server.sendContent(content_element);
-  }
-
-   server.sendContent_P(WEB_PAGE_BUTTON_END);
-
+   server.sendContent(content_element);
+   content_element="";
+   server.sendContent_P(WEB_PAGE_BUTTON_TABLE_END);
  
-  // ******************* Send Sequence Section Form ****************
+  // *******************Song catalog ****************
+  #ifdef TR_WEBUI_PAGE_GENERATION
+   Serial.println(F("TR_WEBUI_PAGE_GENERATION> render song preset buttons"));
+  #endif
+ 
   server.sendContent_P(WEB_PRESET_SECTION_START);
-  
- 
-  
-  content_element="";
   for(int song_index=0;song_index<song_catalog_count;song_index++) {
         content_element+=F("<div class=\"lb_box\"><a class=\"lb\"  href=\"song?song_index=");
         content_element+=(song_index);  
@@ -283,7 +303,10 @@ void send_main_page() {
   server.sendContent(content_element);
 
   // ******************* Send Sequence Section Form ****************
-
+  #ifdef TR_WEBUI_PAGE_GENERATION
+   Serial.println(F("TR_WEBUI_PAGE_GENERATION> render seqence entry form"));
+  #endif
+  
   server.sendContent_P(WEB_PAGE_FORM_SECTION_START);
 
   // Parts
@@ -298,7 +321,10 @@ void send_main_page() {
   
   // End of Part/ Sequence Form
   server.sendContent_P(WEB_PAGE_FORM_END);
-
+  
+  #ifdef TR_WEBUI_PAGE_GENERATION
+   Serial.println(F("TR_WEBUI_PAGE_GENERATION> html render complete"));
+  #endif
   send_html_footer();
 }
 
