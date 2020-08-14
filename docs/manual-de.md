@@ -14,8 +14,10 @@ Sowie der Lightstick Strom hat sucht er die Verbindung zum WLAN. In dieser Zeit 
 
 Hat er den Kontakt zum WLAN aufgenommen (Momentan hard codierte Zugangsdaten), blinkt er schwach Grün und ist bereit. Die Webseite ist auf der IP Adresse des Stick zu erreichen (Momentan in unserem Netz unter http://192.168.178.82)
 
-Konnte sich der Stick nicht im WLAN einwählen, baut der Stick seine eigene WLAN Zelle auf. (SSID:"Lightstick-xxxxxxxx" Passwort:"letsparty" (xxxxxx=Seriennummer des eingebauten Controllers)).
-In diesem Fall blinkt er Blau. Um ihn zu bedienen muss man sich mit dem WLAN Verbinden und findet die Webseite dann unter http://192.168.4.22.
+Wenn beim Einschalten/Einstecken der USB Verbindung der Taster gehalten wird, umgeht der Stick den Versuch ein WLAN zu erreichen.
+
+Konnte/Sollte sich der Stick nicht im WLAN einwählen, baut der Stick seine eigene WLAN Zelle auf. (SSID:"Lightstick-xxxxxxxx" Passwort:"letsparty" (xxxxxx=Seriennummer des eingebauten Controllers)).
+In diesem Fall blinkt er Blau. Um ihn zu bedienen muss man sich mit dem WLAN des Sticks Verbinden und findet die Webseite dann unter http://192.168.4.22.
 
 Sollte der Stick auch keinen eigenen AP aufbauen können, blink er rot und ist dann leider nicht bedienbar.
 
@@ -25,22 +27,23 @@ Ein Pattern definiert, welche der eingebauten LED wann und wie lange leuchten. D
 ## Zusammenstellung einer Farbpalette
 Die Farbe der LED wird in der Regel durch die eingestellte Farbpalette festgelegt. Dabei wird vom eingestellten Pattern bestimmt ob mehrere Farben der Palette gleichzeitig genutzt werden und in welchem Tempo zum nächsten Platz der Palette geschaltet wird. 
 
-Mit Auswahl einer Farbe auf der Weboberfläche wird die Farbpalette geleert und der erste Platze  diese Farbe gesetzt. Wird das '+' Zeichen rechts neben der Farbe gewählt, so wird diese Farbe an die Palette angehängt. 
+Mit Auswahl einer Farbe auf der Weboberfläche wird die Farbpalette geleert und der erste Platz der Palette auf diese Farbe gesetzt. Das laufende Pattern ist dann einfarbig (Whipe wird dann nur diese Farbe zeigen). Wird das '+' Zeichen rechts neben der Farbe gewählt, so wird diese Farbe an die Palette angehängt und die Pattern greifen das entsprechend auf.
 
-Je nach Pattern kann es interessant sein, die gleiche Farbe mehrfach hintereinander in die Palette  einzubauen. (z.B. Gelb, Blau, Blau,Blau bei Whipe, leuchtet alle 4 Beats einmal Gelb und ansonsten Blau)
+Je nach Pattern kann es interessant sein, die gleiche Farbe mehrfach hintereinander in die Palette  einzubauen. (z.B. Gelb, Blau, Blau,Blau bei "Fade", leuchtet alle 4 Beats einmal Gelb und ansonsten Blau)
 
 ### Die Pattern:
-    Pulse - Kurzes Aufblitzen auf dem Beat
-    Wipe - leds innerhalb eines Beats nacheinander auf Folgefarbe schalten 
-    Wave - leds nacheinander innerhalb eines Beats ein-  und im Folgebeat wieder ausschalten 
-    Orbit - einfarbig rotierende Lichter. Die mittige Led blinkt dazu in einer langsameren Frequenz
-    Disco - Wie Orbit, allerdings werden 3 einträge der Farbpalette auf die 3 aktiven Led verteilt
+* Pulse - Kurzes Aufblitzen auf dem Beat (nutzt 2 Paletteneinträge)
+* Whipe - leds innerhalb eines Beats nacheinander auf Folgefarbe schalten 
+* Wave - leds nacheinander innerhalb eines Beats ein-  und im Folgebeat wieder ausschalten, dann zum nächsten Paletteneintrag wechseln
+* Orbit - einfarbig rotierende Lichter. Die mittige Led blinkt auf Step 1 und 2 von 8)
+* Disco - Wie Orbit, allerdings werden 3 einträge der Farbpalette auf die 3 aktiven Led verteilt
+* Sparkle - Aufblitzen zufälliger LED mit einer Zufallsfarbe aus 3 Paletteneinträgen
 
 Folgenden Pattern ignorieren die Farbpalette 
 
-    Rainbow - Volles Farbspektrum 
-    Quater - Ausschnitt aus dem Spektrum der sich dann verschiebt
-    Flat - es wird nur eine Farbe des Spektrums gezeigt  und weitergeschaltet
+ Rainbow - Volles Farbspektrum 
+ Quater - Ausschnitt aus dem Spektrum der sich dann verschiebt
+ Flat - es wird nur eine Farbe des Spektrums gezeigt  und weitergeschaltet
 
 ## Synchronisationstaster
 Mit dem Taster werden folgende Funktionen ausgelöst.
@@ -105,12 +108,13 @@ Beispiel: "120 A88# A88 B88 A8888 B88 R8888 8888 >A8888 B88 R8888 8888"
 ### Fehlerbehandlung
 Die Angaben für Song Parts und Song Sequence werden intern bzgl. plausibilität geprüft. Formatfehler führen dazu, dass Teile ignoriert oder auch falsch zugeordnet werden. *Es gibt bisher keine Rückmeldung* ob alle Angaben korrekt waren. Syntaktisch falsche oder inkonsistente Angaben(z.B. Buchstabe doppelt als Song Part genutzt oder nicht als Songpart definiert, unbekannte Farbpalette, unbekannter Pattern Speed) führen zu verschiedenen Phänomenen: Falsche Farbpalette, Falsche Pattern, Falsche Anzahl an Beats bis zum Wechsel
 
-### Farbpaletten
+### Fest programmierte Farbpaletten
+
 ```
 // Code r=red o=orange y=yellow g=green c=cyan sb=sky blue b=blue pu=purple pi=pink
 // prefix "l" = light   prefix"w" = White (unsaturated)
 0: // Prime Colors and Yellow
-1: // Police USA (red,white (over blue) ,blue,white over red)
+1: // Police USA 
 2: // Red blue variant (w,sb,r,b,o,sb,r,b) "not today"
 3: // b g y
 4: // Yellow pulse with blue and green change
@@ -133,8 +137,51 @@ Die Angaben für Song Parts und Song Sequence werden intern bzgl. plausibilität
 102: // o wo r wo wo
 120: // pu pu pi pi wpu wpu pi pi
 ```
-Weiß wird durch eine *entsättigte Farbe* dargestellt. Bei Pattern, die die Sättigung verändern (z.Zt. "Pulse", der von Weiß in den gesättigten Ton überführt) hat dies eine Relevanz, da dann die LED zwischen Weiß und der entsprechenden Farbe wechselt.
+Weiß wird durch eine *entsättigte Farbe* dargestellt. Bei Pattern, die die Sättigung verändern ("Pulse" und "Sparkle") hat dies eine Relevanz, da dann die LED zwischen Weiß und der entsprechend unterlegten Farbe wechselt.
 	
+
+### Generische Farbpaletten
+Bei generischen Farbpaletten werden die Farben mit der Farbpalettennummer bestimmt. Dabei gilt folgende Farbcodierung:
+```
+0=rot       5=cyan
+1=orange    6=sky
+2=gelb      7=blau
+3=lemon     8=lila
+4=grün      9=pink
+```
+
+#### 4 Step Paletten (10000-19999 )
+Legen immer 4 Einträge in der Palette an. Die vier letzten Ziffern der Nummer bestimmen die Farbfolge.
+
+12779 z.b. ergibt die Farbpalette;gelb blau blau pink
+
+#### Palettengeneratoren für 1-3 Farben (20000-99000)
+Palettengeneratoren erzeugen aus den Farben komplexere Farbfolgen die auch Weiß enthalten. 
+Die letzten drei Ziffern definieren die zu verwendenen Farben (x y z). Sind diese all gleich, wird ein einfarbiger Generator genutzt, sind die letzten beiden Ziffern gleich, wird ein zweifarbiger Generator angesprochen, ansonsten ein Dreifarbiger.
+
+Die ersten beiden Ziffern der Palettennummer bestimmen innerhalb der 1er,2er und,3er Farbgeneratoren den konkreten Generator aus. 
+Momentan gibt es folgende Möglichkeiten
+```
+Einfarbig: 20-24,29
+Zweifarbig: 20-36,40-43,70-73
+Dreifarbig: 20-21,25-29,40-49,70-73
+
+Beispiele:
+20 Einfarbig: x wx
+20 Zweifarbig: x y y
+20 Dreifarbig: x y z
+20333 wird zu>lemon weiß über lemon
+20377 wird zu>lemon blau blau
+20370 wird zu>lemon blau rot
+
+25 Zweifarbig: wx x y y
+25 Dreifarbig: wx y x z
+
+43 Zweifarbig: wx x x x wx x x x wy y y y wy y y y
+43 Dreifarbig: x y y y x y y y x z z z x z z z
+```
+Ein vollständiger Katalog kann nur dem Code entommen werden
+
 ### Pattern Presets
 ```
 0-3: Pulse
@@ -150,5 +197,8 @@ Weiß wird durch eine *entsättigte Farbe* dargestellt. Bei Pattern, die die Sä
 70-77: Half  Rainbow
 80-87: Quater  Rainbow
 90-97: Flat (Varies in distance to next color)
+100-107: Sparkle shift 1
+110-117: Sparkle shift 2
+120-127: Sparkle shift 3
 ```
 Die Pattern innerhalb einer Gruppe (z.B. 0-3), varieren über die Anzahl Steps bis zum Weiterschalten einer Farbe. Dabei wird in der Regel in 2er Potenzen skaliert. So schaltet 20 bei jedem Step eine Farbe weiter, 21 jeden 2. Step, 22 jeden 4., 23 jeden 8.  Ein Song Part 20/4 schaltet also jeden Beat die Farbe voran. Ebenso 21/8 und 22/16, wobei das Muster sich aber jeweils schneller  in 1/4, 1/8 und 1/16 Noten bewegt. Mit 22/4 Schaltet die Farbe jeden 4. Beat voran, also auf jeden Takt.
