@@ -6,7 +6,7 @@
 // Activate general trace output
 
 #ifdef TRACE_ON
-//#define TR_INP 
+#define TR_INP 
 // #define TR_INP_HIGH
 //#define TR_INP_TIMING 
 #endif

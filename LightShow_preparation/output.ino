@@ -223,6 +223,29 @@ void output_load_color_palette(long palette_id)
       case 5:                 //  y g b c 
            palette_id=15247;
            break;
+      case 6:                // Mixed rainbow
+           patconf_color_palette_lenght=8;
+           patconf_color_palette[0].h=HUE_RED;
+           patconf_color_palette[1].h=HUE_CYAN;
+           patconf_color_palette[2].h=HUE_YELLOW;
+           patconf_color_palette[3].h=HUE_PURPLE; 
+           patconf_color_palette[4].h=HUE_GREEN;
+           patconf_color_palette[5].h=HUE_PINK;
+           patconf_color_palette[6].h=HUE_ORANGE;
+           patconf_color_palette[7].h=HUE_BLUE;
+           break;
+      case 7:                // w B g y r p  rainbow
+           patconf_color_palette_lenght=8;
+           patconf_color_palette[0].h=HUE_BLUE;patconf_color_palette[0].s=0.0; //WHITE
+           patconf_color_palette[1].h=HUE_BLUE;
+           patconf_color_palette[2].h=HUE_CYAN;
+           patconf_color_palette[3].h=HUE_GREEN;
+           patconf_color_palette[4].h=HUE_YELLOW;
+           patconf_color_palette[5].h=HUE_ORANGE;
+           patconf_color_palette[6].h=HUE_RED;
+           patconf_color_palette[7].h=HUE_PINK;
+           break;
+      
      /// ---------- Cold section       
      case 20:                // blue green  
            palette_id=14747;
