@@ -1,4 +1,4 @@
-# Personal K-Pop Lightstick - Manua
+# Personal K-Pop Lightstick - Manual
 With the "Personal K-Pop Lightstick" you have your own light show available. 
 In contrast to commercial products, it works independently of a concert event. The configuration and controlling is done  via a web browser interface.
 It offers the following features
@@ -9,8 +9,8 @@ It offers the following features
 
 ## Power on
 
-The stick is activated on by opening the cover at the lower end of the stick and connecting the USB plug to a suitable power supply. 
-If that is compact enough, you can deposit it directly in the stick and close the lid again.
+The stick is activated by opening the cover at the lower end of the stick and connecting the USB plug to a suitable power supply. 
+If the powersupply is a compact power bank, you can deposit it directly in the stick and close the lid again.
 
 As soon as the Lightstick has power, it searches for a connection to the WLAN. During this time it glows faintly in orange.
 
@@ -100,11 +100,11 @@ The two text snippets can also be edited there or copied from an external source
 
 ### Song Parts
 A song part is specified in the following syntax:
-``
+```
 <Part Letter> <Pattern preset> / <Speed>: <Color P Palette>
 
 Example: "A10/4:0 B42/8:2 R30/8:0"
-``
+```
 * Part Letter: A letter which identifies this part in the song sequence. Good practice is A B C for verse sections, R S T for chorus sections, I J L M for intro sections
 * Pattern Preset: The number of a pattern preset (defines pattern and color stepping, see list in Appendix)
 * Speed: tempo of the stepping within the beat (2 = 2 beats (half note), 4 = 1 beat (fourth note), 8 = 1/2 beat (eighth note), 16, 32.64
@@ -113,11 +113,11 @@ Example: "A10/4:0 B42/8:2 R30/8:0"
 ### Song Sequence:
 The song sequence represents the sequence of the song. It begins with the BPM declaration, which is then followed by the song sections.
 Various special characters mark special locations in the sequence
-``
+```
 <bpm> <Part Letter> <Beats> <Beats> ... <Part Letter> ...
 
 Example: "120 A88 # A88 B88 A8888 B88 R8888 8888> A8888 B88 R8888 8888"
-``
+```
 
 * Part Letter: Must be one of the letters from the "Song Parts" definition
 * Beats: The beats are given as single-digit numbers and as such then added up for the current section until a new letter declares the next section. (Examples: 8888 = 32 beats 248 = 14 beats)
@@ -135,7 +135,7 @@ check the programming strings
 
 ###Permanently programmed color palettes###
 
-``
+```
 // Code r = red o = orange y = yellow g = green c = cyan sb = sky blue b = blue pu = purple pi = pink
 // prefix "l" = light prefix "w" = White (unsaturated)
 0: // Prime Colors and Yellow (Same as 12740)
@@ -161,19 +161,19 @@ check the programming strings
 101: // r wr o w + o
 102: // o where r where where
 120: // pu pu pi pi wpu wpu pi pi
-``
+```
 White is represented by a * desaturated color *. This is relevant for patterns that change the saturation ("Pulse" and "Sparkle"),
 since the LED then changes between white and the corresponding color.
 
 ### Generic color palettes ###
 For generic color palettes, the colors are determined using a one digit color palette number:
-``
+```
 0 = red     5 = cyan
 1 = orange  6 = sky
 2 = yellow  7 = blue
 3 = lemon   8 = purple
 4 = green   9 = pink
-``
+```
 
 #### 4 step pallets (10000-19999)
 Always creates 4 entries in the palette. The last four digits of the number determine the color sequence.
@@ -187,7 +187,7 @@ if the last two digits are the same, a two-color generator is addressed, otherwi
 
 The first two digits of the pallet number determine the specific generator within the 1, 2 and 3 color generators.
 There are currently the following options implemented
-``
+```
 One color: 20-24, 29
 Two color: 20-36, 40-43, 70-73
 Three color: 20-21, 25-29, 40-49, 70-73
@@ -205,11 +205,11 @@ Examples:
 
 43 Two color: wx x x x wx x x x wy y y y wy y y y
 43 Three color: x y y y x y y y x z z z x z z z
-``
+```
 A complete catalog can only be obtained from the code in the output.ino module
 
 ### Pattern Presets
-``
+```
 0-3: pulse
 4-7: Heartbeat Pulse
 8-9: Dimmed Pulse, Heartbeat
@@ -226,7 +226,7 @@ A complete catalog can only be obtained from the code in the output.ino module
 100-107: Sparkle shift 1
 110-117: Sparkle shift 2
 120-127: Sparkle shift 3
-``
+```
 The patterns within a group (e.g. 20-27) vary over the number of steps until the next palette color is taken. 
 This is usually scaled in powers of 2. So 20 advances one color with each step, 21 advances each second step, 22 each 4th, 23 each 8th. 
 A song part 20/4 advances the color each beat. 21/8 and 22/16 will do the same, but the pattern moves faster in 1/4, 1/8 and 1/16 notes.
