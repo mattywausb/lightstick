@@ -218,9 +218,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="430.63151"
-     inkscape:cy="207.57532"
+     inkscape:zoom="3.959798"
+     inkscape:cx="540.54395"
+     inkscape:cy="204.51603"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -259,7 +259,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -603,55 +603,45 @@
     <rect
        style="opacity:1;vector-effect:none;fill:#adffce;fill-opacity:1;stroke:#000000;stroke-width:0.56499994;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
        id="rect904"
-       width="11.734264"
-       height="16.935261"
-       x="138.19972"
-       y="78.87928"
-       rx="0.99999994"
+       width="6.4556913"
+       height="17.803886"
+       x="143.01056"
+       y="78.612007"
+       rx="0.99999988"
        ry="1" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.8052752px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
-       x="139.1449"
-       y="87.73539"
+       x="-95.664719"
+       y="146.88754"
        id="text908"
-       transform="scale(1.0004201,0.99958006)"><tspan
+       transform="matrix(0,-1.0004201,0.99958007,0,0,0)"><tspan
          sodipodi:role="line"
-         id="tspan906"
-         x="139.1449"
-         y="87.73539"
-         style="stroke-width:0.26458332">NodeMCU</tspan><tspan
-         sodipodi:role="line"
-         x="139.1449"
-         y="89.991982"
+         x="-95.664719"
+         y="146.88754"
          style="stroke-width:0.26458332"
-         id="tspan910">ESP8266</tspan></text>
+         id="tspan910">NodeMCU ESP8266</tspan></text>
     <rect
        ry="1"
        rx="0.99999994"
-       y="99.722679"
+       y="98.787239"
        x="138.19972"
        height="16.935261"
-       width="11.734264"
+       width="7.7252216"
        id="rect916"
        style="opacity:1;vector-effect:none;fill:#adffce;fill-opacity:1;stroke:#000000;stroke-width:0.56499994;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal" />
     <text
        id="text922"
-       y="107.28429"
-       x="139.1449"
+       y="141.22057"
+       x="-114.47741"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:1.8052752px;line-height:1.25;font-family:'Open Sans';-inkscape-font-specification:'Open Sans';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        xml:space="preserve"
-       transform="scale(1.0004201,0.99958006)"><tspan
-         id="tspan920"
+       transform="matrix(0,-1.0004201,0.99958007,0,0,0)"><tspan
          style="stroke-width:0.26458332"
-         y="107.28429"
-         x="139.1449"
-         sodipodi:role="line">USB Power</tspan><tspan
-         style="stroke-width:0.26458332"
-         y="109.54088"
-         x="139.1449"
+         y="141.22057"
+         x="-114.47741"
          sodipodi:role="line"
-         id="tspan926">Bank</tspan></text>
+         id="tspan926">USB Power Stick</tspan></text>
     <rect
        ry="5.8122404e-012"
        rx="5.8122396e-012"
@@ -814,5 +804,29 @@
        d="m 117.88904,16.36166 5.30133,3.573072"
        id="path3038"
        inkscape:connector-curvature="0" />
+    <rect
+       style="opacity:1;vector-effect:none;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal"
+       id="rect923"
+       width="1.7764432"
+       height="4.1090422"
+       x="138.56631"
+       y="94.761436"
+       rx="5.8122396e-012"
+       ry="5.8122404e-012" />
+    <rect
+       ry="5.8122404e-012"
+       rx="5.8122396e-012"
+       y="96.164597"
+       x="147.72029"
+       height="2.1713381"
+       width="1.0414521"
+       id="rect925"
+       style="opacity:1;vector-effect:none;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:0.465;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 139.10919,94.972471 c 0,0 -0.78705,-4.750169 -0.86862,-7.14946 -0.11444,-3.365913 -0.95945,-7.07107 0.53454,-10.089422 0.25934,-0.523953 0.79148,-1.347833 1.33634,-1.135896 0.50205,0.195289 0.16699,1.065958 0.20046,1.603616 0.26158,4.20136 -0.47457,8.445827 0,12.628485 0.22415,1.97557 0.22978,4.161252 1.33634,5.813113 0.36457,0.544227 1.00718,0.865046 1.60362,1.135896 1.12637,0.511503 2.82848,-0.09184 3.60814,0.868624 1.92391,2.370043 0.26024,6.101363 0.26727,9.153983 0.006,2.71805 -1.60089,5.82221 -0.20045,8.15172 0.28226,0.46952 0.93512,0.85347 1.46998,0.73499 0.94411,-0.20914 1.4711,-1.36393 1.80407,-2.27179 0.72126,-1.96658 0.15055,-4.18675 0.20045,-6.28084 0.0674,-2.82815 0.30296,-5.66192 0.13363,-8.485803 -0.0592,-0.987281 0.57869,-2.803468 -0.4009,-2.939957 -0.38525,-0.05368 -0.38291,0.689465 -0.46772,1.069078 -0.71414,3.196462 0.0636,6.563642 -0.26725,9.822152 -0.25819,2.54283 1.20443,7.82803 -1.33635,7.55036 -1.04155,-0.11383 0.10886,-2.09296 0.13364,-3.14042 0.11011,-4.65369 0.0668,-13.964823 0.0668,-13.964823"
+       id="path929"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="caaaaaaaaaaaaaaaaaaac" />
   </g>
 </svg>
