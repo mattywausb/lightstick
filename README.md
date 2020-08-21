@@ -19,7 +19,7 @@ My daughter and her friends are huge fans of K-POP music and wanted to have thes
 * small facette crystal
 * transparent sphere
 
-For more information check out my [arduino project page]( https://create.arduino.cc/projecthub/mattywausb)
+For more information check out my [arduino project page]( https://create.arduino.cc/projecthub/mattywausb/k-pop-lightstick-personal-lightshow-641dac)
 
 # Software Architecture
 The software is split up into the following modules
