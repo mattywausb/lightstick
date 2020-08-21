@@ -788,6 +788,7 @@ void start_sparkle(float lamp_value, int steps_per_color, int color_palette_incr
   output_current_stepper_type=ST_SPARKLE;
   patvar_previous_step_time = output_get_current_beat_start_time();
   patvar_previous_fade_time = 0L;
+  patvar_color_palette_index=0;
   
   patconf_pattern_lamp_value = lamp_value;
   patconf_steps_until_color_change=steps_per_color;
