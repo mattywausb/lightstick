@@ -144,7 +144,10 @@ static void send_html_header() {
 }
 
 /* End of Webpage */
-const char WEB_PAGE_FOOTER[] PROGMEM = "</body></html>\r\n";
+const char WEB_PAGE_FOOTER[] PROGMEM = 
+      "<hr/>"
+      "<div class=\"anntn\">Firmware Build: " __DATE__ " " __TIME__ "</div>"
+      "</body></html>\r\n";
 
 
 static void send_html_footer() {
@@ -156,7 +159,7 @@ static void send_html_footer() {
 }
 
 const char WEB_PAGE_BUTTON_TABLE_START[] PROGMEM =
-      "<div>" 
+      "<div id=\"menusection\">" 
       "<table width=100%>";
       
 const char WEB_PAGE_PATTERN_PART_HEADING[] PROGMEM =
@@ -172,7 +175,7 @@ const char WEB_PAGE_COLOR_PART_HEADING[] PROGMEM =
 const char WEB_PAGE_BUTTON_TABLE_END[] PROGMEM = "</table></div>";
 
 
-const char WEB_PAGE_FORM_SECTION_START[] PROGMEM ="<hr/><div><form action=\"/\" method=\"post\">"; 
+const char WEB_PAGE_FORM_SECTION_START[] PROGMEM ="<hr/><div id=\"programsection\"><form action=\"#programsection\" method=\"post\">"; 
 
 const char WEB_PAGE_SEQ_PART_START[] PROGMEM =
       "<div> <label for=\"Sequence\" >Song Sequence</label>"
@@ -207,9 +210,11 @@ const char WEB_PAGE_FORM_END[] PROGMEM =
       "<input type=\"submit\" value=\"Start\">"
       "</form>";
 
-const char WEB_PRESET_SECTION_START[] PROGMEM =
+const char WEB_SONG_SECTION_START[] PROGMEM =
       "<hr/>"
-      "<h1>Song Presets</h1>";
+      "<h1 id=\"songsection\">Song Presets</h1>";
+
+
 
 void send_main_page() {
 
@@ -289,11 +294,11 @@ void send_main_page() {
    Serial.println(F("TR_WEBUI_PAGE_GENERATION> render song preset buttons"));
   #endif
  
-  server.sendContent_P(WEB_PRESET_SECTION_START);
+  server.sendContent_P(WEB_SONG_SECTION_START);
   for(int song_index=0;song_index<song_catalog_count;song_index++) {
         content_element+=F("<div class=\"lb_box\"><a class=\"lb\"  href=\"song?song_index=");
         content_element+=(song_index);  
-        content_element+=F("\">");
+        content_element+=F("#songsection\">");
         strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_name)));
         content_element+=string_buffer;
         content_element+=F("</a></div>");
