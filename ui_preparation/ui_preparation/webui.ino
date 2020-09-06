@@ -517,6 +517,7 @@ t_webui_connect_mode webui_setup(boolean force_softAP)
   #ifdef TRACE_ON
     Serial.println(F(">webui_setup finished "));
   #endif
+  return webui_connect_mode;
 }
 
 void webui_loop(void)
