@@ -1,4 +1,4 @@
-/* Compile against  NodeMCU 1.0 Profile */
+/* Profiles:  NodeMCU 1.0 | WeMos D1 R1 */
 
 /* Main controller Module
  *  
