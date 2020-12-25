@@ -64,6 +64,9 @@ const char WEB_PAGE_HEADER[] PROGMEM = "<!DOCTYPE html><html>"
 const char TXT_CONTENT_TYPE_TEXT_HTML[] PROGMEM = "text/html; charset=utf-8";
 
 void sendStylesheet() {
+    #ifdef TR_WEBUI
+    Serial.println(F("TR_WEBUI> Sending Stylesheet "));
+  #endif
    server.send(200, "text/css", F(
 "body{font-family:\"OpenSans\",\"Arial\",\"mono\";color:#f7d53d;background-color:#193c3d;font-size:16px ;text-align:left;}"
 "h1{margin:2px 2px ;font-size:18px ;padding:2px 2px ;}"
