@@ -147,7 +147,7 @@ static void send_html_header() {
 }
 
 /* End of Webpage */
-const char WEB_PAGE_FOOTER[] PROGMEM = "</body></html>\r\n";
+const char WEB_PAGE_FOOTER[] PROGMEM = "<hr><div class=\"anntn\">Firmware Build " __DATE__ " " __TIME__ "</div> </body></html>\r\n";
 
 
 static void send_html_footer() {
@@ -175,7 +175,7 @@ const char WEB_PAGE_COLOR_PART_HEADING[] PROGMEM =
 const char WEB_PAGE_BUTTON_TABLE_END[] PROGMEM = "</table></div>";
 
 
-const char WEB_PAGE_FORM_SECTION_START[] PROGMEM ="<hr/><div><form action=\"/\" method=\"post\">"; 
+const char WEB_PAGE_FORM_SECTION_START[] PROGMEM ="<hr/><div><form id=\"progform\" action=\"/#progform\" method=\"post\">"; 
 
 const char WEB_PAGE_SEQ_PART_START[] PROGMEM =
       "<div> <label for=\"Sequence\" >Song Sequence</label>"
@@ -212,7 +212,7 @@ const char WEB_PAGE_FORM_END[] PROGMEM =
 
 const char WEB_PRESET_SECTION_START[] PROGMEM =
       "<hr/>"
-      "<h1>Song Presets</h1>";
+      "<h1 id=\"presets\">Song Presets</h1>";
 
 void send_main_page() {
 
@@ -296,7 +296,7 @@ void send_main_page() {
   for(int song_index=0;song_index<song_catalog_count;song_index++) {
         content_element+=F("<div class=\"lb_box\"><a class=\"lb\"  href=\"song?song_index=");
         content_element+=(song_index);  
-        content_element+=F("\">");
+        content_element+=F("#presets\">");
         strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_name)));
         content_element+=string_buffer;
         content_element+=F("</a></div>");
@@ -526,4 +526,5 @@ t_webui_connect_mode webui_setup(boolean force_softAP)
 void webui_loop(void)
 {
   server.handleClient();
+  yield();
 }

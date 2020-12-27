@@ -77,14 +77,25 @@
 <input type="submit" value="set">
 </form>
 <hr/>
-<h1 id="SongSection">Song Presets</h1>
-<div class="lb_box"><a class="lb"  href="/Song.html?Song_index=4#SongSection">Cypher 4 (BTS)</a></div>
-<div class="lb_box"><a class="lb" href="#SongSection">IDOL (BTS)</a></div>
+<h1 id="presets">Song Presets</h1>
+<div class="lb_box"><a class="lb"  href="/index.html?index=4#presets">Cypher 4 (BTS)</a></div>
+<div class="lb_box"><a class="lb" href="?index=5#presets">IDOL (BTS)</a></div>
 <div class="lb_box"><a class="lb" href="#PatternSection">DNA (BTS)</a></div>
 <hr/>
 
-<form action="#ProgramSection" method="post">
-<div> <label for="Sequence" ><h1 id="ProgramSection" >Song Sequence</h1></label>
+<form id="progform" action="#progform" method="post">
+
+<div > <label for="Parts" >Song Parts</label>
+<textarea name="Parts" style="width:100%; height:1; " >
+I14/8:20 A12/4:0 C60:4/0
+</textarea> </div>
+<div class="annotations">
+Syntax:  &lt;Part Letter&gt;&lt;Pattern&gt;/&lt;Speed&gt;:&lt;color&gt;... <br/>
+Pattern: identifies the pattern of light change (see pattern catalog)<br/>
+Speed: Speed of the pattern 2=Haft Beat 4=Beat 8=8th, 16,32,64 <br/>
+Color: defines the color palette (see color palette catalog)
+</div>
+<div> <label for="Sequence" >Song Sequence</label>
 <textarea  id="Sequence" name="Sequence" style="width:100%; height:3; " >
 120 I8888 A8888 C8888
 </textarea> </div>
@@ -95,16 +106,6 @@ Syntax: &lt;bpm&gt; &lt;Part Letter&gt; &lt;Beats&gt;&lt;Beats&gt;... &lt;Part L
 Part Letter is defined in Song part configuration<br/>
 Beats are one digit numbers, that get accumulated: 8888=32 Beats <br/>
 248 =14 Beats
-</div>
-<div > <label for="Parts" ><h1>Song Parts</h1></label>
-<textarea  id="Parts" name="Parts" style="width:100%; height:1; " >
-I14/8:20 A12/4:0 C60:4/0
-</textarea> </div>
-<div class="annotations">
-Syntax:  &lt;Part Letter&gt;&lt;Pattern&gt;/&lt;Speed&gt;:&lt;color&gt;... <br/>
-Pattern: identifies the pattern of light change (see pattern catalog)<br/>
-Speed: Speed of the pattern 2=Haft Beat 4=Beat 8=8th, 16,32,64 <br/>
-Color: defines the color palette (see color palette catalog)
 </div>
 <input type="submit" value="Start">
 </form>
