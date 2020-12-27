@@ -1,4 +1,4 @@
-/* Compile against  NodeMCU 1.0 Profile */
+/* Profiles:  NodeMCU 1.0 | WeMos D1 R1 */
 
 /*
  * Demonstrate using an http server and an HTML form to control an LED.

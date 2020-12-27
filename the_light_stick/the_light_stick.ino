@@ -410,6 +410,7 @@ void loop() {
   
 
   // Manage Serial input
+  #ifdef FEAT_SERIAL_INPUT
   /*
    * Commands:
    * x<id>               load song preset
@@ -559,6 +560,7 @@ void loop() {
       }  // end "t" command
 
   }  // end Serial command available
+  #endif
 
   // ------ here starts the final processing 
   

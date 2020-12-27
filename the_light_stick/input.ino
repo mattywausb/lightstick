@@ -236,6 +236,7 @@ void input_switches_scan_tick()
 
 } // void input_switches_tick()
 
+#ifdef FEAT_SERIAL_INPUT
 /* ************** Manage Serial input ***************** */
 
 void input_pollSerial() {
@@ -257,6 +258,7 @@ void input_pollSerial() {
     }
   }
 }
+#endif
 
 /* ***************************       S E T U P           ******************************
 */
