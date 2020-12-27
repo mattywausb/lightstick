@@ -110,6 +110,13 @@ Beats are one digit numbers, that get accumulated: 8888=32 Beats <br/>
 <input type="submit" value="Start">
 </form>
 <hr/>
+<form id="fileform" action="#fileform" method="post">
+<label for="filename" >File name</label>
+<input type="text" id="filename" name="filename" value="BTS-no">
+<div class="annotations">Save the latest started pattern. Will overwrite existing files without asking. Only 30 letters allowed. Add "###" to an existing file name to delete the file.</div>
+<input type="submit" value="Save">
+</form>
+<hr/>
 <h1>Pattern Catalog</h1>
 <div class="annotations">
 Groups of same pattern varies in speed of color change relative to beat<br/>
