@@ -99,6 +99,7 @@ void setup() {
   output_reset_color_palette(HUE_ORANGE,1);
   output_start_pattern(9);  // Heartbeat with low light
   input_setup();
+  song_catalog_setup();
   
   input_switches_scan_tick();
   #ifdef TRACE_ON

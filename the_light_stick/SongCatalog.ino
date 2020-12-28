@@ -1,6 +1,8 @@
-/* This module keeps all song data, that is available as ready to run preset in the firmware */
+/* This module manages song data to store and retreive from the filesystem */
 
 #include "mainSettings.h"
+#include <FS.h>
+#include <LittleFS.h>
 
 #ifdef TRACE_ON
 #define TRACE_PRESET_API_CALL
@@ -90,4 +92,25 @@ void song_preset_start(int preset_id) {
   strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[preset_id].song_sequence_definition)));
   parse_sequence(string_buffer);
 }
+
+String song_catalog_status_message="";
+boolean song_catalog_has_error=false;
+
+
+void song_catalog_setup() {
+Serial.println("Mount LittleFS");
+  if (!LittleFS.begin()) {
+    song_catalog_status_message="Could not open filesystem";
+    song_catalog_has_error=true;
+    Serial.println("LittleFS mount failed");
+    return;
+  }
+}
+
+
+// song_catalog_get_first_entry
+// song_catalog_get_next_entry
+// song_catalog_load_song
+// song_catalog_save_song
+// song_catalog_delete_song
 
