@@ -26,14 +26,14 @@
 
 #ifdef TRACE_ON
 #define TR_WEBUI
-//#define TR_WEBUI_PAGE_GENERATION
+#define TR_WEBUI_PAGE_GENERATION
 #define TR_WEBUI_CONNECT
 #endif
 
 /* Macro to declare Strings with reserved buffer */
 #define DECLARE_PREALLOCATED_STRING(varname, alloc_size) String varname((const char*)nullptr); varname.reserve(alloc_size)
 
-
+#define MAX_DEFINITON_STRING_LENGTH 150
 
 //  SSID and password are defined in header file that will not be in the git repo
 const char* ssid = STASSID;
@@ -44,10 +44,6 @@ t_webui_connect_mode webui_connect_mode =NONE;
 MDNSResponder mdns;
 
 ESP8266WebServer server(80);
-
-String webui_song_sequence_textarea="120 I8#>A8888 B8888 R8888 8888";
-
-String webui_song_parts_textarea="I8/2:0 A10/4:0 B11/4:0 R68/8:0";
 
 String softAp_password="letsparty";
 
@@ -73,6 +69,8 @@ void sendStylesheet() {
 "label{float:left;margin:2px 2px ;font-size:18px ;padding:2px 2px ;}"
 "input[type=\"submit\"]{background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;margin:2px 2px ;padding:16px 16px ;font-size:16px ;cursor:pointer; width:100%}"
 "input[type=\"submit\"]:hover{background-color:#a6449f;color:#fff;}"
+"input{background-color:#317577;border-radius:4px ;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px ;padding:10px 10px ;}"
+"select{background-color:#317577;border-radius:4px;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px;padding:10px 10px;}"
 "textarea{background-color:#317577;border-radius:4px ;border:none;color:#f7d53d;box-sizing:border-box;margin:2px 2px ;padding:10px 10px ;}"
 ".lb{display:block;background-color:#773172;border-radius:4px ;border:none;color:#f7d53d;padding:10px 10px ;font-size:14px ;cursor:pointer;text-decoration:none}"
 ".lb:hover{background-color:#a6449f;color:#fff;}"
@@ -214,13 +212,36 @@ const char WEB_PRESET_SECTION_START[] PROGMEM =
       "<hr/>"
       "<h1 id=\"presets\">Song Presets</h1>";
 
+const char WEB_FILEFORM_P1[] PROGMEM =
+      "<hr/>"
+      "<form id=\"fileform\" action=\"#fileform\" method=\"post\">"
+      "<table width=100%>"
+      "<tr><td><label for=\"filename\" >Filename</label>"
+      "<input type=\"text\" id=\"filename\" name=\"filename\" value=\"";
+      // Insert Filename here
+const char WEB_FILEFORM_P2[] PROGMEM =
+      "\">"
+      "</td><td><label for=\"file-op\">Operation</label>"
+      "<select id=\"file-op\" name=\"cars\">"
+        "<option value=\"cre\">create</option>"
+        "<option value=\"upd\">update</option>"
+        "<option value=\"del\">delete</option>"
+      "</select>"
+      "</td><td ><div style=\"color:#ff0000\" ><b>";
+      // Insert catalog message here
+const char WEB_FILEFORM_P3[] PROGMEM =
+      "</b></div>"
+      "</td></tr></table>"
+      "<input type=\"submit\" value=\"Execute\">"
+      "</form>";
+
 void send_main_page() {
 
   #ifdef TR_WEBUI
    Serial.println(F("TR_WEBUI> send_main_page started"));
   #endif
   
-  String value_as_string;
+  String local_buffer_string;
   
   send_html_header() ;
 
@@ -293,12 +314,14 @@ void send_main_page() {
   #endif
  
   server.sendContent_P(WEB_PRESET_SECTION_START);
-  for(int song_index=0;song_index<song_catalog_count;song_index++) {
-        content_element+=F("<div class=\"lb_box\"><a class=\"lb\"  href=\"song?song_index=");
-        content_element+=(song_index);  
+  song_catalog_goto_start();
+  while(song_catalog_next()) {
+        local_buffer_string=song_catalog_list_name;
+        local_buffer_string.replace(" ","_");
+        content_element+=F("<div class=\"lb_box\"><a class=\"lb\"  href=\"song?song_name=");
+        content_element+=(local_buffer_string);  
         content_element+=F("#presets\">");
-        strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_name)));
-        content_element+=string_buffer;
+        content_element+=song_catalog_list_name;
         content_element+=F("</a></div>");
   } // Loop over song catalog
 
@@ -314,17 +337,30 @@ void send_main_page() {
 
   // Parts
   server.sendContent_P(WEB_PAGE_SONG_PART_START);
-  server.sendContent(webui_song_parts_textarea);
+  if(song_catalog_current_parts.length()>0) server.sendContent(song_catalog_current_parts);
   server.sendContent_P(WEB_PAGE_SONG_PART_END);
 
   // Sequence
   server.sendContent_P(WEB_PAGE_SEQ_PART_START);
-  server.sendContent(webui_song_sequence_textarea);
+  if(song_catalog_current_sequence.length()>0) server.sendContent(song_catalog_current_sequence);
   server.sendContent_P(WEB_PAGE_SEQ_PART_END);
   
   // End of Part/ Sequence Form
   server.sendContent_P(WEB_PAGE_FORM_END);
-  
+
+  // ******************* Send file management form ****************
+  #ifdef TR_WEBUI_PAGE_GENERATION
+   Serial.println(F("TR_WEBUI_PAGE_GENERATION> render file management form"));
+  #endif
+
+  server.sendContent_P(WEB_FILEFORM_P1);
+  if(song_catalog_current_name.length()>0) server.sendContent(song_catalog_current_name);
+  server.sendContent_P(WEB_FILEFORM_P2);
+  if(song_catalog_status_message.length()>0) server.sendContent(song_catalog_status_message);
+  song_catalog_status_message="";
+  server.sendContent_P(WEB_FILEFORM_P3);
+ 
+  // ******************* finally  ****************
   #ifdef TR_WEBUI_PAGE_GENERATION
    Serial.println(F("TR_WEBUI_PAGE_GENERATION> html render complete"));
   #endif
@@ -334,14 +370,14 @@ void send_main_page() {
 void parseFormData()
 {
   if (server.hasArg("Parts")) {
-      webui_song_parts_textarea = server.arg("Parts");
+      song_catalog_current_parts = server.arg("Parts");
   }
 
   if (server.hasArg("Sequence")) {
-      webui_song_sequence_textarea = server.arg("Sequence");
+      song_catalog_current_sequence = server.arg("Sequence");
   }
-  parse_slot_settings( webui_song_parts_textarea);
-  parse_sequence (webui_song_sequence_textarea);
+  parse_slot_settings( song_catalog_current_parts);
+  parse_sequence (song_catalog_current_sequence);
 }
 
 void handleRoot()
@@ -360,23 +396,22 @@ void handleSong()
   #ifdef TR_WEBUI
     Serial.println(F("TR_WEBUI> handleSong started"));
   #endif
-  
-  String song_index_parameter;
-  char string_buffer[MAX_DEFINITON_STRING_LENGTH];
+
+  String song_name;
    
-  if (server.hasArg("song_index")) {
-     song_index_parameter=server.arg("song_index");
+  if (server.hasArg("song_name")) {
+     song_name=server.arg("song_name");
+     song_name.replace("_"," ");  // Revert the tagging
      #ifdef TR_WEBUI
-       Serial.print(F("TR_WEBUI> song_index:"));Serial.println(song_index_parameter);
+       Serial.print(F("TR_WEBUI> song_name:"));Serial.println(song_name);
     #endif   
-    int song_index=song_index_parameter.toInt();  // Bad input will result in song 0 (can happen from saved urls, not from urls of own form)
-    song_preset_start(song_index_parameter.toInt());
-
-    strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_slot_definition)));
-    webui_song_parts_textarea=string_buffer;
-
-    strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[song_index].song_sequence_definition)));
-    webui_song_sequence_textarea=string_buffer;
+    if(song_catalog_load_song(song_name)) {
+      parse_slot_settings( song_catalog_current_parts);
+      parse_sequence (song_catalog_current_sequence);
+    } 
+  #ifdef TR_WEBUI
+      else  Serial.print(F("TR_WEBUI> error:"));Serial.println(song_catalog_status_message);
+  #endif   
   }
   send_main_page() ;
 }
