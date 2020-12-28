@@ -159,6 +159,7 @@ boolean song_catalog_delete_song(String song_name) {
     }
     
     LittleFS.remove(path);
+    song_catalog_status_message="Song deleted";
     return true;
 }
 

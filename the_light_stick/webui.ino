@@ -222,7 +222,7 @@ const char WEB_FILEFORM_P1[] PROGMEM =
 const char WEB_FILEFORM_P2[] PROGMEM =
       "\">"
       "</td><td><label for=\"file-op\">Operation</label>"
-      "<select id=\"file-op\" name=\"cars\">"
+      "<select id=\"file-op\" name=\"file-op\">"
         "<option value=\"cre\">create</option>"
         "<option value=\"upd\">update</option>"
         "<option value=\"del\">delete</option>"
@@ -367,8 +367,11 @@ void send_main_page() {
   send_html_footer();
 }
 
-void parseFormData()
+void receiveSongConfigForm()
 {
+  #ifdef TR_WEBUI
+    Serial.println(F("TR_WEBUI> receiveSongConfigForm started"));
+  #endif
   if (server.hasArg("Parts")) {
       song_catalog_current_parts = server.arg("Parts");
   }
@@ -380,13 +383,42 @@ void parseFormData()
   parse_sequence (song_catalog_current_sequence);
 }
 
+void receiveFileOperationForm()
+{
+  #ifdef TR_WEBUI
+    Serial.println(F("TR_WEBUI> receiveFileOperationForm started"));
+  #endif
+
+  String file_name;
+  String file_operation;
+   
+  if (server.hasArg("filename")) {
+     file_name=server.arg("filename");
+     file_operation=server.arg("file-op");
+     #ifdef TR_WEBUI
+      Serial.print(F("TR_WEBUI> file-op"));Serial.println(file_operation);
+     #endif
+     if(file_operation=="del") {
+        song_catalog_delete_song(file_name);
+     } else {
+       song_catalog_save_song(file_name, file_operation=="upd");
+     }
+  }
+  #ifdef TR_WEBUI
+      else  Serial.print(F("TR_WEBUI> error:"));Serial.println(song_catalog_status_message);
+  #endif   
+}
+
 void handleRoot()
 {
   #ifdef TR_WEBUI
     Serial.println(F("TR_WEBUI> handleRoot started"));
   #endif
   if (server.hasArg("Parts")) {
-    parseFormData();
+    receiveSongConfigForm();
+  }
+  if (server.hasArg("filename")) {
+    receiveFileOperationForm();
   }
   send_main_page() ;
 }
@@ -415,6 +447,8 @@ void handleSong()
   }
   send_main_page() ;
 }
+
+
 
 void handleSwitch()
 {
@@ -544,7 +578,7 @@ t_webui_connect_mode webui_setup(boolean force_softAP)
   }  
   
   if(webui_connect_mode!=NONE){
-      server.on("/", handleRoot);
+      server.on("/", handleRoot); // manages all forms
       server.on("/song", handleSong);
       server.on("/switch", handleSwitch);
       server.on("/default.css", sendStylesheet);
