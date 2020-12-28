@@ -111,10 +111,20 @@ Beats are one digit numbers, that get accumulated: 8888=32 Beats <br/>
 </form>
 <hr/>
 <form id="fileform" action="#fileform" method="post">
-<label for="filename" >File name</label>
+<table width=100%>
+<tr> 
+<td><label for="filename" >File name</label>
 <input type="text" id="filename" name="filename" value="BTS-no">
+</td><td><label for="file-op">Operation</label>
+<select id="file-op" name="cars">
+  <option value="cre">create</option>
+  <option value="upd">update</option>
+  <option value="del">delete</option>
+</select>
+</td><td ><div style="color:#ffffff" ><b>File saved </b></div>
+</td></tr></table>
 <div class="annotations">Save the latest started pattern. Will overwrite existing files without asking. Only 30 letters allowed. Add "###" to an existing file name to delete the file.</div>
-<input type="submit" value="Save">
+<input type="submit" value="Execute">
 </form>
 <hr/>
 <h1>Pattern Catalog</h1>

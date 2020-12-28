@@ -26,6 +26,14 @@ input[type="submit"]:hover {
   background-color: #a6449f;
   color: #fff;
 }
+select {  background-color: #317577;
+  border-radius: 4px;
+  border: none;
+  color:#f7d53d;
+  box-sizing: border-box;
+  margin: 2px 2px;
+  padding: 10px 10px;
+}
 
 input{
   background-color: #317577;
