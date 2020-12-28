@@ -252,7 +252,7 @@ void song_catalog_to_serial() {
 // ############## Preset manage functions #####################
 
 
-void preset_store(int preset_id) {
+void preset_store(int preset_id, boolean do_overwrite) {
   char string_buffer[SONG_LOAD_BUFFER_LENGTH];
   
   if(preset_id<0 && preset_id>song_catalog_count) return;  // Bail out, if input is bad
@@ -268,7 +268,7 @@ void preset_store(int preset_id) {
   strcpy_P(string_buffer, (char*)pgm_read_dword(&(song_catalog[preset_id].song_name)));
   Serial.print(F(">TRACE_PRESET_API_CALL song_preset_run:"));Serial.println(string_buffer);
 
-  song_catalog_save_song(string_buffer,false);
+  song_catalog_save_song(string_buffer,do_overwrite);
   if (song_catalog_has_error) {
         Serial.print(F("ERROR:"));
         }
@@ -365,8 +365,18 @@ void loop() {
     }
     if(input_currentSerialCommand.startsWith("x")){    // X port song
       int preset_id=input_currentSerialCommand.substring(1).toInt();
-      preset_store(preset_id);
+      preset_store(preset_id,false);
     }
+
+    if(input_currentSerialCommand.startsWith("y")){    // X port song
+      int preset_id=input_currentSerialCommand.substring(1).toInt();
+      preset_store(preset_id,true);
+    }
+
+    if(input_currentSerialCommand.startsWith("z")){    // X port all songs
+      for(int i=0;i<song_catalog_count;i++)   preset_store(i,true);
+    }
+
 
     if(input_currentSerialCommand.startsWith("r")){  // R ead song
       song_catalog_load_song(input_currentSerialCommand.substring(2));
@@ -381,6 +391,14 @@ void loop() {
     
     if(input_currentSerialCommand.startsWith("p")){  // P rint song file
       readSongToSerial(input_currentSerialCommand.substring(2));
+    }
+
+    if(input_currentSerialCommand.startsWith("F")){  // F ormat File System
+      LittleFS.end();
+      LittleFS.format();
+      if (!LittleFS.begin()) {
+        Serial.println("LittleFS mount after format failed");
+      } else {   Serial.println("LittleFS formatted"); }
     }
 
     if(input_currentSerialCommand.startsWith("d")){  // D elete song file
