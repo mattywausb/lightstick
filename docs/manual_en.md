@@ -61,7 +61,7 @@ The following functions are triggered with the button.
 * 4x regular tapping - measure and set the pace (irregular tapping does not result in any changes)
 
 ## Play song program
-The built-in songs are displayed as separate buttons on the web interface. 
+The songs, that are currently stored on the stick are displayed as separate buttons on the web interface. 
 With the selection of a song, its program is activated immediately, this includes the correct tempo (BPM) and a sequence of patterns
 and colors matching the course of the song. The program starts with a pattern as a waiting loop. It will not proceed to the 
 next pattern until the button is pressed.
@@ -130,6 +130,12 @@ The information for Song Parts and Song Sequence is checked internally for plaus
 Syntactically incorrect or inconsistent information (e.g. letters used twice as song part or not defined as song part, unknown color palette,
 unknown pattern speed) lead to various phenomena: wrong color palette, wrong pattern, wrong number of beats until the change. So if something weird happens, 
 check the programming strings
+
+## Store new songs
+you can store and modify the songs in the internal flash memory of the stick by using the "Filename", "Operation" and "Execute" elements.
+Before storing a Part / Sequence Setting make sure, to activate the current version with the "Start" button.
+To prevent accidential overwriting or deletion, you need to select these operations explcitly, when needed, before hitting "Execute".
+
 
 ## Appendix
 

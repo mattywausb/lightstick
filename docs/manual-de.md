@@ -49,6 +49,7 @@ Folgenden Pattern ignorieren die Farbpalette
 Mit dem Taster werden folgende Funktionen ausgelöst.
 * 1xTippen - Beatposition festlegen / korrigieren 
 * 4x regelmäßig Tippen - Tempo messen und einstellen (unregelmäßiges Tippen führt zu keiner Änderungen) 
+* Halten - Aktuelles Pattern wird festgehalten. Mit Loslassen des Tasters wird das nächste Pattern gestartet
 
 ## Songprogramm abspielen
 Die fest eingebauten Songs werden auf der Weboberfläche als eigene Schaltflächen angezeigt. Mit der Auswahl eines Songs wird dessen Programm sofort aktiviert, dies umfasst das korrekte Tempo (BPM) und eine Abfolge von Mustern und Farben passend zum Songverlauf.
@@ -107,6 +108,33 @@ Beispiel: "120 A88# A88 B88 A8888 B88 R8888 8888 >A8888 B88 R8888 8888"
 
 ### Fehlerbehandlung
 Die Angaben für Song Parts und Song Sequence werden intern bzgl. plausibilität geprüft. Formatfehler führen dazu, dass Teile ignoriert oder auch falsch zugeordnet werden. *Es gibt bisher keine Rückmeldung* ob alle Angaben korrekt waren. Syntaktisch falsche oder inkonsistente Angaben(z.B. Buchstabe doppelt als Song Part genutzt oder nicht als Songpart definiert, unbekannte Farbpalette, unbekannter Pattern Speed) führen zu verschiedenen Phänomenen: Falsche Farbpalette, Falsche Pattern, Falsche Anzahl an Beats bis zum Wechsel
+
+## Songprogramme speichern
+Ein Songprogramm kann fest in dem Stick gespeichert und dann über die Auswahlliste wieder abgerufen werden. Hierzu dienenen die Eingabefelder "Filename" und "Operation" sowei die Schaltfläche "Execute"
+
+### Neuen Song hinzufügen
+* Gewünschte Part- und Sequencedefinition müssen eingegeben und gestartet worden sein
+* In "Filename" den Namen des Liedes eingeben (Buchstaben, Zahlen sowie Klammern und Bindestriche sind gestattet). Der Name wird automatisch von dem zulestzt geladenen Song vorbelegt.
+* In Operation "Create" auswählen.
+* Execute betätigen
+Der Song sollte nun unter seinem neuen Namen in der Songprogrammliste erscheinen. Gibt es schon einen Song mit dem Namen, wird dies mit einer Meldung angezeigt und die Daten sind nicht gespeichert.
+
+### Vorhandenen Song anpassen
+* Song auswählen
+* Part- und Sequencedefintionen anpassen und starten
+* Der Filename sollte noch mit dem Namen des geladenen Songs besetzt sein
+* In Operation "Update" auswählen
+* Execute betätigen
+
+### Vorhandenen Song löschen
+* Song auswählen
+* Der Filename wird mit dem Namen des geladenen Songs besetzt
+* In Operation "Delete" auswählen
+* Execute betätigen
+Achtung: Diese Operation kann nicht Rückgängig gemacht werden
+ 
+
+## Anhang
 
 ### Fest programmierte Farbpaletten
 
