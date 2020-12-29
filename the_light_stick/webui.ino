@@ -26,7 +26,7 @@
 
 #ifdef TRACE_ON
 #define TR_WEBUI
-#define TR_WEBUI_PAGE_GENERATION
+//#define TR_WEBUI_PAGE_GENERATION
 #define TR_WEBUI_CONNECT
 #endif
 
@@ -49,6 +49,8 @@ MDNSResponder mdns;
 ESP8266WebServer server(80);
 
 String softAp_password="letsparty";
+
+String webui_hostname="lighstick";
 
 
 /* HTML Header */ 
@@ -238,6 +240,30 @@ const char WEB_FILEFORM_P3[] PROGMEM =
       "<input type=\"submit\" value=\"Execute\">"
       "</form>";
 
+const char WEB_WIFI_P1[] PROGMEM =
+          "<hr/>"
+          "<h1>Wifi Settings</h1>"
+          "<div>To connect the Stick to a local Wifi, enter credentials here</div>"
+          "<form action=\"/\" method=\"post\">"
+          "<label for=\"SSID\" class=\"col-1\">SSID</label>"
+          "<input type=\"text\" id=\"SSID\" name=\"SSID\" value=\"";
+          // Insert SSID String 
+const char WEB_WIFI_P2[] PROGMEM =
+          "\"><br/>"
+          "<label for=\"Password\" class=\"col-1\">Password</label>"
+          "<input type=\"text\" id=\"WIFIPW\" name=\"WIFIPW\" value=\"";
+          // Insert wifi password here
+const char WEB_WIFI_P3[] PROGMEM =
+        "\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\">"
+        "<div class=\"anntn\" >"
+        "To try out the credentials, the stick will disconnect and this website will not be available any more. When successfull, access the stick in the target network. In case of blue light, connect to the sticks own wifi to access it"
+        "</div>"
+        "<input type=\"submit\" value=\"connect to wifi\">"
+        "</form>";
+
+          
+      
+
 void send_main_page() {
 
   #ifdef TR_WEBUI
@@ -362,6 +388,17 @@ void send_main_page() {
   if(song_catalog_status_message.length()>0) server.sendContent(song_catalog_status_message);
   song_catalog_status_message="";
   server.sendContent_P(WEB_FILEFORM_P3);
+
+  // ******************* Wifi connect form ****************
+  #ifdef TR_WEBUI_PAGE_GENERATION
+   Serial.println(F("TR_WEBUI_PAGE_GENERATION> render wifi connect form"));
+  #endif
+
+  server.sendContent_P(WEB_WIFI_P1);
+  if(webui_ssid_input.length()>0) server.sendContent(webui_ssid_input);
+  server.sendContent_P(WEB_WIFI_P2);
+  if(webui_password_input.length()>0) server.sendContent(webui_password_input);
+  server.sendContent_P(WEB_WIFI_P3);
  
   // ******************* finally  ****************
   #ifdef TR_WEBUI_PAGE_GENERATION
@@ -369,6 +406,8 @@ void send_main_page() {
   #endif
   send_html_footer();
 }
+
+// ************* Request management FORMS ****************************
 
 void receiveSongConfigForm()
 {
@@ -412,6 +451,23 @@ void receiveFileOperationForm()
   #endif   
 }
 
+void receiveWifiConnectForm()
+{
+  #ifdef TR_WEBUI
+    Serial.println(F("TR_WEBUI> receiveWifiConnectForm started"));
+  #endif
+  if (server.hasArg("SSID")) {
+      webui_ssid_input = server.arg("SSID");
+  }
+
+  if (server.hasArg("WIFIPW")) {
+      webui_password_input = server.arg("WIFIPW");
+  }
+  webui_change_wifi(); 
+}
+
+// ************* Request management URLS ****************************
+
 void handleRoot()
 {
   #ifdef TR_WEBUI
@@ -422,6 +478,9 @@ void handleRoot()
   }
   if (server.hasArg("filename")) {
     receiveFileOperationForm();
+  }
+  if (server.hasArg("SSID")) {
+     receiveWifiConnectForm();
   }
   send_main_page() ;
 }
@@ -480,6 +539,7 @@ void handleSwitch()
   send_main_page() ;
 }
 
+// ************* Request management standards ****************************
 
 void returnFail(String msg)
 {
@@ -513,6 +573,7 @@ void handleNotFound()
   server.send(404, "text/plain", message);
 }
 
+// ************************* Network Management *******************************************
 
 // Setup return code will connection result
 // 1 = Couldconncet to WiFi
@@ -529,10 +590,19 @@ t_webui_connect_mode webui_setup(boolean force_softAP) {
     server.onNotFound(handleNotFound);
 
     // Start Network
+    webui_hostname="Lightstick-"+String(ESP.getChipId());
+    WiFi.hostname(webui_hostname);   
+     
     if(force_softAP) {
       establish_soft_AP();
     } else webui_connect_wifi();
-    server.begin();
+    
+    if(webui_connect_mode!=NONE){
+         webui_start_services();
+         webui_initiate_adress_pattern();
+    } else {
+         webui_initiate_nowifi_pattern();
+    }
    
     #ifdef TRACE_ON
     Serial.println(F(">webui_setup finished "));
@@ -541,7 +611,7 @@ t_webui_connect_mode webui_setup(boolean force_softAP) {
 }
 
 void establish_soft_AP() {
-    String ap_ssid="Lightstick-"+String(ESP.getChipId());
+    String ap_ssid=webui_hostname+"-AP";
     IPAddress local_IP(192,168,4,22);
     IPAddress gateway(192,168,4,9);
     IPAddress subnet(255,255,255,0);
@@ -557,9 +627,6 @@ void establish_soft_AP() {
           Serial.print("\nTR_WEBUI_CONNECT>Started access point:'"+ap_ssid+"' password:'"+softAp_password+"' with IP ");
           Serial.println(myIP);
         #endif
-        if (mdns.begin("lightstick",local_IP)) {
-          Serial.println("MDNS responder started");
-        }
      } else {
        webui_connect_mode =NONE;
        #ifdef TR_WARNING
@@ -569,14 +636,39 @@ void establish_soft_AP() {
 }
 
 void webui_change_wifi() {
-    server.stop();
+    webui_stop_services();
+    
     webui_connect_wifi();
-   if(webui_connect_mode!=NONE){
+
+    if(webui_connect_mode!=NONE){
+         webui_start_services();
+         webui_initiate_adress_pattern();
+    } else {
+         webui_initiate_nowifi_pattern();
+    }
+}
+
+void webui_start_services() {
+         #ifdef TR_WEBUI_CONNECT
+           Serial.print("TR_WEBUI_CONNECT> Hostname: ");    Serial.println(webui_hostname);
+           Serial.print("TR_WEBUI_CONNECT> IP address: ");    Serial.println(WiFi.localIP());
+         #endif 
+         
+         if (mdns.begin(webui_hostname,WiFi.localIP())) {
+           Serial.println("TR_WEBUI_CONNECT> MDNS responder started");
+         }
          server.begin();
          #ifdef TR_WEBUI_CONNECT
-          Serial.println("TR_WEBUI_CONNECT> Webserver restarted ");
-        #endif 
-    }
+          Serial.println("TR_WEBUI_CONNECT> Webserver started ");
+         #endif 
+}
+
+void webui_stop_services() {
+    #ifdef TR_WEBUI_CONNECT
+           Serial.println("TR_WEBUI_CONNECT> Stopping Services");    
+    #endif
+    server.stop();
+    mdns.end();
 }
 
 t_webui_connect_mode webui_connect_wifi()
@@ -584,39 +676,28 @@ t_webui_connect_mode webui_connect_wifi()
   if(WiFi.status() == WL_CONNECTED ) WiFi.disconnect();  
   webui_connect_mode =NONE; 
   
-  String my_hostname="Lightstick-"+String(ESP.getChipId());
-  WiFi.hostname(my_hostname);
-
   if(webui_ssid_input.length()>0) { // try to use the given credentials
     WiFi.begin(webui_ssid_input, webui_password_input);
     #ifdef TR_WEBUI_CONNECT
       Serial.print("TR_WEBUI_CONNECT> Try to connect to "); Serial.println(webui_ssid_input);
     #endif 
-    for(int retry=0; WiFi.status() != WL_CONNECTED && retry<10; retry++) {
+  } else {    
+      WiFi.begin();
       #ifdef TR_WEBUI_CONNECT
-         Serial.print('.');
-      #endif
-      delay(500);
-    } 
-    if(WiFi.status() == WL_CONNECTED)  webui_connect_mode =WIFI;
-  }
-  
-  if(WiFi.status() != WL_CONNECTED) {
-    WiFi.begin();
-    #ifdef TR_WEBUI_CONNECT
-      Serial.print("TR_WEBUI_CONNECT> Try to connect last Access Point:");
-      Serial.println(WiFi.SSID());
-    #endif 
-    for(int retry=0; WiFi.status() != WL_CONNECTED && retry<10; retry++) {
-      #ifdef TR_WEBUI_CONNECT
-         Serial.print('.');
-      #endif
-      delay(500);
-    } 
-    if(WiFi.status() == WL_CONNECTED)  webui_connect_mode =WIFI;
+        Serial.print("TR_WEBUI_CONNECT> Try to connect last Access Point:");
+        Serial.println(WiFi.SSID());
+      #endif 
   }
 
-  if(WiFi.status() != WL_CONNECTED) {
+  for(int retry=0; WiFi.status() != WL_CONNECTED && retry<15; retry++) {
+      #ifdef TR_WEBUI_CONNECT
+         Serial.print('.');
+      #endif
+      delay(500);
+  } 
+    
+  if(WiFi.status() == WL_CONNECTED)  webui_connect_mode =WIFI;
+  else { 
      WiFi.begin(ssid, password);
     #ifdef TR_WEBUI_CONNECT
       Serial.print("TR_WEBUI_CONNECT> Try to connect to default SSID ");
@@ -635,6 +716,51 @@ t_webui_connect_mode webui_connect_wifi()
 
   return webui_connect_mode;
 }
+
+void webui_initiate_adress_pattern(){
+  IPAddress ipAddress=WiFi.localIP();
+
+String adress_string=(ipAddress[0]) + String(".") +\
+  String(ipAddress[1]) + String(".") +\
+  String(ipAddress[2]) + String(".") +\
+  String(ipAddress[3])  ;
+
+  mode_of_operation=MODE_FIX_PRESET;
+  output_set_bpm(80);
+  output_set_pattern_speed(STEP_ON_8TH);
+  switch (webui_connect_mode) {
+    case WIFI: output_reset_color_palette(HUE_GREEN,0);
+               output_add_color_palette_entry(HUE_GREEN,0);
+               output_add_color_palette_entry(HUE_GREEN,1);
+               output_add_color_palette_entry(HUE_GREEN,0);
+               break;
+    case SOFT_AP: output_reset_color_palette(HUE_BLUE,0);
+               output_add_color_palette_entry(HUE_BLUE,0);
+               output_add_color_palette_entry(HUE_BLUE,1);
+               output_add_color_palette_entry(HUE_BLUE,0);
+               break;
+  }
+
+  int digit=0;
+  for(int i=0;i<adress_string.length();i++) {
+    if(adress_string[i]=='.') output_add_color_palette_entry(HUE_BLUE,0);
+    else {
+      digit=adress_string.substring(i,i+1).toInt();
+      output_add_color_palette_entry(output_general_color[digit],1);
+    }   
+  }
+  output_start_pattern(13);  // Wipe low light
+}
+
+
+void webui_initiate_nowifi_pattern() {
+  mode_of_operation=MODE_FIX_PRESET;
+  output_set_bpm(80);
+  output_set_pattern_speed(STEP_ON_BEAT);
+  output_reset_color_palette(HUE_RED,1);
+  output_start_pattern(9);  // Heartbeat with low light
+};
+
 
 void webui_loop(void)
 {

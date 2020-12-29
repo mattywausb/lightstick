@@ -37,7 +37,7 @@ typedef struct {
     float s;       // a fraction between 0 and 1
 } t_color_hs;
 
-#define COLOR_PALETTE_MAX_ENTRIES  16
+#define COLOR_PALETTE_MAX_ENTRIES  22
 t_color_hs patconf_color_palette[COLOR_PALETTE_MAX_ENTRIES];
 uint8_t patconf_color_palette_lenght=0;
 uint8_t patvar_color_palette_index=0;
@@ -698,8 +698,8 @@ void output_start_pattern(int pattern_id) {
                       2  ); // follow up tick count (4= equally spaced)
          }
          break;
-    case 1:            // WHIPE  10 = direct , 11= over black
-         start_colorWipe(0.8,pattern_id%2);  // brightness, over_black
+    case 1:            // WHIPE  10 = direct , 11= over black, 12= direct low light, 13 = over black low light
+         start_colorWipe(0.8/1+(pattern_id/2),pattern_id%2);  // brightness, over_black flag
          break;
     case 2:            // DOUBLE ORBIT 20-26: Color step 1,2,4,8,16,32,64
           start_doubleOrbit(0.8,1<<(pattern_id-20));  // brightness, Steps until color increment
