@@ -8,18 +8,38 @@ Mit dem "Personal K-Pop Lightstick" hat man seine eigene Lichtshow verfügbar. I
 
 ## Einschalten
 
-Der Stick wird eingeschaltet, indem man den Deckel am unteren Stabende öffnet und den USB Stecker mit einer passenden Stromversorgung verbindet. Sofern diese kompakt genug ist, kann man sie direkt im Stick deponieren und den Deckel wieder verschließen.
+Der Stick wird eingeschaltet, indem man den USB Stecker aus dem unteren Stabende herausholt und mit einer passenden Stromversorgung verbindet. Sofern diese kompakt genug ist, kann man sie direkt im Stick deponieren und den Deckel wieder verschließen.
 
-Sowie der Lightstick Strom hat sucht er die Verbindung zum WLAN. In dieser Zeit leuchtet er schwach in Orange. 
+Sowie der Lightstick Strom hat sucht er die Verbindung zum zuletzt kontaktierten WLAN. In dieser Zeit leuchtet er schwach in Orange. Kann er das WLAN nicht erreichen versucht er Kontakt mit einem fest codierten WLAN aufzunehmen. 
+War der Verbindungsaufbau erfolgreich, wird dies durch ein schwaches grünes Blinken mitgeteilt.
 
-Hat er den Kontakt zum WLAN aufgenommen (Momentan hard codierte Zugangsdaten), blinkt er schwach Grün und ist bereit. Die Webseite ist auf der IP Adresse des Stick zu erreichen (Momentan in unserem Netz unter http://192.168.178.82)
+Kann er kein WLAN erreichen, eröffnet der Stick eine eigene WLAN Zelle. (SSID:"Lightstick-xxxxxxxx-AP" Passwort:"letsparty" (xxxxxx=Seriennummer des eingebauten Controllers))
 
-Wenn beim Einschalten/Einstecken der USB Verbindung der Taster gehalten wird, umgeht der Stick den Versuch ein WLAN zu erreichen.
+Wenn beim Einschalten/Einstecken der USB Verbindung der Taster gehalten wird, umgeht der Stick den Versuch ein WLAN zu erreichen und baut sofort seine eigene WLAN Zelle auf.
 
-Konnte/Sollte sich der Stick nicht im WLAN einwählen, baut der Stick seine eigene WLAN Zelle auf. (SSID:"Lightstick-xxxxxxxx" Passwort:"letsparty" (xxxxxx=Seriennummer des eingebauten Controllers)).
-In diesem Fall blinkt er Blau. Um ihn zu bedienen muss man sich mit dem WLAN des Sticks Verbinden und findet die Webseite dann unter http://192.168.4.22.
+Das ein eigenes WLAN eingerichtet wurde, wird durch ein schwaches blaues Blinken mitgetilt.
 
 Sollte der Stick auch keinen eigenen AP aufbauen können, blink er rot und ist dann leider nicht bedienbar.
+
+## Zugriff auf die Bedienoberfläche
+Für den Zugriff benötigt man einen Browser auf einem beliebigen Gerät, das mit dem gleichen Netzwerk verbunden ist, wie der Stick.
+
+Die im Browser einzugebende IP Adresse besteht aus 4 Zahlen, die jeweils von einem Punkt getrennt sind (z.B. 192.168.178.14) und wird vom Stick wie folgt als sich wiederholender Ablauf verschiedener Muster dargestellt.
+* 8 Beats schwach grün/Blau = WLAN Modus (siehe oben)
+* 2 Beats dunkel weiß>pink = Startzeichen für erste Zahl
+* n rotierende Schritte in rot (n= Ziffer 1)
+* 2 Beats dunkel pink 
+* n rotierende Schritte in gelb (n= Ziffer 2)
+* 2 Beats dunkel pink 
+* n rotierende Schritte in blau (n= Ziffer 3)
+* 2 Beats dunkel pink 
+* 2 Beats dunkel weiß>pink = Startzeichen für zweite Zahl
+* n rotierende Schritte in rot (n= Ziffer 1)
+...
+
+Um eine Null als Ziffer darzustellen wird mit einem kräftigen Pink einmal aufgeblendet. Die Ziffern 2 und 3 werden nicht genutzt, wenn sie für die Zahl nicht notwendig sind.
+
+
 
 ## Auswahl eines Pattern (Musters)
 Ein Pattern definiert, welche der eingebauten LED wann und wie lange leuchten. Dies erfolgt bezogen auf den laufenden Takt, d.h. das Pattern passt sein Lauftempo der Beatzahl(BPM) an, die über den Taster ermittelt wird oder von einem vorigen Song noch eingestellt ist. 
@@ -133,7 +153,11 @@ Der Song sollte nun unter seinem neuen Namen in der Songprogrammliste erscheinen
 * Execute betätigen
 Achtung: Diese Operation kann nicht Rückgängig gemacht werden
  
-
+## WLAN Netzwerk konfigurieren
+Mit den Feldern "SSID", "Password" und der Schaltfläche "connect to wifi" kann der Stick mit einem vorhandenen WLAN verbunden werden. Beim Verbindungsaufbau geht die alte Verbindung zum Stick verloren und es muss für die weitere Steuerung ein Browser im nun verbunden WLAN verwendet werden.
+Sollte die Verbindung fehlschlagen und das fest einprogrammierte WLAN nicht erreichbar sein, baut der Stick wieder sein eigenes WLAN auf.
+Die Darstellung von Status und IP Adresses ist identische mit der Beschreibung in "Zugriff auf die Bedienoberfläche".
+ 
 ## Anhang
 
 ### Fest programmierte Farbpaletten

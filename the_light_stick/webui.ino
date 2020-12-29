@@ -244,18 +244,19 @@ const char WEB_FILEFORM_P3[] PROGMEM =
 const char WEB_WIFI_P1[] PROGMEM =
           "<hr/>"
           "<h1>Wifi Settings</h1>"
-          "<div>To connect the Stick to a local Wifi, enter credentials here</div>"
           "<form action=\"/\" method=\"post\">"
-          "<label for=\"SSID\" class=\"col-1\">SSID</label>"
+          "<table><tr>"
+          "<td><label for=\"SSID\" class=\"col-1\">SSID</label>"
           "<input type=\"text\" id=\"SSID\" name=\"SSID\" value=\"";
           // Insert SSID String 
 const char WEB_WIFI_P2[] PROGMEM =
-          "\"><br/>"
-          "<label for=\"Password\" class=\"col-1\">Password</label>"
+          "\"></td>"
+          "<td><label for=\"Password\" class=\"col-1\">Password</label>"
           "<input type=\"text\" id=\"WIFIPW\" name=\"WIFIPW\" value=\"";
           // Insert wifi password here
 const char WEB_WIFI_P3[] PROGMEM =
-        "\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\">"
+        "\" autocomplete=\"off\" autocapitalize=\"off\" autocorrect=\"off\"></td>"
+         "</table></tr>"
         "<div class=\"anntn\" >"
         "To try out the credentials, the stick will disconnect and this website will not be available any more. When successfull, access the stick in the target network. In case of blue light, connect to the sticks own wifi to access it"
         "</div>"

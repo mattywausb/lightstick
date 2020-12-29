@@ -12,18 +12,32 @@ It offers the following features
 The stick is activated by opening the cover at the lower end of the stick and connecting the USB plug to a suitable power supply. 
 If the powersupply is a compact power bank, you can deposit it directly in the stick and close the lid again.
 
-As soon as the Lightstick has power, it searches for a connection to the WLAN. During this time it glows faintly in orange.
+As soon as the Lightstick has power, it tries to connect to a Network as follows:
+* search for the previous WLAN it was connnected
+* try to connect to a internally hard coded WLAN
+* Open its own Access Point "Lightstick-xxxxxxxx-AP" Password: "letsparty" (This can be forced by holding the button during power on)
 
-If it has made contact with the WLAN (currently hard-coded access keys ), it flashes weakly green and is ready. 
-The website can be reached on the IP address of the stick (currently in our network at http://192.168.178.82)
+The finals status is presented as follows:
+* low green blinking followed by IP address code= successfully connected to WIFI Connection
+* low blue blinking followed by IP address code= Providing Access Point
+* low red blinking: Something prevented all options
 
-If the button is held while switching on/plugging in the USB connection, the stick bypasses the attempt to reach a WLAN.
-
-If the stick could not / should not dial into the WLAN, the stick establishes its own WLAN cell. 
-(SSID: "Lightstick-xxxxxxxx" Password: "letsparty" (xxxxxx = serial number of the built-in controller)).
-In this case it flashes blue. To use it, you have to connect to the stick's WLAN and then find the website at http://192.168.4.22.
-
-If the stick cannot set up its own AP, it flashes red and is then unfortunately not operable.
+## Access the User Interface
+To access the user interface open a browser on any kind of device in the same network. Type in the ip address according to the blink pattern.
+An ip address consists of 4 numbers with 1 to 3 digits separated by a dot e.g. "192.168.178.18". The code is defined as follows.
+* 8 Beats of low green/low blow blinks
+* 2 Beats flash pink blinks = start of first number
+* n rotation steps in red (n=digit 1)
+* 2 Beats pink blinks
+* n rotation steps in yellow (n=digit 2)
+* 2 Beats pink blinks
+* n rotation steps in blue (n=digit 3)
+* 2 Beats pink blinks
+* 2 Beats flash pink blinks = start of next number
+* n rotation steps in red (n=digit 1)
+* ...
+In case of a zero as digit, there will always be a bright pink swipe instead of a step in the normal color. Only necessary digits are transmitted. So shot numbers will have less digits.
+After presenting all numbers, the pattern will repeat with the 8 Beats for the connection status. 
 
 ## Selection of a pattern
 A pattern defines which of the built-in LEDs light up when and for how long. 
@@ -136,6 +150,10 @@ you can store and modify the songs in the internal flash memory of the stick by 
 Before storing a Part / Sequence Setting make sure, to activate the current version with the "Start" button.
 To prevent accidential overwriting or deletion, you need to select these operations explcitly, when needed, before hitting "Execute".
 
+## Configure WiFi Network
+To Enter or change the WiFi to connect to, the SSID and Password must be entered in the corresponding fields.
+By starting the connection, the access to the userinterface gets lost and you need to user a browser in the tartge Network, to access the Userinterface again. 
+See the description about network status and IP Adress presentation in the "Power on" section above.
 
 ## Appendix
 
