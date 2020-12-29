@@ -41,6 +41,7 @@ const char* password = STAPSK;
 
 String webui_ssid_input="";
 String webui_password_input="";
+IPAddress webui_ipAddress(0,0,0,0);
 
 t_webui_connect_mode webui_connect_mode =NONE; 
 
@@ -612,10 +613,10 @@ t_webui_connect_mode webui_setup(boolean force_softAP) {
 
 void establish_soft_AP() {
     String ap_ssid=webui_hostname+"-AP";
-    IPAddress local_IP(192,168,4,22);
-    IPAddress gateway(192,168,4,9);
+    webui_ipAddress=IPAddress(192,168,4,10);
+    IPAddress gateway(192,168,4,254);
     IPAddress subnet(255,255,255,0);
-    if(!WiFi.softAPConfig(local_IP, gateway, subnet)) {
+    if(!WiFi.softAPConfig(webui_ipAddress, gateway, subnet)) {
        #ifdef TR_WARNING
           Serial.println("\n#!# TR_WARNING> Could not configure SoftAP ");
        #endif;
@@ -651,10 +652,10 @@ void webui_change_wifi() {
 void webui_start_services() {
          #ifdef TR_WEBUI_CONNECT
            Serial.print("TR_WEBUI_CONNECT> Hostname: ");    Serial.println(webui_hostname);
-           Serial.print("TR_WEBUI_CONNECT> IP address: ");    Serial.println(WiFi.localIP());
+           Serial.print("TR_WEBUI_CONNECT> IP address: ");    Serial.println(webui_ipAddress);
          #endif 
          
-         if (mdns.begin(webui_hostname,WiFi.localIP())) {
+         if (mdns.begin(webui_hostname,webui_ipAddress)) {
            Serial.println("TR_WEBUI_CONNECT> MDNS responder started");
          }
          server.begin();
@@ -712,23 +713,23 @@ t_webui_connect_mode webui_connect_wifi()
      if(WiFi.status() == WL_CONNECTED)  webui_connect_mode =WIFI;
   } 
 
+  webui_ipAddress=WiFi.localIP();
   if(WiFi.status() != WL_CONNECTED) establish_soft_AP();
 
   return webui_connect_mode;
 }
 
 void webui_initiate_adress_pattern(){
-  IPAddress ipAddress=WiFi.localIP();
-
-String adress_string=(ipAddress[0]) + String(".") +\
-  String(ipAddress[1]) + String(".") +\
-  String(ipAddress[2]) + String(".") +\
-  String(ipAddress[3])  ;
+  
+String adress_string=(webui_ipAddress[0]) + String(".") +\
+  String(webui_ipAddress[1]) + String(".") +\
+  String(webui_ipAddress[2]) + String(".") +\
+  String(webui_ipAddress[3])  ;
 
   mode_of_operation=MODE_FIX_PRESET;
   output_set_bpm(80);
   output_set_pattern_speed(STEP_ON_8TH);
-  String part_description ="F8/4:19999 P8/4:29999 A20/4:10000 B20/4:12222 C20/4:16666 ";
+  String part_description ="F8/4:19999 P8/4:29999 A20/4:10000 B20/4:12222 C20/4:16666 Z11/4:19999 ";
   String sequence_description = "100 I8 P2 ";
 
   // Example F8/4:19999 P8/4:29999 A20/4:10000 B20/4:12222 C20/4:16666 I8/4:17777   
@@ -751,7 +752,8 @@ String adress_string=(ipAddress[0]) + String(".") +\
       pattern_letter='A';
     }
     else {
-      sequence_description +=String(pattern_letter)+String(adress_string[i])+" F2 ";
+      if(adress_string[i]!='0') sequence_description +=String(pattern_letter)+String(adress_string[i])+" F2 ";
+      else sequence_description += "Z2 F2 ";
       pattern_letter++;
     }   
   }

@@ -17,7 +17,7 @@
 
 
 #ifdef TRACE_ON
-#define TR_SEQUENCE_PROGRESS
+//#define TR_SEQUENCE_PROGRESS
 //#define TR_STRING_PARSING
 //#define TR_WATCH_MODE_CHANGE
 //#define TR_BUTTON_INPUT
