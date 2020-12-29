@@ -261,7 +261,7 @@ const char WEB_WIFI_P3[] PROGMEM =
         "<input type=\"submit\" value=\"connect to wifi\">"
         "</form>";
 
-          
+         
       
 
 void send_main_page() {
@@ -728,28 +728,36 @@ String adress_string=(ipAddress[0]) + String(".") +\
   mode_of_operation=MODE_FIX_PRESET;
   output_set_bpm(80);
   output_set_pattern_speed(STEP_ON_8TH);
+  String part_description ="F8/4:19999 P8/4:29999 A20/4:10000 B20/4:12222 C20/4:16666 ";
+  String sequence_description = "100 I8 P2 ";
+
+  // Example F8/4:19999 P8/4:29999 A20/4:10000 B20/4:12222 C20/4:16666 I8/4:17777   
+  // Example 100 I8 P2 A1 F2 B9 F2 C2 F2 P2 A1 F2 B6 F2 C8 F2 P2 A1 F2 B7 F2 C8 F2 P2 A8 F2 B3 F2 
+  //                    !     !     !        !     !     !        !     !     !        !     !
+  //                    1     9     2    .   1     6     8     .  1     7     8    .   8     3   
+  
   switch (webui_connect_mode) {
-    case WIFI: output_reset_color_palette(HUE_GREEN,0);
-               output_add_color_palette_entry(HUE_GREEN,0);
-               output_add_color_palette_entry(HUE_GREEN,1);
-               output_add_color_palette_entry(HUE_GREEN,0);
+    case WIFI: part_description += "I8/4:14444";
                break;
-    case SOFT_AP: output_reset_color_palette(HUE_BLUE,0);
-               output_add_color_palette_entry(HUE_BLUE,0);
-               output_add_color_palette_entry(HUE_BLUE,1);
-               output_add_color_palette_entry(HUE_BLUE,0);
+    case SOFT_AP: part_description += "I8/4:17777";
                break;
   }
 
   int digit=0;
+  char pattern_letter='A';
   for(int i=0;i<adress_string.length();i++) {
-    if(adress_string[i]=='.') output_add_color_palette_entry(HUE_BLUE,0);
+    if(adress_string[i]=='.') {
+      sequence_description +="P2 ";
+      pattern_letter='A';
+    }
     else {
-      digit=adress_string.substring(i,i+1).toInt();
-      output_add_color_palette_entry(output_general_color[digit],1);
+      sequence_description +=String(pattern_letter)+String(adress_string[i])+" F2 ";
+      pattern_letter++;
     }   
   }
-  output_start_pattern(13);  // Wipe low light
+
+  parse_slot_settings(part_description);
+  parse_sequence (sequence_description);
 }
 
 
