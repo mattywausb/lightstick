@@ -39,6 +39,9 @@
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
+String webui_ssid_input="";
+String webui_password_input="";
+
 t_webui_connect_mode webui_connect_mode =NONE; 
 
 MDNSResponder mdns;
@@ -516,40 +519,28 @@ void handleNotFound()
 // 2 = Started own AP
 // 0 = no WiFi available
 
-t_webui_connect_mode webui_setup(boolean force_softAP)
-{
-  webui_connect_mode =NONE;
-  if(!force_softAP) {
-    WiFi.begin(ssid, password);
-    //WiFi.begin(ssid, "badpassword");
-    // Wait for connection
-    #ifdef TR_WEBUI_CONNECT
-      Serial.print("TR_WEBUI_CONNECT> Try to connect to SSID ");
-      Serial.println(ssid);
-    #endif 
-    for(int retry=0; WiFi.status() != WL_CONNECTED && retry<10; retry++) {
-      #ifdef TR_WEBUI_CONNECT
-         Serial.print('.');
-      #endif
-      delay(500);
-    } 
-  }
-  if (WiFi.status() == WL_CONNECTED) {
-     webui_connect_mode =WIFI;
-     #ifdef TR_WEBUI_CONNECT
-      Serial.print("\nTR_WEBUI_CONNECT> Connected to ");
-      Serial.println(ssid);
-      Serial.print("IP address: ");
-      Serial.println(WiFi.localIP());
-     #endif
-     if (mdns.begin("lightstick", WiFi.localIP())) {
-          Serial.println("MDNS responder started");
-     }
-  } else {
-      WiFi.disconnect();  
-  }
+t_webui_connect_mode webui_setup(boolean force_softAP) {
 
- if (webui_connect_mode==NONE) {
+    // Esatblish all url handlers
+    server.on("/", handleRoot); // manages all forms
+    server.on("/song", handleSong);
+    server.on("/switch", handleSwitch);
+    server.on("/default.css", sendStylesheet);
+    server.onNotFound(handleNotFound);
+
+    // Start Network
+    if(force_softAP) {
+      establish_soft_AP();
+    } else webui_connect_wifi();
+    server.begin();
+   
+    #ifdef TRACE_ON
+    Serial.println(F(">webui_setup finished "));
+    #endif
+    return webui_connect_mode;
+}
+
+void establish_soft_AP() {
     String ap_ssid="Lightstick-"+String(ESP.getChipId());
     IPAddress local_IP(192,168,4,22);
     IPAddress gateway(192,168,4,9);
@@ -575,20 +566,73 @@ t_webui_connect_mode webui_setup(boolean force_softAP)
           Serial.println("\n#!# TR_WARNING> Could not start any Wifi ");
        #endif
      }
-  }  
+}
+
+void webui_change_wifi() {
+    server.stop();
+    webui_connect_wifi();
+   if(webui_connect_mode!=NONE){
+         server.begin();
+         #ifdef TR_WEBUI_CONNECT
+          Serial.println("TR_WEBUI_CONNECT> Webserver restarted ");
+        #endif 
+    }
+}
+
+t_webui_connect_mode webui_connect_wifi()
+{
+  if(WiFi.status() == WL_CONNECTED ) WiFi.disconnect();  
+  webui_connect_mode =NONE; 
   
-  if(webui_connect_mode!=NONE){
-      server.on("/", handleRoot); // manages all forms
-      server.on("/song", handleSong);
-      server.on("/switch", handleSwitch);
-      server.on("/default.css", sendStylesheet);
-      server.onNotFound(handleNotFound);
-      server.begin();
+  String my_hostname="Lightstick-"+String(ESP.getChipId());
+  WiFi.hostname(my_hostname);
+
+  if(webui_ssid_input.length()>0) { // try to use the given credentials
+    WiFi.begin(webui_ssid_input, webui_password_input);
+    #ifdef TR_WEBUI_CONNECT
+      Serial.print("TR_WEBUI_CONNECT> Try to connect to "); Serial.println(webui_ssid_input);
+    #endif 
+    for(int retry=0; WiFi.status() != WL_CONNECTED && retry<10; retry++) {
+      #ifdef TR_WEBUI_CONNECT
+         Serial.print('.');
+      #endif
+      delay(500);
+    } 
+    if(WiFi.status() == WL_CONNECTED)  webui_connect_mode =WIFI;
+  }
+  
+  if(WiFi.status() != WL_CONNECTED) {
+    WiFi.begin();
+    #ifdef TR_WEBUI_CONNECT
+      Serial.print("TR_WEBUI_CONNECT> Try to connect last Access Point:");
+      Serial.println(WiFi.SSID());
+    #endif 
+    for(int retry=0; WiFi.status() != WL_CONNECTED && retry<10; retry++) {
+      #ifdef TR_WEBUI_CONNECT
+         Serial.print('.');
+      #endif
+      delay(500);
+    } 
+    if(WiFi.status() == WL_CONNECTED)  webui_connect_mode =WIFI;
   }
 
-  #ifdef TRACE_ON
-    Serial.println(F(">webui_setup finished "));
-  #endif
+  if(WiFi.status() != WL_CONNECTED) {
+     WiFi.begin(ssid, password);
+    #ifdef TR_WEBUI_CONNECT
+      Serial.print("TR_WEBUI_CONNECT> Try to connect to default SSID ");
+      Serial.println(ssid);
+    #endif 
+    for(int retry=0; WiFi.status() != WL_CONNECTED && retry<10; retry++) {
+      #ifdef TR_WEBUI_CONNECT
+         Serial.print('.');
+      #endif
+      delay(500);
+    }
+     if(WiFi.status() == WL_CONNECTED)  webui_connect_mode =WIFI;
+  } 
+
+  if(WiFi.status() != WL_CONNECTED) establish_soft_AP();
+
   return webui_connect_mode;
 }
 
