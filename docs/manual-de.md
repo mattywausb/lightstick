@@ -13,7 +13,7 @@ Der Stick wird eingeschaltet, indem man den USB Stecker aus dem unteren Stabende
 Sowie der Lightstick Strom hat sucht er die Verbindung zum zuletzt kontaktierten WLAN. In dieser Zeit leuchtet er schwach in Orange. Kann er das WLAN nicht erreichen versucht er Kontakt mit einem fest codierten WLAN aufzunehmen. 
 War der Verbindungsaufbau erfolgreich, wird dies durch ein schwaches grünes Blinken mitgeteilt.
 
-Kann er kein WLAN erreichen, eröffnet der Stick eine eigene WLAN Zelle. (SSID:"Lightstick-xxxxxxxx-AP" Passwort:"letsparty" (xxxxxx=Seriennummer des eingebauten Controllers))
+Kann er kein WLAN erreichen, eröffnet der Stick eine eigene WLAN Zelle. (SSID:"Lightstick-xxxxxxxx-AP" Passwort:"letsparty" (xxxxxx=Seriennummer des eingebauten Controllers)) und ist dort unter der Adress 192.168.4.10 erreichbar.
 
 Wenn beim Einschalten/Einstecken der USB Verbindung der Taster gehalten wird, umgeht der Stick den Versuch ein WLAN zu erreichen und baut sofort seine eigene WLAN Zelle auf.
 
@@ -24,7 +24,7 @@ Sollte der Stick auch keinen eigenen AP aufbauen können, blink er rot und ist d
 ## Zugriff auf die Bedienoberfläche
 Für den Zugriff benötigt man einen Browser auf einem beliebigen Gerät, das mit dem gleichen Netzwerk verbunden ist, wie der Stick.
 
-Die im Browser einzugebende IP Adresse besteht aus 4 Zahlen, die jeweils von einem Punkt getrennt sind (z.B. 192.168.178.14) und wird vom Stick wie folgt als sich wiederholender Ablauf verschiedener Muster dargestellt.
+Die im Browser einzugebende IP Adresse besteht aus 4 Zahlen, die jeweils von einem Punkt getrennt sind (z.B. 192.168.4.10) und wird vom Stick wie folgt als sich wiederholender Ablauf verschiedener Muster dargestellt.
 * 8 Beats schwach grün/Blau = WLAN Modus (siehe oben)
 * 2 Beats dunkel weiß>pink = Startzeichen für erste Zahl
 * n rotierende Schritte in rot (n= Ziffer 1)
@@ -38,8 +38,6 @@ Die im Browser einzugebende IP Adresse besteht aus 4 Zahlen, die jeweils von ein
 ...
 
 Um eine Null als Ziffer darzustellen wird mit einem kräftigen Pink einmal aufgeblendet. Die Ziffern 2 und 3 werden nicht genutzt, wenn sie für die Zahl nicht notwendig sind.
-
-
 
 ## Auswahl eines Pattern (Musters)
 Ein Pattern definiert, welche der eingebauten LED wann und wie lange leuchten. Dies erfolgt bezogen auf den laufenden Takt, d.h. das Pattern passt sein Lauftempo der Beatzahl(BPM) an, die über den Taster ermittelt wird oder von einem vorigen Song noch eingestellt ist. 

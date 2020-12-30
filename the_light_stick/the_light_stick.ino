@@ -408,7 +408,7 @@ void loop() {
   
 
   // Manage Serial input
-  #ifdef FEAT_SERIAL_INPUT
+  #ifdef FEAT_ALLOW_SERIAL_INPUT
   /*
    * Commands:
    * x<id>               load song preset

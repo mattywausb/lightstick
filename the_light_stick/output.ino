@@ -306,9 +306,9 @@ void output_load_color_palette(long palette_id)
            break; 
    // -- Single Color + White Overlay version
      case 80:         // pure red
-           palette_id=20000;
+           palette_id=10000;
            break; 
-     case 81:         // pure red over white  
+     case 81:         // pure white  over red
            palette_id=29000;
            break; 
            
@@ -419,9 +419,11 @@ void output_load_color_palette(long palette_id)
           case 29:
                   patconf_color_palette_lenght=1;                   // wx
                   patconf_color_palette[0].h=output_general_color[digit3];patconf_color_palette[0].s=0.0; 
+                  break;
            default:                                                 // BAD ID
                   patconf_color_palette_lenght=1;
-                  patconf_color_palette[0].h=HUE_MAGENTA;                  
+                  patconf_color_palette[0].h=HUE_MAGENTA;  
+                  patconf_color_palette[0].s=1.0;                
          } //switch
       } else {
         if(digit4==digit5) {    // two Color special Pattern

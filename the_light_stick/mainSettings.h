@@ -6,7 +6,7 @@
 #define TR_WARNING
 #endif
 
-//#define FEAT_SERIAL_INPUT
+//#define FEAT_ALLOW_SERIAL_INPUT
 
 #define MAX_NUMBER_OF_PROGRAM_SLOTS 10
 
