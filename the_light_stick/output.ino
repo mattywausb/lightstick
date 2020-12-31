@@ -88,6 +88,7 @@ float patconf_rainbow_step_angle_increment=1.0;
 int patconf_step_0_waittime=0;
 int patconf_step_1_waittime=0;
 byte patconf_follow_up_ticks=4;
+boolean patconf_offbeat_pulse=false;
 
 int patvar_current_step_index = 0;
 uint8_t patvar_step_in_color_index=0;
@@ -526,14 +527,16 @@ void output_load_color_palette(long palette_id)
             case 40:                                                 // wx  x  x  x wy  y  y  y 
             case 41:                                                 // wx  x wx  x wy  y wy  y 
             case 42:                                                 //  x wx  x wx  y wy  y wy 
+            case 44:                                                 // x   x  x wx  y  y  y wy 
                     patconf_color_palette_lenght=8;
                     output_generate_4step_palette(digit3,digit4,digit3,digit4);
+                    if(generator_id==44) { patconf_color_palette[3].s=0.0; patconf_color_palette[7].s=0.0; break;}
                     output_patch_palette_white(generator_id==42?1:0,generator_id==40?4:2);
                     break;
             case 43:                                                 // wx  x  x  x wx  x  x  x wy  y  y  y wy  y  y  y 
-                    patconf_color_palette_lenght=generator_id=16;
+                    patconf_color_palette_lenght=16;
                     output_generate_4step_palette(digit3,digit3,digit4,digit4);
-                    output_patch_palette_white(0,4);
+                    if(generator_id==43) output_patch_palette_white(0,4);
                     break;
             case 60:                                                // px py
             case 61:                                                // px y
@@ -626,6 +629,8 @@ void output_load_color_palette(long palette_id)
            case 30:                                                   //  x  x  y  y  z  z 
            case 31:                                                   // wx  x wy  y wz  z 
            case 32:                                                   // px  x py  y pz  z 
+           case 33:                                                   //  x wx  y wy  z wz 
+           case 34:                                                   //  x px  y py  z pz 
                     patconf_color_palette_lenght=6;
                     patconf_color_palette[0].h=output_general_color[digit3];
                     patconf_color_palette[1].h=output_general_color[digit3];
@@ -636,6 +641,8 @@ void output_load_color_palette(long palette_id)
                     switch(generator_id) {
                       case 31: output_patch_palette_white(0,2); break;
                       case 32: output_patch_palette_saturation(PALETTE_PASTELL_SATURATION,0,2); break;
+                      case 33: output_patch_palette_white(1,2); break;
+                      case 34: output_patch_palette_saturation(PALETTE_PASTELL_SATURATION,1,2); break;
                     }
                     break;
            case 40:                                                  // x y y y x z z z 
@@ -865,7 +872,15 @@ void output_start_pattern(int pattern_id) {
          break;
     case 12:           // SPARKLE 120-126 palette increment 3 
          start_sparkle(0.8,1<<(pattern_id-120),3);  // brightness, Steps until color increment, color palette increment   
-         break;  
+         break; 
+    case 13:           // Offbeat Pulse
+          int followup_tick_v2=pattern_id<134?4:6;  
+          start_pulse_v2(1, // brightness 
+                      1<<(1+((pattern_id+2)%4)),  // Steps until color increment
+                      0.85, // preserve brightnes factor 
+                      followup_tick_v2,    // follow up tick count (4= equally spaced)
+                      true); // use offbeat
+         break;
   }
   output_process_pattern();
 }
@@ -986,6 +1001,10 @@ void process_sparkle() {
  *   follow_up_time_shift: number of 1/4 waittime between center and ring pulse
  */
 void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int follow_up_ticks){
+  start_pulse_v2(lamp_value,  steps_per_color,  fade_factor,  follow_up_ticks, false);
+}
+
+void start_pulse_v2(float lamp_value, int steps_per_color, float fade_factor, int follow_up_ticks, boolean use_offbeat){
   #ifdef TR_PATTERN_SETTING
       Serial.print(F("TR_PATTERN_SETTING> start_pulse:"));
       Serial.print(steps_per_color);Serial.print(',');
@@ -1001,14 +1020,23 @@ void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int f
   patconf_fade_factor = fade_factor;
   patconf_steps_until_color_change=steps_per_color;
   patconf_follow_up_ticks=follow_up_ticks;
+  patconf_offbeat_pulse=use_offbeat;
  
   patvar_current_step_index = 0;
   patvar_color_palette_index=0;
   patvar_step_in_color_index=0;
   
-  lamp[0].set_value(0.0);
-  for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
-           lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
+  if(!patconf_offbeat_pulse) 
+  { 
+    lamp[0].set_value(0.0);
+    for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
+             lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
+    }
+  } else {
+    lamp[0].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value);
+    for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
+             lamp[lamp_index].set_value(0.0);
+    }
   }
   patconf_step_0_waittime=follow_up_ticks*output_waittime[patconf_speed_id]/4;
   patconf_step_1_waittime=output_waittime[patconf_speed_id]*2-patconf_step_0_waittime;
@@ -1016,6 +1044,7 @@ void start_pulse(float lamp_value, int steps_per_color, float fade_factor, int f
     Serial.print(F(">TR_OUT_TIMING patconf_step_0_waittime ")); Serial.println(patconf_step_0_waittime);
     Serial.print(F(">TR_OUT_TIMING patconf_step_1_waittime ")); Serial.println(patconf_step_1_waittime);
   #endif
+  output_beat_sync_happened=false; //We dont skip colors of palette when just starting
   output_push_lamps_to_pixels();
 }
 
@@ -1059,16 +1088,21 @@ void process_pulse() {
             }
       }
 
-      if(patvar_current_step_index%2==0) {  // ignite ring
+      // Determine color index depeding on even/odd step index
+      int follow_up_palette_entry= patvar_color_palette_index;
+      if(patvar_current_step_index%2!=0) {
+            follow_up_palette_entry++;
+            if( follow_up_palette_entry>=patconf_color_palette_lenght)follow_up_palette_entry-=patconf_color_palette_lenght;
+            // Recalculate waittimes if speed changed
+            patconf_step_0_waittime=patconf_follow_up_ticks*output_waittime[patconf_speed_id]/4;
+           patconf_step_1_waittime=output_waittime[patconf_speed_id]*2-patconf_step_0_waittime;
+      }
+         
+      if(patvar_current_step_index%2==(patconf_offbeat_pulse?1:0)) {  // ignite ring on 1 or 2 depending on offbeat flag
          for (int lamp_index = 1; lamp_index < LAMP_COUNT; ++lamp_index){
-            lamp[lamp_index].set_hsv(patconf_color_palette[patvar_color_palette_index].h,patconf_color_palette[patvar_color_palette_index].s,patconf_pattern_lamp_value*0.6);
+            lamp[lamp_index].set_hsv(patconf_color_palette[follow_up_palette_entry].h,patconf_color_palette[follow_up_palette_entry].s,patconf_pattern_lamp_value*0.6);
          }
-         // Recalculate waittimes if speed changed
-         patconf_step_0_waittime=patconf_follow_up_ticks*output_waittime[patconf_speed_id]/4;
-         patconf_step_1_waittime=output_waittime[patconf_speed_id]*2-patconf_step_0_waittime;
       } else { // ignite center
-         int follow_up_palette_entry= patvar_color_palette_index+1;
-         if( follow_up_palette_entry>=patconf_color_palette_lenght)follow_up_palette_entry-=patconf_color_palette_lenght;
          lamp[0].set_hsv(patconf_color_palette[follow_up_palette_entry].h,patconf_color_palette[follow_up_palette_entry].s,patconf_pattern_lamp_value);
       }
    }

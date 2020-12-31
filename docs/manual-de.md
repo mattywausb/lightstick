@@ -250,5 +250,7 @@ Ein vollständiger Katalog kann nur dem Code entommen werden
 100-107: Sparkle shift 1
 110-117: Sparkle shift 2
 120-127: Sparkle shift 3
+130-133: Pulse with offbeat
+134-137: Heartbeat with reverse impulse
 ```
 Die Pattern innerhalb einer Gruppe (z.B. 0-3), varieren über die Anzahl Steps bis zum Weiterschalten einer Farbe. Dabei wird in der Regel in 2er Potenzen skaliert. So schaltet 20 bei jedem Step eine Farbe weiter, 21 jeden 2. Step, 22 jeden 4., 23 jeden 8.  Ein Song Part 20/4 schaltet also jeden Beat die Farbe voran. Ebenso 21/8 und 22/16, wobei das Muster sich aber jeweils schneller  in 1/4, 1/8 und 1/16 Noten bewegt. Mit 22/4 Schaltet die Farbe jeden 4. Beat voran, also auf jeden Takt.
