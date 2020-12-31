@@ -102,9 +102,9 @@ typedef struct pattern_button {
 } t_pattern_button;
 
 t_pattern_button webui_pattern_button[] {
-  {pattx_pulse,2,2},    {pattx_whipe,10,4},   {pattx_wave,11,8},
+  {pattx_pulse,2,4},    {pattx_whipe,10,4},   {pattx_wave,11,8},
   {pattx_orbit,24,8},   {pattx_disco,44,4},   {pattx_sparkle,104,16},
-  {pattx_rainbow,64,4}, {pattx_quater,83,4},  {pattx_flat,91,2}
+  {pattx_rainbow,60,16}, {pattx_quater,80,16},  {pattx_flat,90,2}
 };
 
 #define WEBUI_PATTERN_BUTTON_COUNT 9
@@ -303,7 +303,7 @@ void send_main_page() {
         content_element+=F("<td><div class=\"lb_box\"><a class=\"lb\"  href=\"/switch?p=");
         content_element+=webui_pattern_button[element_index].pattern_id;
         content_element+=F("&w=");
-        content_element+=webui_pattern_button[element_index].base_speed*2;
+        content_element+=webui_pattern_button[element_index].base_speed*4;
         content_element+=("\">&gt;&gt;");
         content_element+=F("</a></div></td>");
         if(element_index%3==2) content_element+="</tr>";  // Works only for button count  that is dividable by 3

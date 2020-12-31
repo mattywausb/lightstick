@@ -76,6 +76,7 @@ boolean output_beat_sync_happened=false;
 
 #define PATCONF_FADE_FRAMETIME 25
 #define PATCONF_PULSE_SATURATION_INCREMENT 0.15
+#define PALETTE_PASTELL_SATURATION 0.85
 
 int patconf_speed_id=STEP_ON_BEAT;
 uint8_t patconf_steps_until_color_change=0;
@@ -158,7 +159,6 @@ void output_generate_4step_palette( byte step1_index, byte step2_index,byte step
 
 
 // patch color palette with AAA BBB CCC DDD pattern
-// first color index can be >9 to trigger white with follow up color
 void output_generate_3step_palette( byte step1_index, byte step2_index,byte step3_index, byte step4_index)
 {
   for(int i=0;i<3;i++){
@@ -187,6 +187,13 @@ void output_patch_palette_white( byte start,byte stepping )
   }
 }
 
+// patch color palette with saturation on interval  pattern
+void output_patch_palette_saturation(float saturation, byte start,byte stepping )
+{
+  for(int i=start;i<COLOR_PALETTE_MAX_ENTRIES;i+= stepping){
+       patconf_color_palette[i].s=saturation;
+  }
+}
 
 void output_load_color_palette(long palette_id)
 {
@@ -389,37 +396,64 @@ void output_load_color_palette(long palette_id)
               Serial.println(F("TR_COLOR_PRESET_PALETTE_SETTING> 1 color special"));
         #endif
 
+        patconf_color_palette_lenght=6;
+        output_generate_4step_palette(digit3,digit3,digit3,digit3);
         switch(generator_id){
           case 20:                                                   // x wx
                   patconf_color_palette_lenght=2;
-                  patconf_color_palette[0].h=output_general_color[digit3];
-                  patconf_color_palette[1].h=output_general_color[digit3];patconf_color_palette[1].s=0.0; 
+                  patconf_color_palette[1].s=0.0; 
                   break;
           case 21:                                                  
                   patconf_color_palette_lenght=2;                   // wx x
-                  patconf_color_palette[0].h=output_general_color[digit3];patconf_color_palette[0].s=0.0; 
-                  patconf_color_palette[1].h=output_general_color[digit3];
+                  patconf_color_palette[0].s=0.0; 
                   break;
           case 22:
                   patconf_color_palette_lenght=3;                   // wx x x
-                  patconf_color_palette[0].h=output_general_color[digit3];patconf_color_palette[0].s=0.0; 
-                  patconf_color_palette[1].h=output_general_color[digit3];
-                  patconf_color_palette[2].h=output_general_color[digit3];
+                  patconf_color_palette[0].s=0.0; 
                   break;
           case 23:                                                   // wx x x x  
                   patconf_color_palette_lenght=4;
-                  output_generate_4step_palette(digit3,digit3,digit3,digit3);
                   patconf_color_palette[0].s=0.0; 
                   break;
           case 24:
                   patconf_color_palette_lenght=6;                   // x x x wx x x 
-                  output_generate_3step_palette(digit3,digit3,digit3,digit3);
                   patconf_color_palette[2].s=0.0; 
                   break;
           case 29:
                   patconf_color_palette_lenght=1;                   // wx
-                  patconf_color_palette[0].h=output_general_color[digit3];patconf_color_palette[0].s=0.0; 
+                  patconf_color_palette[0].s=0.0; 
                   break;
+          case 30:
+                  patconf_color_palette_lenght=1;                   // px
+                  patconf_color_palette[0].s=PALETTE_PASTELL_SATURATION; 
+                  break;
+          case 31:
+                  patconf_color_palette_lenght=2;                   // px  x
+                  patconf_color_palette[0].s=PALETTE_PASTELL_SATURATION; 
+                  break;
+          case 32:
+                  patconf_color_palette_lenght=2;                   // x px
+                  patconf_color_palette[1].s=PALETTE_PASTELL_SATURATION; 
+                  break;
+          case 33:
+                  patconf_color_palette_lenght=3;                   // px x  x  
+                  patconf_color_palette[0].s=PALETTE_PASTELL_SATURATION; 
+                  break;
+          case 34:
+                  patconf_color_palette_lenght=3;                   // x px px
+                  patconf_color_palette[1].s=PALETTE_PASTELL_SATURATION; 
+                  patconf_color_palette[2].s=PALETTE_PASTELL_SATURATION; 
+                  break;
+          case 35:
+                  patconf_color_palette_lenght=4;                   // px x  x  x
+                  patconf_color_palette[0].s=PALETTE_PASTELL_SATURATION; 
+                  break;
+          case 36:
+                  patconf_color_palette_lenght=4;                   // x px px px
+                  patconf_color_palette[1].s=PALETTE_PASTELL_SATURATION; 
+                  patconf_color_palette[2].s=PALETTE_PASTELL_SATURATION; 
+                  patconf_color_palette[3].s=PALETTE_PASTELL_SATURATION; 
+                  break;           
            default:                                                 // BAD ID
                   patconf_color_palette_lenght=1;
                   patconf_color_palette[0].h=HUE_MAGENTA;  
@@ -501,7 +535,42 @@ void output_load_color_palette(long palette_id)
                     output_generate_4step_palette(digit3,digit3,digit4,digit4);
                     output_patch_palette_white(0,4);
                     break;
-            
+            case 60:                                                // px py
+            case 61:                                                // px y
+            case 66:                                                // px py  x  y
+                    patconf_color_palette[0].h=output_general_color[digit3];
+                    patconf_color_palette[1].h=output_general_color[digit4];        
+                    patconf_color_palette[0].s=PALETTE_PASTELL_SATURATION;                      
+                    if(generator_id==66) {
+                      patconf_color_palette[2].h=output_general_color[digit3];
+                      patconf_color_palette[3].h=output_general_color[digit4]; 
+                      patconf_color_palette_lenght=4;
+                    } else patconf_color_palette_lenght=2;
+                    if(generator_id==61 ) break;
+                    patconf_color_palette[1].s=PALETTE_PASTELL_SATURATION;                      
+                    break;
+            case 62:                                                  // px py py
+            case 63:                                                  //  x py py
+            case 64:                                                  // px  y  y
+            case 65:                                                  //  x py  y
+                    patconf_color_palette_lenght=3;
+                    patconf_color_palette[0].h=output_general_color[digit3];
+                    patconf_color_palette[1].h=output_general_color[digit4];        
+                    patconf_color_palette[2].h=output_general_color[digit4];        
+                    if(generator_id==62 || generator_id==64) patconf_color_palette[0].s=PALETTE_PASTELL_SATURATION; 
+                    if(generator_id!=64 ) patconf_color_palette[1].s=PALETTE_PASTELL_SATURATION; 
+                    if(generator_id<=63 ) patconf_color_palette[2].s=PALETTE_PASTELL_SATURATION; 
+                    break;
+            // 66 is in 60+61        
+            case 67:
+                    patconf_color_palette_lenght=4;
+                    patconf_color_palette[0].h=output_general_color[digit3];
+                    patconf_color_palette[1].h=output_general_color[digit3];        
+                    patconf_color_palette[2].h=output_general_color[digit4];        
+                    patconf_color_palette[3].h=output_general_color[digit4];        
+                    patconf_color_palette[0].s=PALETTE_PASTELL_SATURATION;
+                    patconf_color_palette[2].s=PALETTE_PASTELL_SATURATION;  
+                    break;
             case 70:                                                 //  x  x  x  y  y  y 
             case 71:                                                 //  x wx  x  y wy  y 
             case 72:                                                 //  x  y  x  y  x  y 
@@ -529,12 +598,17 @@ void output_load_color_palette(long palette_id)
           switch(generator_id){
            case 20:                                                   // x y z
            case 21:                                                  // wx wy wz
+           case 22:                                                  // px py pz
+           case 23:                                                  // p py pz
                   patconf_color_palette_lenght=3;
                   patconf_color_palette[0].h=output_general_color[digit3];
                   patconf_color_palette[1].h=output_general_color[digit4];
                   patconf_color_palette[2].h=output_general_color[digit5];
-                  if(generator_id==20)break;
-                  output_patch_palette_white(0,1);
+                  switch (generator_id) {
+                    case 21: output_patch_palette_white(0,1); break;
+                    case 22: output_patch_palette_saturation(PALETTE_PASTELL_SATURATION,0,1); break;
+                    case 23: output_patch_palette_saturation(PALETTE_PASTELL_SATURATION,1,1); break;
+                  }
                   break;
            case 25:                                                  //wx y x z
            case 26:                                                  //x wy x z
@@ -549,19 +623,67 @@ void output_load_color_palette(long palette_id)
                   if(generator_id<29) patconf_color_palette[generator_id-25].s=0.0;
                   else output_patch_palette_white(0,1);
                   break;
+           case 30:                                                   //  x  x  y  y  z  z 
+           case 31:                                                   // wx  x wy  y wz  z 
+           case 32:                                                   // px  x py  y pz  z 
+                    patconf_color_palette_lenght=6;
+                    patconf_color_palette[0].h=output_general_color[digit3];
+                    patconf_color_palette[1].h=output_general_color[digit3];
+                    patconf_color_palette[2].h=output_general_color[digit4];
+                    patconf_color_palette[3].h=output_general_color[digit4];           
+                    patconf_color_palette[4].h=output_general_color[digit5];
+                    patconf_color_palette[5].h=output_general_color[digit5];           
+                    switch(generator_id) {
+                      case 31: output_patch_palette_white(0,2); break;
+                      case 32: output_patch_palette_saturation(PALETTE_PASTELL_SATURATION,0,2); break;
+                    }
+                    break;
            case 40:                                                  // x y y y x z z z 
            case 41:                                                  // x y x y x z x z 
            case 42:                                                  // y x y x z x z x
+           case 50:
+           case 51:
+           case 52:
+           case 56:
+           case 57:
                   patconf_color_palette_lenght=8;
                   output_generate_4step_palette(digit4,digit5,digit5,digit3);
-                  output_patch_palette_hue(output_general_color[digit3],generator_id==42?1:0,generator_id==40?4:2);
+                  switch (generator_id){
+                    case 40:
+                    case 50:
+                    case 56:
+                            output_patch_palette_hue(output_general_color[digit3],0,4); break;
+                    case 41:
+                    case 51:
+                    case 57:
+                            output_patch_palette_hue(output_general_color[digit3],0,2); break;
+                    case 42:
+                    case 52:
+                            output_patch_palette_hue(output_general_color[digit3],1,2); break;
+                  }
+                  if (generator_id>=50) output_patch_palette_saturation(PALETTE_PASTELL_SATURATION,0,1);
+                  if (generator_id>=56) output_patch_palette_saturation(1.0,0,4);
                   break;
            case 43:                                                  // x y y y x y y y  x z z z x z z z 
            case 44:                                                  // x y x y x y x y  x z x z x z x z 
            case 45:                                                  // y x y x y x y x  z x z x z x z x
+           case 53:                                                  // px py py py px py py py  px pz pz pz px pz pz pz 
+           case 54:                                                  // px py px py px py px py  px pz px pz px pz px pz 
+           case 55:                                                  // py px py px py px py px  pz px pz px pz px pz px
                   patconf_color_palette_lenght=16;
                   output_generate_4step_palette(digit4,digit4,digit5,digit5);
-                  output_patch_palette_hue(output_general_color[digit3],generator_id==45?1:0,generator_id==43?4:2);
+                  switch (generator_id){
+                    case 43:
+                    case 53:
+                            output_patch_palette_hue(output_general_color[digit3],0,4); break;
+                    case 44:
+                    case 54:
+                            output_patch_palette_hue(output_general_color[digit3],0,2); break;
+                    case 45:
+                    case 55:
+                            output_patch_palette_hue(output_general_color[digit3],1,2); break;
+                  }
+                  if (generator_id>=50) output_patch_palette_saturation(PALETTE_PASTELL_SATURATION,0,1);
                   break;
            case 46:                                                  // wx  x  x  x wy  y  y  y wz  z  z  z 
            case 47:                                                  // wx  x wx  x wy  y wy  y wz  z wz  z 
@@ -581,7 +703,7 @@ void output_load_color_palette(long palette_id)
                              break;
                   }
                   break;
-
+           // case 50-55 ->  40-45
            case 70:                                                  // x  x  x  y  y  y  z  z  z
            case 71:                                                  // x wx  x  y wy  y  z wz  z
            case 72:                                                  // x  y  x  y  z  y  z  x  z
