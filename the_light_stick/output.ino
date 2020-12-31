@@ -76,7 +76,7 @@ boolean output_beat_sync_happened=false;
 
 #define PATCONF_FADE_FRAMETIME 25
 #define PATCONF_PULSE_SATURATION_INCREMENT 0.15
-#define PALETTE_PASTELL_SATURATION 0.85
+#define PALETTE_PASTELL_SATURATION 0.78
 
 int patconf_speed_id=STEP_ON_BEAT;
 uint8_t patconf_steps_until_color_change=0;
