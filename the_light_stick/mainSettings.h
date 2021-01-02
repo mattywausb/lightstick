@@ -1,7 +1,7 @@
 #ifndef __MAINSETTINGS_H__
 #define __MAINSETTINGS_H__
 
-#define TRACE_ON 
+//#define TRACE_ON 
 #ifdef TRACE_ON
 #define TR_WARNING
 #endif
